@@ -36,6 +36,7 @@ export default function LoginModal({ isOpen, onClose }) {
   const [emailSentNotice, setEmailSentNotice] = useState(false);
 
   // Step 5 Welcome & Step 6 Delivery Address Transition States
+  const [welcomeSlideIn, setWelcomeSlideIn] = useState(false);
   const [isWelcomeFadingOut, setIsWelcomeFadingOut] = useState(false);
   const [isDeliveryAddressVisible, setIsDeliveryAddressVisible] = useState(false);
   const [addressSlideIn, setAddressSlideIn] = useState(false);
@@ -98,6 +99,7 @@ export default function LoginModal({ isOpen, onClose }) {
         setEmailOtp(['', '', '', '', '', '']);
         setEmailOtpError('');
         setEmailSentNotice(false);
+        setWelcomeSlideIn(false);
         setIsWelcomeFadingOut(false);
         setIsDeliveryAddressVisible(false);
         setAddressSlideIn(false);
@@ -463,13 +465,26 @@ export default function LoginModal({ isOpen, onClose }) {
       // storage unavailable
     }
 
-    setStep('success');
-    setIsWelcomeFadingOut(false);
+    // 1. Dismiss 100% VH modal cleanly
+    setDetailsSlideIn(false);
 
-    // Smoothly fade out "Welcome to Sonu Shoes." after 2s and slide up Delivery Address
-    closeTimerRef.current = setTimeout(() => {
-      handleTransitionToDeliveryAddress();
-    }, 2000);
+    // 2. Once the 100% VH modal slides away, show the small modal from below
+    setTimeout(() => {
+      setStep('success');
+      setIsWelcomeFadingOut(false);
+      setWelcomeSlideIn(false);
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setWelcomeSlideIn(true);
+        });
+      });
+
+      // Smoothly fade out "Welcome to Sonu Shoes." after 2.5s and slide up Delivery Address
+      closeTimerRef.current = setTimeout(() => {
+        handleTransitionToDeliveryAddress();
+      }, 2500);
+    }, 400);
   };
 
   // Save Delivery Address and finalize onboarding
@@ -529,9 +544,7 @@ export default function LoginModal({ isOpen, onClose }) {
   const isMobileFloating = isMobileFocused || mobileNumber.length > 0;
   const isOnboardingFullScreen =
     step === 'details' ||
-    step === 'email-otp' ||
-    step === 'success' ||
-    step === 'delivery-address';
+    step === 'email-otp';
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center select-none font-['Helvetica_Now_Text',sans-serif]">
@@ -1299,52 +1312,60 @@ export default function LoginModal({ isOpen, onClose }) {
               </div>
             )}
 
-            {/* STEP 5: SUCCESS STATE ("Welcome to Sonu Shoes.") */}
-            {step === 'success' && (
-              <div
-                className={`transition-opacity duration-500 ease-out ${
-                  isWelcomeFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
-                }`}
-              >
-                {/* Centered Brand Logo at top */}
-                <div className="flex justify-center pt-1 pb-1">
-                  <img
-                    src="/Logo/Logo_Full.png"
-                    alt="SONU Logo"
-                    className="h-7 sm:h-8 w-auto object-contain"
-                    loading="eager"
-                    fetchPriority="high"
-                    width={150}
-                    height={32}
-                  />
-                </div>
+          </div>
+        </div>
+      )}
 
-                {/* Header: Welcome to Sonu Shoes. */}
-                <h2
-                  className="text-[22px] sm:text-[24px] font-bold text-[#111111] text-center mt-3 tracking-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
-                  style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
-                >
-                  Welcome to Sonu Shoes.
-                </h2>
+      {/* 2.5. SMALL POPUP MODAL: STEP 5 SUCCESS ("Welcome to Sonu Shoes.") APPEARS FROM BELOW */}
+      {step === 'success' && (
+        <div
+          className={`relative w-full max-w-[440px] bg-white rounded-t-[28px] sm:rounded-[24px] px-6 sm:px-8 pt-8 pb-8 shadow-2xl z-50 transform transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+            welcomeSlideIn && !isWelcomeFadingOut
+              ? 'translate-y-0 opacity-100 scale-100'
+              : isWelcomeFadingOut
+              ? 'opacity-0 scale-95 duration-300'
+              : 'translate-y-full opacity-0 scale-95'
+          }`}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Welcome to Sonu Shoes"
+        >
+          {/* Centered Brand Logo */}
+          <div className="flex justify-center pt-1 pb-1">
+            <img
+              src="/Logo/Logo_Full.png"
+              alt="SONU Logo"
+              className="h-7 sm:h-8 w-auto object-contain"
+              loading="eager"
+              fetchPriority="high"
+              width={150}
+              height={32}
+            />
+          </div>
 
-                {/* Subtitle */}
-                <p className="text-[14px] sm:text-[15px] text-[#707072] text-center mt-1.5 leading-normal">
-                  Your email has been verified. Welcome aboard{firstName ? `, ${firstName}` : ''}!
-                </p>
+          {/* Header: Welcome to Sonu Shoes. */}
+          <h2
+            className="text-[22px] sm:text-[24px] font-bold text-[#111111] text-center mt-3 tracking-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
+            style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+          >
+            Welcome to Sonu Shoes.
+          </h2>
 
-                {/* Continue action smoothly triggers transition to Delivery Address */}
-                <div className="mt-8 text-center">
-                  <button
-                    type="button"
-                    onClick={handleTransitionToDeliveryAddress}
-                    className="w-full py-3.5 sm:py-4 rounded-full text-[15px] sm:text-[16px] font-medium bg-[#111111] hover:bg-black text-white cursor-pointer shadow-sm active:scale-[0.99] transition-all font-['Helvetica_Now_Text_Medium',sans-serif]"
-                    style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
-                  >
-                    Continue
-                  </button>
-                </div>
-              </div>
-            )}
+          {/* Subtitle */}
+          <p className="text-[14px] sm:text-[15px] text-[#707072] text-center mt-2 leading-normal font-['Helvetica_Now_Text',sans-serif]">
+            Your email has been verified. Welcome aboard{firstName ? `, ${firstName}` : ''}!
+          </p>
+
+          {/* Continue button */}
+          <div className="mt-8 text-center">
+            <button
+              type="button"
+              onClick={handleTransitionToDeliveryAddress}
+              className="w-full py-3.5 sm:py-4 rounded-full text-[15px] sm:text-[16px] font-medium bg-[#111111] hover:bg-black text-white cursor-pointer shadow-sm active:scale-[0.99] transition-all font-['Helvetica_Now_Text_Medium',sans-serif]"
+              style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+            >
+              Continue
+            </button>
           </div>
         </div>
       )}
