@@ -221,8 +221,7 @@ export default function LoginModal({ isOpen, onClose }) {
   const isEmailOtpValid = emailOtp.join('').length === 6;
   const isAddrValid =
     addrHouseNo.trim().length > 0 &&
-    addrStreet.trim().length > 0 &&
-    addrCity.trim().length > 0 &&
+    addrRoadArea.trim().length > 0 &&
     addrPincode.replace(/\D/g, '').length === 6;
 
   // Handlers
