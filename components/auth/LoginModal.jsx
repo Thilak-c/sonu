@@ -281,9 +281,9 @@ export default function LoginModal({ isOpen, onClose }) {
     }
 
     setStep('success');
-    setTimeout(() => {
+    closeTimerRef.current = setTimeout(() => {
       onClose();
-    }, 1200);
+    }, 4000);
   };
 
   const isMobileFloating = isMobileFocused || mobileNumber.length > 0;
@@ -975,31 +975,60 @@ export default function LoginModal({ isOpen, onClose }) {
           </div>
         )}
 
-        {/* STEP 5: SUCCESS STATE */}
+        {/* STEP 5: SUCCESS STATE ("Welcome to Sonu Shoes.") */}
         {step === 'success' && (
-          <div className="py-8 text-center">
-            <div className="w-14 h-14 bg-[#008a00] text-white rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg
-                className="w-7 h-7"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={3}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
+          <div>
+            {/* Centered Brand Logo at top */}
+            <div className="flex justify-center pt-1 pb-1">
+              <img
+                src="/Logo/Logo_Full.png"
+                alt="SONU Logo"
+                className="h-7 sm:h-8 w-auto object-contain"
+                loading="eager"
+                fetchPriority="high"
+                width={150}
+                height={32}
+              />
             </div>
-            <h3
-              className="text-[22px] font-bold text-[#111111] tracking-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
+
+            {/* Header: Welcome to Sonu Shoes. */}
+            <h2
+              className="text-[22px] sm:text-[24px] font-bold text-[#111111] text-center mt-3 tracking-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
               style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
             >
-              Welcome to SONU, {firstName || 'Shopper'}!
-            </h3>
-            <p className="text-[14px] text-[#707072] mt-1.5">
-              Your profile has been verified and saved.
+              Welcome to Sonu Shoes.
+            </h2>
+
+            {/* Subtitle */}
+            <p className="text-[14px] sm:text-[15px] text-[#707072] text-center mt-1.5 leading-normal">
+              Your email has been verified. Welcome aboard{firstName ? `, ${firstName}` : ''}!
             </p>
+
+            {/* Checkmark icon & Continue action replacing OTPs form */}
+            <div className="mt-8 text-center">
+              <div className="w-14 h-14 bg-[#111111] text-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+                <svg
+                  className="w-7 h-7"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={3}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+
+              <button
+                type="button"
+                onClick={onClose}
+                className="w-full py-3.5 sm:py-4 rounded-full text-[15px] sm:text-[16px] font-medium bg-[#111111] hover:bg-black text-white cursor-pointer shadow-sm active:scale-[0.99] transition-all font-['Helvetica_Now_Text_Medium',sans-serif]"
+                style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+              >
+                Continue
+              </button>
+            </div>
           </div>
         )}
       </div>
