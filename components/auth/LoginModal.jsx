@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 
 export default function LoginModal({ isOpen, onClose }) {
-  // Step: 'mobile' | 'otp' | 'details' | 'success'
+  // Step: 'mobile' | 'otp' | 'details' | 'email-otp' | 'success'
   const [step, setStep] = useState('mobile');
 
   // Step 1: Mobile
@@ -12,7 +12,7 @@ export default function LoginModal({ isOpen, onClose }) {
   const [isMobileFocused, setIsMobileFocused] = useState(false);
   const mobileInputRef = useRef(null);
 
-  // Step 2: OTP
+  // Step 2: Mobile OTP
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [timer, setTimer] = useState(30);
 
@@ -23,6 +23,14 @@ export default function LoginModal({ isOpen, onClose }) {
   const [dob, setDob] = useState('');
   const [email, setEmail] = useState('');
   const [agreed, setAgreed] = useState(true);
+
+  // Email verification state
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [emailError, setEmailError] = useState('');
+  const [sentEmailCode, setSentEmailCode] = useState('');
+  const [emailOtp, setEmailOtp] = useState(['', '', '', '', '', '']);
+  const [emailTimer, setEmailTimer] = useState(30);
+  const [emailOtpError, setEmailOtpError] = useState('');
 
   // Focused state for each field in Step 3
   const [focusedField, setFocusedField] = useState(null);
@@ -58,6 +66,11 @@ export default function LoginModal({ isOpen, onClose }) {
         setAgreed(true);
         setFocusedField(null);
         setIsPrefDropdownOpen(false);
+        setIsSendingEmail(false);
+        setEmailError('');
+        setSentEmailCode('');
+        setEmailOtp(['', '', '', '', '', '']);
+        setEmailOtpError('');
       }, 300);
     }
 
@@ -102,7 +115,7 @@ export default function LoginModal({ isOpen, onClose }) {
     };
   }, [isOpen, isPrefDropdownOpen, onClose]);
 
-  // Timer countdown when on OTP step
+  // Timer countdown when on Mobile OTP step
   useEffect(() => {
     let interval = null;
     if (step === 'otp' && timer > 0) {
@@ -112,6 +125,17 @@ export default function LoginModal({ isOpen, onClose }) {
     }
     return () => clearInterval(interval);
   }, [step, timer]);
+
+  // Timer countdown when on Email OTP step
+  useEffect(() => {
+    let interval = null;
+    if (step === 'email-otp' && emailTimer > 0) {
+      interval = setInterval(() => {
+        setEmailTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [step, emailTimer]);
 
   if (!isMounted) return null;
 
@@ -126,6 +150,7 @@ export default function LoginModal({ isOpen, onClose }) {
     dob.length === 10 &&
     isEmailValid &&
     agreed;
+  const isEmailOtpValid = emailOtp.join('').length === 6;
 
   // Handlers
   const handleMobileChange = (e) => {
@@ -143,7 +168,6 @@ export default function LoginModal({ isOpen, onClose }) {
   const handleVerifyOtp = (e) => {
     e.preventDefault();
     if (!isOtpValid) return;
-
     // Advance directly to the "Almost there!" details collection step
     setStep('details');
   };
@@ -159,9 +183,82 @@ export default function LoginModal({ isOpen, onClose }) {
     setDob(formatted);
   };
 
-  const handleSaveDetails = (e) => {
+  // Triggered when user clicks "Verify Email" on the "Almost there!" form
+  const handleSendVerificationEmail = async (e) => {
     e.preventDefault();
-    if (!isDetailsValid) return;
+    if (!isDetailsValid || isSendingEmail) return;
+
+    setIsSendingEmail(true);
+    setEmailError('');
+
+    try {
+      const res = await fetch('/api/auth/send-verification-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email.trim(),
+          name: firstName.trim(),
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to send verification email');
+      }
+
+      setSentEmailCode(data.code || '');
+      setEmailOtp(['', '', '', '', '', '']);
+      setEmailTimer(30);
+      setEmailOtpError('');
+      setStep('email-otp');
+    } catch (err) {
+      setEmailError(err.message || 'Unable to send verification email. Please try again.');
+    } finally {
+      setIsSendingEmail(false);
+    }
+  };
+
+  // Resend email verification code
+  const handleResendEmailOtp = async () => {
+    if (emailTimer > 0 || isSendingEmail) return;
+    setIsSendingEmail(true);
+    setEmailOtpError('');
+
+    try {
+      const res = await fetch('/api/auth/send-verification-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email.trim(),
+          name: firstName.trim(),
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setSentEmailCode(data.code || '');
+        setEmailTimer(30);
+      } else {
+        setEmailOtpError(data.error || 'Failed to resend code.');
+      }
+    } catch (err) {
+      setEmailOtpError('Failed to resend code. Please try again.');
+    } finally {
+      setIsSendingEmail(false);
+    }
+  };
+
+  // Complete profile saving after email code verification
+  const handleVerifyEmailOtp = (e) => {
+    if (e) e.preventDefault();
+    const entered = emailOtp.join('');
+    if (entered.length !== 6) return;
+
+    // Verify against generated code if present
+    if (sentEmailCode && entered !== sentEmailCode) {
+      setEmailOtpError('Incorrect code. Please enter the 6-digit code sent to your email.');
+      return;
+    }
 
     const userProfile = {
       firstName: firstName.trim(),
@@ -170,6 +267,7 @@ export default function LoginModal({ isOpen, onClose }) {
       dob,
       email: email.trim(),
       mobile: mobileNumber,
+      isEmailVerified: true,
     };
 
     try {
@@ -185,7 +283,7 @@ export default function LoginModal({ isOpen, onClose }) {
     setStep('success');
     setTimeout(() => {
       onClose();
-    }, 1000);
+    }, 1200);
   };
 
   const isMobileFloating = isMobileFocused || mobileNumber.length > 0;
@@ -357,7 +455,7 @@ export default function LoginModal({ isOpen, onClose }) {
           </div>
         )}
 
-        {/* STEP 2: OTP VERIFICATION */}
+        {/* STEP 2: MOBILE OTP VERIFICATION */}
         {step === 'otp' && (
           <div>
             {/* Centered Brand Logo */}
@@ -481,7 +579,7 @@ export default function LoginModal({ isOpen, onClose }) {
             </p>
 
             {/* Form Fields with Notched Outline Floating Label Animation */}
-            <form onSubmit={handleSaveDetails} className="mt-6 space-y-3.5 sm:space-y-4">
+            <form onSubmit={handleSendVerificationEmail} className="mt-6 space-y-3.5 sm:space-y-4">
               {/* 1. First Name* */}
               <div
                 className={`relative w-full h-[52px] sm:h-[54px] px-4 rounded-[8px] border transition-colors cursor-text bg-white flex items-center ${
@@ -725,24 +823,159 @@ export default function LoginModal({ isOpen, onClose }) {
                 </p>
               </div>
 
+              {/* Error message if email sending fails */}
+              {emailError && (
+                <p className="text-[13px] text-[#d32f2f] text-center mt-2 leading-tight">
+                  {emailError}
+                </p>
+              )}
+
               {/* Verify Email Pill Button */}
               <button
                 type="submit"
-                disabled={!isDetailsValid}
-                className={`w-full py-3.5 sm:py-4 rounded-full mt-4 text-[15px] sm:text-[16px] font-medium transition-all ${
-                  isDetailsValid
+                disabled={!isDetailsValid || isSendingEmail}
+                className={`w-full py-3.5 sm:py-4 rounded-full mt-4 text-[15px] sm:text-[16px] font-medium transition-all flex items-center justify-center gap-2 ${
+                  isDetailsValid && !isSendingEmail
                     ? 'bg-[#111111] hover:bg-black text-white cursor-pointer active:scale-[0.99] shadow-sm'
                     : 'bg-[#e5e5e5] text-[#707072] cursor-not-allowed'
                 }`}
                 style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
               >
-                Verify Email
+                {isSendingEmail ? (
+                  <>
+                    <svg
+                      className="animate-spin h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
+                    </svg>
+                    <span>Sending verification email...</span>
+                  </>
+                ) : (
+                  'Verify Email'
+                )}
               </button>
             </form>
           </div>
         )}
 
-        {/* STEP 4: SUCCESS STATE */}
+        {/* STEP 4: EMAIL OTP VERIFICATION */}
+        {step === 'email-otp' && (
+          <div>
+            {/* Centered Brand Logo */}
+            <div className="flex justify-center pt-1 pb-1">
+              <img
+                src="/Logo/Logo_Full.png"
+                alt="SONU Logo"
+                className="h-7 sm:h-8 w-auto object-contain"
+                loading="eager"
+                fetchPriority="high"
+                width={150}
+                height={32}
+              />
+            </div>
+
+            <h2
+              className="text-[22px] sm:text-[24px] font-bold text-[#111111] text-center mt-3 tracking-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
+              style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+            >
+              Verify your email
+            </h2>
+            <p className="text-[14px] text-[#707072] text-center mt-1 leading-normal max-w-[340px] mx-auto">
+              Sent to <strong className="text-[#111111]">{email}</strong>{' '}
+              <button
+                type="button"
+                onClick={() => setStep('details')}
+                className="text-[#111111] font-medium underline ml-1 cursor-pointer"
+              >
+                Edit
+              </button>
+            </p>
+
+            <form onSubmit={handleVerifyEmailOtp} className="mt-6">
+              <div className="flex justify-center gap-2 sm:gap-2.5">
+                {emailOtp.map((digit, idx) => (
+                  <input
+                    key={idx}
+                    id={`email-otp-input-${idx}`}
+                    type="tel"
+                    inputMode="numeric"
+                    maxLength={1}
+                    value={digit}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, '');
+                      const next = [...emailOtp];
+                      next[idx] = val;
+                      setEmailOtp(next);
+                      setEmailOtpError('');
+                      if (val && idx < 5) {
+                        document.getElementById(`email-otp-input-${idx + 1}`)?.focus();
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Backspace' && !emailOtp[idx] && idx > 0) {
+                        document.getElementById(`email-otp-input-${idx - 1}`)?.focus();
+                      }
+                    }}
+                    className="w-11 h-12 sm:w-12 sm:h-13 text-center border border-[#8d8d8d] focus:border-[#111111] rounded-lg text-[18px] font-bold outline-none"
+                  />
+                ))}
+              </div>
+
+              {emailOtpError && (
+                <p className="text-[13px] text-[#d32f2f] text-center mt-3">
+                  {emailOtpError}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                disabled={!isEmailOtpValid}
+                className={`w-full py-3.5 sm:py-4 rounded-full mt-6 text-[15px] sm:text-[16px] font-medium transition-all ${
+                  isEmailOtpValid
+                    ? 'bg-[#111111] hover:bg-black text-white cursor-pointer shadow-sm active:scale-[0.99]'
+                    : 'bg-[#e5e5e5] text-[#707072] cursor-not-allowed'
+                }`}
+                style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+              >
+                Verify & Complete
+              </button>
+
+              <div className="text-center mt-4">
+                {emailTimer > 0 ? (
+                  <p className="text-[13px] text-[#707072]">
+                    Resend code in <span className="font-medium text-[#111111]">{emailTimer}s</span>
+                  </p>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleResendEmailOtp}
+                    disabled={isSendingEmail}
+                    className="text-[13px] font-medium text-[#111111] underline cursor-pointer"
+                  >
+                    Resend verification code
+                  </button>
+                )}
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* STEP 5: SUCCESS STATE */}
         {step === 'success' && (
           <div className="py-8 text-center">
             <div className="w-14 h-14 bg-[#008a00] text-white rounded-full flex items-center justify-center mx-auto mb-4">
@@ -765,7 +998,7 @@ export default function LoginModal({ isOpen, onClose }) {
               Welcome to SONU, {firstName || 'Shopper'}!
             </h3>
             <p className="text-[14px] text-[#707072] mt-1.5">
-              Your profile has been saved.
+              Your profile has been verified and saved.
             </p>
           </div>
         )}
