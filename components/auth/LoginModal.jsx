@@ -58,6 +58,7 @@ export default function LoginModal({ isOpen, onClose }) {
   const [focusedField, setFocusedField] = useState(null);
   const [isPrefDropdownOpen, setIsPrefDropdownOpen] = useState(false);
   const prefContainerRef = useRef(null);
+  const firstNameInputRef = useRef(null);
 
   // Modal mount/visibility animation
   const [isMounted, setIsMounted] = useState(false);
@@ -183,6 +184,25 @@ export default function LoginModal({ isOpen, onClose }) {
     return () => clearInterval(interval);
   }, [step, emailTimer]);
 
+  // Automatically open keyboard when "Almost there" or "Verify your email" opens
+  useEffect(() => {
+    if (step === 'details') {
+      const timer = setTimeout(() => {
+        firstNameInputRef.current?.focus();
+        setFocusedField('firstName');
+      }, 200);
+      return () => clearTimeout(timer);
+    }
+
+    if (step === 'email-otp') {
+      const timer = setTimeout(() => {
+        const firstInput = document.getElementById('email-otp-input-0');
+        firstInput?.focus();
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [step]);
+
   if (!isMounted) return null;
 
   // Validation
@@ -236,6 +256,11 @@ export default function LoginModal({ isOpen, onClose }) {
       });
 
       setTimeout(() => {
+        firstNameInputRef.current?.focus();
+        setFocusedField('firstName');
+      }, 200);
+
+      setTimeout(() => {
         setOtpVerifyState('idle');
       }, 500);
     }, 400);
@@ -280,6 +305,10 @@ export default function LoginModal({ isOpen, onClose }) {
       setEmailTimer(30);
       setEmailOtpError('');
       setStep('email-otp');
+
+      setTimeout(() => {
+        document.getElementById('email-otp-input-0')?.focus();
+      }, 150);
     } catch (err) {
       setEmailError(err.message || 'Unable to send verification email. Please try again.');
     } finally {
@@ -846,6 +875,8 @@ export default function LoginModal({ isOpen, onClose }) {
                       First Name*
                     </span>
                     <input
+                      ref={firstNameInputRef}
+                      autoFocus
                       type="text"
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
@@ -1161,6 +1192,7 @@ export default function LoginModal({ isOpen, onClose }) {
                       <input
                         key={idx}
                         id={`email-otp-input-${idx}`}
+                        autoFocus={idx === 0}
                         type="tel"
                         inputMode="numeric"
                         maxLength={1}
