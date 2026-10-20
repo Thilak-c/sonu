@@ -312,25 +312,29 @@ export default function CheckoutPage() {
     );
   }
 
-  // EMPTY BAG SCREEN (Only for bag step when empty)
-  if (cartItems.length === 0 && checkoutStep === 'bag') {
+  // EMPTY BAG SCREEN (When cart has 0 items)
+  if (cartItems.length === 0 && checkoutStep !== 'confirmation') {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-20 text-center select-none font-['Helvetica_Now_Text',sans-serif]">
-        <div className="w-full max-w-[360px] flex flex-col items-center">
+      <div className="min-h-[75vh] flex flex-col items-center justify-center px-6 text-center select-none font-['Helvetica_Now_Text',sans-serif]">
+        <div className="max-w-[440px] mx-auto flex flex-col items-center">
           <h1
-            className="text-[24px] sm:text-[28px] font-medium text-[#111111] tracking-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
+            className="text-[26px] sm:text-[30px] font-medium text-[#111111] tracking-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
             style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
           >
-            Bag
+            Your bag is empty.
           </h1>
-          <p className="text-[14px] sm:text-[15px] text-[#707072] mt-1 mb-8">0 items | ₹0</p>
-          <div className="w-full border-t border-[#e5e5e5] mb-8" />
-          <p className="text-[16px] text-[#707072] mb-8 font-normal">There are no items in your bag.</p>
+          <p
+            className="text-[15px] sm:text-[16px] text-[#111111] mt-2 sm:mt-2.5 mb-8 font-normal font-['Helvetica_Now_Text',sans-serif]"
+            style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+          >
+            When you add products, they'll appear here.
+          </p>
           <Link
             href="/#fresh-drops"
-            className="w-full py-4 bg-[#111111] text-white text-[15px] font-medium rounded-full text-center hover:bg-neutral-800 active:scale-[0.99] transition-all"
+            className="inline-flex items-center justify-center px-10 sm:px-12 py-3.5 sm:py-4 bg-[#111111] hover:bg-black active:scale-[0.99] text-white text-[15px] sm:text-[16px] font-medium rounded-full transition-all shadow-sm font-['Helvetica_Now_Text_Medium',sans-serif]"
+            style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
           >
-            Explore Fresh Drops
+            Shop Now
           </Link>
         </div>
       </div>
