@@ -41,11 +41,12 @@ export default function LoginModal({ isOpen, onClose }) {
   const [addressSlideIn, setAddressSlideIn] = useState(false);
 
   // Address Form States matching User's Exact Design
-  const [addrPincode, setAddrPincode] = useState('800013');
+  const [addrPincode, setAddrPincode] = useState('');
   const [isPincodeFocused, setIsPincodeFocused] = useState(false);
   const [isPincodeLoading, setIsPincodeLoading] = useState(false);
-  const [detectedCity, setDetectedCity] = useState('Patna');
-  const [detectedState, setDetectedState] = useState('Bihar');
+  const [detectedCity, setDetectedCity] = useState('');
+  const [detectedState, setDetectedState] = useState('');
+  const [pincodeServiceable, setPincodeServiceable] = useState(null);
   const [deliveryEtd, setDeliveryEtd] = useState('');
   const [addrHouseNo, setAddrHouseNo] = useState('');
   const [addrRoadArea, setAddrRoadArea] = useState('');
@@ -100,11 +101,12 @@ export default function LoginModal({ isOpen, onClose }) {
         setIsWelcomeFadingOut(false);
         setIsDeliveryAddressVisible(false);
         setAddressSlideIn(false);
-        setAddrPincode('800013');
+        setAddrPincode('');
         setIsPincodeFocused(false);
         setIsPincodeLoading(false);
-        setDetectedCity('Patna');
-        setDetectedState('Bihar');
+        setDetectedCity('');
+        setDetectedState('');
+        setPincodeServiceable(null);
         setDeliveryEtd('');
         setAddrHouseNo('');
         setAddrRoadArea('');
@@ -354,12 +356,29 @@ export default function LoginModal({ isOpen, onClose }) {
       const res = await fetch(`/api/shiprocket/serviceability?pincode=${code}`);
       const json = await res.json();
       if (json.success && json.data) {
-        setDetectedCity(json.data.city || 'Patna');
-        setDetectedState(json.data.state || 'Bihar');
-        setDeliveryEtd(json.data.etd || 'Within 2-3 business days');
+        if (json.data.deliverable) {
+          setDetectedCity(json.data.city || '');
+          setDetectedState(json.data.state || '');
+          setDeliveryEtd(json.data.etd || (json.data.estimatedDays ? `In ${json.data.estimatedDays} days` : ''));
+          setPincodeServiceable(true);
+        } else {
+          setDetectedCity(json.data.city || '');
+          setDetectedState(json.data.state || '');
+          setDeliveryEtd('');
+          setPincodeServiceable(false);
+        }
+      } else {
+        setDetectedCity('');
+        setDetectedState('');
+        setDeliveryEtd('');
+        setPincodeServiceable(false);
       }
     } catch (err) {
       console.error('Shiprocket serviceability error:', err);
+      setDetectedCity('');
+      setDetectedState('');
+      setDeliveryEtd('');
+      setPincodeServiceable(false);
     } finally {
       setIsPincodeLoading(false);
     }
@@ -374,6 +393,9 @@ export default function LoginModal({ isOpen, onClose }) {
       fetchShiprocketEtd(val);
     } else {
       setDeliveryEtd('');
+      setDetectedCity('');
+      setDetectedState('');
+      setPincodeServiceable(null);
     }
   };
 
@@ -475,8 +497,8 @@ export default function LoginModal({ isOpen, onClose }) {
       mobile: finalMobile,
       email: email.trim(),
       pincode: addrPincode.trim(),
-      city: detectedCity || 'Patna',
-      state: detectedState || 'Bihar',
+      city: detectedCity || '',
+      state: detectedState || '',
       houseNo: addrHouseNo.trim(),
       street: addrRoadArea.trim(),
       roadArea: addrRoadArea.trim(),
@@ -1375,21 +1397,45 @@ export default function LoginModal({ isOpen, onClose }) {
 
               {/* Location Card: Auto-detected or Skeleton Animation */}
               <div className="bg-[#f5f5f5] rounded-[12px] p-4 mb-4 transition-all">
-                {isPincodeLoading || (isPincodeFocused && addrPincode.length < 6) ? (
+                {isPincodeLoading || (isPincodeFocused && addrPincode.length > 0 && addrPincode.length < 6) ? (
                   <div className="animate-pulse space-y-2 py-0.5">
                     <div className="h-5 bg-[#e2e2e5] rounded w-36" />
                     <div className="h-3.5 bg-[#e2e2e5] rounded w-48" />
                   </div>
-                ) : (
+                ) : detectedCity ? (
                   <div>
                     <h3
                       className="text-[16px] sm:text-[17px] font-bold text-[#111111] leading-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
                       style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
                     >
-                      {detectedCity || 'Patna'}, {detectedState || 'Bihar'}
+                      {detectedCity}{detectedState ? `, ${detectedState}` : ''}
                     </h3>
                     <p className="text-[13px] text-[#707072] mt-0.5 font-['Helvetica_Now_Text',sans-serif]">
                       Location auto-detected
+                    </p>
+                  </div>
+                ) : pincodeServiceable === false ? (
+                  <div>
+                    <h3
+                      className="text-[16px] sm:text-[17px] font-bold text-[#e53935] leading-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
+                      style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                    >
+                      Delivery Not Available
+                    </h3>
+                    <p className="text-[13px] text-[#707072] mt-0.5 font-['Helvetica_Now_Text',sans-serif]">
+                      {addrPincode ? `PIN code ${addrPincode} is not serviceable` : 'Invalid PIN code'}
+                    </p>
+                  </div>
+                ) : (
+                  <div>
+                    <h3
+                      className="text-[16px] sm:text-[17px] font-bold text-[#707072] leading-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
+                      style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                    >
+                      Enter PIN code
+                    </h3>
+                    <p className="text-[13px] text-[#8d8d8d] mt-0.5 font-['Helvetica_Now_Text',sans-serif]">
+                      Location will be auto-detected
                     </p>
                   </div>
                 )}
@@ -1444,6 +1490,23 @@ export default function LoginModal({ isOpen, onClose }) {
                     <div className="flex items-center gap-2 mt-2 px-1 text-[13px] text-[#707072] animate-pulse">
                       <div className="w-3.5 h-3.5 rounded-full border-2 border-[#111111] border-t-transparent animate-spin shrink-0" />
                       <span>Checking delivery date via Shiprocket...</span>
+                    </div>
+                  ) : pincodeServiceable === false ? (
+                    <div className="flex items-center gap-2 mt-2 px-1 text-[13px] text-[#e53935]">
+                      <svg
+                        className="w-4 h-4 text-[#e53935] shrink-0"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="15" y1="9" x2="9" y2="15" />
+                        <line x1="9" y1="9" x2="15" y2="15" />
+                      </svg>
+                      <span>Delivery not available for PIN code {addrPincode}</span>
                     </div>
                   ) : deliveryEtd ? (
                     <div className="flex items-center gap-2 mt-2 px-1 text-[13px] text-[#111111]">

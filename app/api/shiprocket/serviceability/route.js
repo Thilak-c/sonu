@@ -21,16 +21,11 @@ export async function GET(request) {
     return NextResponse.json(
       {
         success: false,
+        deliverable: false,
         error: err.message || 'Serviceability check failed',
-        data: {
-          deliverable: true,
-          city: 'Patna',
-          state: 'Bihar',
-          etd: 'Within 3-4 days',
-          estimatedDays: '3',
-        },
+        data: null,
       },
-      { status: 200 }
+      { status: 500 }
     );
   }
 }
