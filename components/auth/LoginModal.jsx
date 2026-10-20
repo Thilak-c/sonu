@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 
 export default function LoginModal({ isOpen, onClose }) {
-  // Step: 'mobile' | 'otp' | 'details' | 'email-otp' | 'success'
+  // Step: 'mobile' | 'otp' | 'details' | 'email-otp' | 'success' | 'delivery-address'
   const [step, setStep] = useState('mobile');
 
   // Step 1: Mobile
@@ -34,6 +34,20 @@ export default function LoginModal({ isOpen, onClose }) {
   const [emailTimer, setEmailTimer] = useState(30);
   const [emailOtpError, setEmailOtpError] = useState('');
   const [emailSentNotice, setEmailSentNotice] = useState(false);
+
+  // Step 5 Welcome & Step 6 Delivery Address Transition States
+  const [isWelcomeFadingOut, setIsWelcomeFadingOut] = useState(false);
+  const [isDeliveryAddressVisible, setIsDeliveryAddressVisible] = useState(false);
+  const [addressSlideIn, setAddressSlideIn] = useState(false);
+  const [addrHouseNo, setAddrHouseNo] = useState('');
+  const [addrStreet, setAddrStreet] = useState('');
+  const [addrLandmark, setAddrLandmark] = useState('');
+  const [addrCity, setAddrCity] = useState('');
+  const [addrState, setAddrState] = useState('Maharashtra');
+  const [addrPincode, setAddrPincode] = useState('');
+  const [addrFocusedField, setAddrFocusedField] = useState(null);
+  const [isAddrStateDropdownOpen, setIsAddrStateDropdownOpen] = useState(false);
+  const addrStateContainerRef = useRef(null);
 
   // Focused state for each field in Step 3
   const [focusedField, setFocusedField] = useState(null);
@@ -77,6 +91,17 @@ export default function LoginModal({ isOpen, onClose }) {
         setEmailOtp(['', '', '', '', '', '']);
         setEmailOtpError('');
         setEmailSentNotice(false);
+        setIsWelcomeFadingOut(false);
+        setIsDeliveryAddressVisible(false);
+        setAddressSlideIn(false);
+        setAddrHouseNo('');
+        setAddrStreet('');
+        setAddrLandmark('');
+        setAddrCity('');
+        setAddrPincode('');
+        setAddrState('Maharashtra');
+        setAddrFocusedField(null);
+        setIsAddrStateDropdownOpen(false);
       }, 300);
     }
 
@@ -101,6 +126,8 @@ export default function LoginModal({ isOpen, onClose }) {
       if (e.key === 'Escape' && isOpen) {
         if (isPrefDropdownOpen) {
           setIsPrefDropdownOpen(false);
+        } else if (isAddrStateDropdownOpen) {
+          setIsAddrStateDropdownOpen(false);
         } else {
           onClose();
         }
@@ -111,6 +138,9 @@ export default function LoginModal({ isOpen, onClose }) {
       if (prefContainerRef.current && !prefContainerRef.current.contains(e.target)) {
         setIsPrefDropdownOpen(false);
       }
+      if (addrStateContainerRef.current && !addrStateContainerRef.current.contains(e.target)) {
+        setIsAddrStateDropdownOpen(false);
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -119,7 +149,7 @@ export default function LoginModal({ isOpen, onClose }) {
       window.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isOpen, isPrefDropdownOpen, onClose]);
+  }, [isOpen, isPrefDropdownOpen, isAddrStateDropdownOpen, onClose]);
 
   // Timer countdown when on Mobile OTP step
   useEffect(() => {
@@ -163,6 +193,11 @@ export default function LoginModal({ isOpen, onClose }) {
     isEmailValid &&
     agreed;
   const isEmailOtpValid = emailOtp.join('').length === 6;
+  const isAddrValid =
+    addrHouseNo.trim().length > 0 &&
+    addrStreet.trim().length > 0 &&
+    addrCity.trim().length > 0 &&
+    addrPincode.replace(/\D/g, '').length === 6;
 
   // Handlers
   const handleMobileChange = (e) => {
@@ -279,6 +314,26 @@ export default function LoginModal({ isOpen, onClose }) {
       });
   };
 
+  // Transition from "Welcome to Sonu Shoes." -> Fade out -> Slide up Delivery Address
+  const handleTransitionToDeliveryAddress = () => {
+    clearTimeout(closeTimerRef.current);
+    // 1. Smoothly fade out the welcome message
+    setIsWelcomeFadingOut(true);
+
+    // 2. Mount Delivery Address and slide up with identical incoming animation
+    setTimeout(() => {
+      setIsDeliveryAddressVisible(true);
+      setStep('delivery-address');
+      setAddressSlideIn(false);
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setAddressSlideIn(true);
+        });
+      });
+    }, 450);
+  };
+
   // Complete profile saving after email code verification
   const handleVerifyEmailOtp = (e) => {
     if (e) e.preventDefault();
@@ -312,13 +367,53 @@ export default function LoginModal({ isOpen, onClose }) {
     }
 
     setStep('success');
+    setIsWelcomeFadingOut(false);
+
+    // Smoothly fade out "Welcome to Sonu Shoes." after 2s and slide up Delivery Address
     closeTimerRef.current = setTimeout(() => {
+      handleTransitionToDeliveryAddress();
+    }, 2000);
+  };
+
+  // Save Delivery Address and finalize onboarding
+  const handleSaveDeliveryAddress = (e) => {
+    e?.preventDefault();
+    if (!isAddrValid) return;
+
+    const shippingAddress = {
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      mobile: mobileNumber,
+      email: email.trim(),
+      pincode: addrPincode.trim(),
+      houseNo: addrHouseNo.trim(),
+      street: addrStreet.trim(),
+      landmark: addrLandmark.trim(),
+      city: addrCity.trim(),
+      state: addrState,
+    };
+
+    try {
+      localStorage.setItem('sonu_shipping_address', JSON.stringify(shippingAddress));
+      window.dispatchEvent(new Event('auth-changed'));
+      window.dispatchEvent(new Event('address-updated'));
+    } catch (err) {
+      // storage unavailable
+    }
+
+    // Smoothly slide down before closing
+    setAddressSlideIn(false);
+    setTimeout(() => {
       onClose();
-    }, 4000);
+    }, 450);
   };
 
   const isMobileFloating = isMobileFocused || mobileNumber.length > 0;
-  const isOnboardingFullScreen = step === 'details' || step === 'email-otp' || step === 'success';
+  const isOnboardingFullScreen =
+    step === 'details' ||
+    step === 'email-otp' ||
+    step === 'success' ||
+    step === 'delivery-address';
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center select-none font-['Helvetica_Now_Text',sans-serif]">
@@ -601,7 +696,7 @@ export default function LoginModal({ isOpen, onClose }) {
         )}
       </div>
 
-      {/* 2. 100% VH FULL-SCREEN OVERLAY FOR ONBOARDING (Almost There, Email OTP, Welcome) */}
+      {/* 2. 100% VH FULL-SCREEN OVERLAY FOR ONBOARDING (Almost There, Email OTP, Welcome, Delivery Address) */}
       {isOnboardingFullScreen && (
         <div
           className={`fixed inset-0 z-50 w-full h-[100dvh] bg-white overflow-y-auto px-6 sm:px-8 py-8 flex flex-col justify-start sm:justify-center transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform ${
@@ -1085,7 +1180,11 @@ export default function LoginModal({ isOpen, onClose }) {
 
             {/* STEP 5: SUCCESS STATE ("Welcome to Sonu Shoes.") */}
             {step === 'success' && (
-              <div>
+              <div
+                className={`transition-opacity duration-500 ease-out ${
+                  isWelcomeFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
+                }`}
+              >
                 {/* Centered Brand Logo at top */}
                 <div className="flex justify-center pt-1 pb-1">
                   <img
@@ -1112,25 +1211,11 @@ export default function LoginModal({ isOpen, onClose }) {
                   Your email has been verified. Welcome aboard{firstName ? `, ${firstName}` : ''}!
                 </p>
 
-                {/* Checkmark icon & Continue action replacing OTPs form */}
+                {/* Continue action smoothly triggers transition to Delivery Address */}
                 <div className="mt-8 text-center">
-                  <div className="w-14 h-14 bg-[#111111] text-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
-                    <svg
-                      className="w-7 h-7"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={3}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                  </div>
-
                   <button
                     type="button"
-                    onClick={onClose}
+                    onClick={handleTransitionToDeliveryAddress}
                     className="w-full py-3.5 sm:py-4 rounded-full text-[15px] sm:text-[16px] font-medium bg-[#111111] hover:bg-black text-white cursor-pointer shadow-sm active:scale-[0.99] transition-all font-['Helvetica_Now_Text_Medium',sans-serif]"
                     style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
                   >
@@ -1139,6 +1224,296 @@ export default function LoginModal({ isOpen, onClose }) {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* 3. STEP 6: DELIVERY ADDRESS FULL-SCREEN SHEET (Slides up from below with identical animation) */}
+      {(step === 'delivery-address' || isDeliveryAddressVisible) && (
+        <div
+          className={`fixed inset-0 z-[60] w-full h-[100dvh] bg-white overflow-y-auto px-6 sm:px-8 py-8 flex flex-col justify-start sm:justify-center transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform ${
+            addressSlideIn ? 'translate-y-0' : 'translate-y-full'
+          }`}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Delivery Address"
+        >
+          {/* Top-Right Close Button */}
+          <button
+            type="button"
+            onClick={() => {
+              setAddressSlideIn(false);
+              setTimeout(() => {
+                onClose();
+              }, 400);
+            }}
+            className="absolute top-5 right-5 p-2 text-[#111111] hover:opacity-60 transition-opacity cursor-pointer z-30"
+            aria-label="Close modal"
+          >
+            <svg
+              aria-hidden="true"
+              focusable="false"
+              viewBox="0 0 24 24"
+              role="img"
+              className="w-5 h-5"
+              fill="none"
+            >
+              <path
+                stroke="#111111"
+                strokeWidth="1.75"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M18.75 5.25L5.25 18.75m0-13.5l13.5 13.5"
+              />
+            </svg>
+          </button>
+
+          <div className="w-full max-w-[440px] mx-auto my-auto py-2">
+            {/* Centered Brand Logo */}
+            <div className="flex justify-center pt-1 pb-1">
+              <img
+                src="/Logo/Logo_Full.png"
+                alt="SONU Logo"
+                className="h-7 sm:h-8 w-auto object-contain"
+                loading="eager"
+                fetchPriority="high"
+                width={150}
+                height={32}
+              />
+            </div>
+
+            <h2
+              className="text-[22px] sm:text-[24px] font-bold text-[#111111] text-center mt-3 tracking-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
+              style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+            >
+              Delivery Address
+            </h2>
+            <p className="text-[14px] sm:text-[15px] text-[#707072] text-center mt-1.5 leading-normal max-w-[320px] mx-auto">
+              Where should we deliver your footwear?
+            </p>
+
+            <form onSubmit={handleSaveDeliveryAddress} className="mt-6 space-y-3.5 sm:space-y-4">
+              {/* PIN Code */}
+              <div
+                className={`relative w-full h-[52px] sm:h-[54px] px-4 rounded-[8px] border transition-colors cursor-text bg-white flex items-center ${
+                  addrFocusedField === 'pincode' ? 'border-[#111111]' : 'border-[#8d8d8d]'
+                }`}
+              >
+                <span
+                  className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${
+                    addrFocusedField === 'pincode' || addrPincode.length > 0
+                      ? '-top-2.5 left-3 px-1.5 bg-white text-[12px] text-[#111111] font-normal leading-none z-10'
+                      : 'top-1/2 -translate-y-1/2 left-4 text-[15px] sm:text-[16px] text-[#707072]'
+                  }`}
+                  style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                >
+                  PIN Code*
+                </span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  value={addrPincode}
+                  onChange={(e) => setAddrPincode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  onFocus={() => setAddrFocusedField('pincode')}
+                  onBlur={() => setAddrFocusedField(null)}
+                  className="w-full bg-transparent text-[15px] sm:text-[16px] text-[#111111] font-normal outline-none p-0"
+                  style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                />
+              </div>
+
+              {/* House / Flat No. */}
+              <div
+                className={`relative w-full h-[52px] sm:h-[54px] px-4 rounded-[8px] border transition-colors cursor-text bg-white flex items-center ${
+                  addrFocusedField === 'houseNo' ? 'border-[#111111]' : 'border-[#8d8d8d]'
+                }`}
+              >
+                <span
+                  className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${
+                    addrFocusedField === 'houseNo' || addrHouseNo.length > 0
+                      ? '-top-2.5 left-3 px-1.5 bg-white text-[12px] text-[#111111] font-normal leading-none z-10'
+                      : 'top-1/2 -translate-y-1/2 left-4 text-[15px] sm:text-[16px] text-[#707072]'
+                  }`}
+                  style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                >
+                  Flat, House No., Building, Apartment*
+                </span>
+                <input
+                  type="text"
+                  value={addrHouseNo}
+                  onChange={(e) => setAddrHouseNo(e.target.value)}
+                  onFocus={() => setAddrFocusedField('houseNo')}
+                  onBlur={() => setAddrFocusedField(null)}
+                  className="w-full bg-transparent text-[15px] sm:text-[16px] text-[#111111] font-normal outline-none p-0"
+                  style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                />
+              </div>
+
+              {/* Street / Area */}
+              <div
+                className={`relative w-full h-[52px] sm:h-[54px] px-4 rounded-[8px] border transition-colors cursor-text bg-white flex items-center ${
+                  addrFocusedField === 'street' ? 'border-[#111111]' : 'border-[#8d8d8d]'
+                }`}
+              >
+                <span
+                  className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${
+                    addrFocusedField === 'street' || addrStreet.length > 0
+                      ? '-top-2.5 left-3 px-1.5 bg-white text-[12px] text-[#111111] font-normal leading-none z-10'
+                      : 'top-1/2 -translate-y-1/2 left-4 text-[15px] sm:text-[16px] text-[#707072]'
+                  }`}
+                  style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                >
+                  Area, Street, Sector, Village*
+                </span>
+                <input
+                  type="text"
+                  value={addrStreet}
+                  onChange={(e) => setAddrStreet(e.target.value)}
+                  onFocus={() => setAddrFocusedField('street')}
+                  onBlur={() => setAddrFocusedField(null)}
+                  className="w-full bg-transparent text-[15px] sm:text-[16px] text-[#111111] font-normal outline-none p-0"
+                  style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                />
+              </div>
+
+              {/* Landmark */}
+              <div
+                className={`relative w-full h-[52px] sm:h-[54px] px-4 rounded-[8px] border transition-colors cursor-text bg-white flex items-center ${
+                  addrFocusedField === 'landmark' ? 'border-[#111111]' : 'border-[#8d8d8d]'
+                }`}
+              >
+                <span
+                  className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${
+                    addrFocusedField === 'landmark' || addrLandmark.length > 0
+                      ? '-top-2.5 left-3 px-1.5 bg-white text-[12px] text-[#111111] font-normal leading-none z-10'
+                      : 'top-1/2 -translate-y-1/2 left-4 text-[15px] sm:text-[16px] text-[#707072]'
+                  }`}
+                  style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                >
+                  Landmark (Optional)
+                </span>
+                <input
+                  type="text"
+                  value={addrLandmark}
+                  onChange={(e) => setAddrLandmark(e.target.value)}
+                  onFocus={() => setAddrFocusedField('landmark')}
+                  onBlur={() => setAddrFocusedField(null)}
+                  className="w-full bg-transparent text-[15px] sm:text-[16px] text-[#111111] font-normal outline-none p-0"
+                  style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                />
+              </div>
+
+              {/* City */}
+              <div
+                className={`relative w-full h-[52px] sm:h-[54px] px-4 rounded-[8px] border transition-colors cursor-text bg-white flex items-center ${
+                  addrFocusedField === 'city' ? 'border-[#111111]' : 'border-[#8d8d8d]'
+                }`}
+              >
+                <span
+                  className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${
+                    addrFocusedField === 'city' || addrCity.length > 0
+                      ? '-top-2.5 left-3 px-1.5 bg-white text-[12px] text-[#111111] font-normal leading-none z-10'
+                      : 'top-1/2 -translate-y-1/2 left-4 text-[15px] sm:text-[16px] text-[#707072]'
+                  }`}
+                  style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                >
+                  City / Town*
+                </span>
+                <input
+                  type="text"
+                  value={addrCity}
+                  onChange={(e) => setAddrCity(e.target.value)}
+                  onFocus={() => setAddrFocusedField('city')}
+                  onBlur={() => setAddrFocusedField(null)}
+                  className="w-full bg-transparent text-[15px] sm:text-[16px] text-[#111111] font-normal outline-none p-0"
+                  style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                />
+              </div>
+
+              {/* State Dropdown */}
+              <div ref={addrStateContainerRef} className="relative">
+                <div
+                  onClick={() => setIsAddrStateDropdownOpen((prev) => !prev)}
+                  className={`relative w-full h-[52px] sm:h-[54px] px-4 rounded-[8px] border transition-colors cursor-pointer bg-white flex items-center justify-between ${
+                    isAddrStateDropdownOpen ? 'border-[#111111]' : 'border-[#8d8d8d]'
+                  }`}
+                >
+                  <span
+                    className="absolute -top-2.5 left-3 px-1.5 bg-white text-[12px] text-[#111111] font-normal leading-none z-10 select-none"
+                    style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                  >
+                    State*
+                  </span>
+                  <span
+                    className="text-[15px] sm:text-[16px] text-[#111111] font-normal"
+                    style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                  >
+                    {addrState}
+                  </span>
+                  <svg
+                    className={`w-3.5 h-3.5 text-[#111111] transition-transform duration-200 shrink-0 ${
+                      isAddrStateDropdownOpen ? 'rotate-180' : ''
+                    }`}
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M7 10l5 5 5-5z" />
+                  </svg>
+                </div>
+
+                {isAddrStateDropdownOpen && (
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-[#e5e5e5] rounded-[10px] shadow-lg py-1.5 z-30 max-h-48 overflow-y-auto">
+                    {[
+                      'Maharashtra',
+                      'Delhi',
+                      'Karnataka',
+                      'Tamil Nadu',
+                      'Telangana',
+                      'Gujarat',
+                      'Haryana',
+                      'Uttar Pradesh',
+                      'West Bengal',
+                      'Rajasthan',
+                      'Kerala',
+                      'Punjab',
+                      'Madhya Pradesh',
+                      'Goa',
+                    ].map((st) => (
+                      <button
+                        key={st}
+                        type="button"
+                        onClick={() => {
+                          setAddrState(st);
+                          setIsAddrStateDropdownOpen(false);
+                        }}
+                        className={`w-full text-left px-4 py-2.5 text-[14px] sm:text-[15px] transition-colors cursor-pointer ${
+                          addrState === st
+                            ? 'bg-[#f5f5f5] text-[#111111] font-medium'
+                            : 'text-[#222222] hover:bg-[#fafafa]'
+                        }`}
+                        style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                      >
+                        {st}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={!isAddrValid}
+                className={`w-full py-3.5 sm:py-4 rounded-full mt-4 text-[15px] sm:text-[16px] font-medium transition-all ${
+                  isAddrValid
+                    ? 'bg-[#111111] hover:bg-black text-white cursor-pointer active:scale-[0.99] shadow-sm'
+                    : 'bg-[#e5e5e5] text-[#707072] cursor-not-allowed'
+                }`}
+                style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+              >
+                Save Delivery Address
+              </button>
+            </form>
           </div>
         </div>
       )}
