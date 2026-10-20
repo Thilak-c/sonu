@@ -1,0 +1,775 @@
+'use client';
+
+import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
+
+export default function LoginModal({ isOpen, onClose }) {
+  // Step: 'mobile' | 'otp' | 'details' | 'success'
+  const [step, setStep] = useState('mobile');
+
+  // Step 1: Mobile
+  const [mobileNumber, setMobileNumber] = useState('');
+  const [isMobileFocused, setIsMobileFocused] = useState(false);
+  const mobileInputRef = useRef(null);
+
+  // Step 2: OTP
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [timer, setTimer] = useState(30);
+
+  // Step 3: Details ("Almost there!")
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [preference, setPreference] = useState('');
+  const [dob, setDob] = useState('');
+  const [email, setEmail] = useState('');
+  const [agreed, setAgreed] = useState(true);
+
+  // Focused state for each field in Step 3
+  const [focusedField, setFocusedField] = useState(null);
+  const [isPrefDropdownOpen, setIsPrefDropdownOpen] = useState(false);
+  const prefContainerRef = useRef(null);
+
+  // Modal mount/visibility animation
+  const [isMounted, setIsMounted] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const closeTimerRef = useRef(null);
+
+  // Manage mount/unmount and smooth animation
+  useEffect(() => {
+    if (isOpen) {
+      clearTimeout(closeTimerRef.current);
+      setIsMounted(true);
+      requestAnimationFrame(() => {
+        setIsVisible(true);
+      });
+    } else {
+      setIsVisible(false);
+      closeTimerRef.current = setTimeout(() => {
+        setIsMounted(false);
+        setStep('mobile');
+        setMobileNumber('');
+        setIsMobileFocused(false);
+        setOtp(['', '', '', '', '', '']);
+        setFirstName('');
+        setLastName('');
+        setPreference('');
+        setDob('');
+        setEmail('');
+        setAgreed(true);
+        setFocusedField(null);
+        setIsPrefDropdownOpen(false);
+      }, 300);
+    }
+
+    return () => clearTimeout(closeTimerRef.current);
+  }, [isOpen]);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
+  // Escape key listener & click outside dropdown
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isOpen) {
+        if (isPrefDropdownOpen) {
+          setIsPrefDropdownOpen(false);
+        } else {
+          onClose();
+        }
+      }
+    };
+
+    const handleClickOutside = (e) => {
+      if (prefContainerRef.current && !prefContainerRef.current.contains(e.target)) {
+        setIsPrefDropdownOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen, isPrefDropdownOpen, onClose]);
+
+  // Timer countdown when on OTP step
+  useEffect(() => {
+    let interval = null;
+    if (step === 'otp' && timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [step, timer]);
+
+  if (!isMounted) return null;
+
+  // Validation
+  const isMobileValid = mobileNumber.length === 10;
+  const isOtpValid = otp.join('').length === 6;
+  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  const isDetailsValid =
+    firstName.trim().length > 0 &&
+    lastName.trim().length > 0 &&
+    preference.length > 0 &&
+    dob.length === 10 &&
+    isEmailValid &&
+    agreed;
+
+  // Handlers
+  const handleMobileChange = (e) => {
+    const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+    setMobileNumber(val);
+  };
+
+  const handleGetOtp = (e) => {
+    e.preventDefault();
+    if (!isMobileValid) return;
+    setStep('otp');
+    setTimer(30);
+  };
+
+  const handleVerifyOtp = (e) => {
+    e.preventDefault();
+    if (!isOtpValid) return;
+
+    // Advance directly to the "Almost there!" details collection step
+    setStep('details');
+  };
+
+  const handleDobChange = (e) => {
+    const digits = e.target.value.replace(/\D/g, '').slice(0, 8);
+    let formatted = digits;
+    if (digits.length > 4) {
+      formatted = `${digits.slice(0, 2)}-${digits.slice(2, 4)}-${digits.slice(4)}`;
+    } else if (digits.length > 2) {
+      formatted = `${digits.slice(0, 2)}-${digits.slice(2)}`;
+    }
+    setDob(formatted);
+  };
+
+  const handleSaveDetails = (e) => {
+    e.preventDefault();
+    if (!isDetailsValid) return;
+
+    const userProfile = {
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      preference,
+      dob,
+      email: email.trim(),
+      mobile: mobileNumber,
+    };
+
+    try {
+      localStorage.setItem('sonu_user_mobile', mobileNumber);
+      localStorage.setItem('sonu_user_name', `${userProfile.firstName} ${userProfile.lastName}`.trim());
+      localStorage.setItem('sonu_user_email', userProfile.email);
+      localStorage.setItem('sonu_user_profile', JSON.stringify(userProfile));
+      window.dispatchEvent(new Event('auth-changed'));
+    } catch (err) {
+      // storage unavailable
+    }
+
+    setStep('success');
+    setTimeout(() => {
+      onClose();
+    }, 1000);
+  };
+
+  const isMobileFloating = isMobileFocused || mobileNumber.length > 0;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center select-none font-['Helvetica_Now_Text',sans-serif]">
+      {/* Dark Overlay Backdrop */}
+      <div
+        className={`fixed inset-0 bg-black/60 transition-opacity duration-300 ${
+          isVisible ? 'opacity-100' : 'opacity-0'
+        }`}
+        onClick={onClose}
+        aria-hidden="true"
+      />
+
+      {/* Login Modal Box / Bottom Sheet */}
+      <div
+        className={`relative w-full max-w-[440px] max-h-[92vh] overflow-y-auto bg-white rounded-t-[28px] sm:rounded-[24px] px-6 sm:px-8 pt-7 pb-8 shadow-2xl z-10 transform transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          isVisible ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-full sm:translate-y-8 opacity-0 sm:scale-95'
+        }`}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Account verification and profile"
+      >
+        {/* Top-Right Close Button (Plain Cross icon) */}
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute top-5 right-5 p-1.5 text-[#111111] hover:opacity-60 transition-opacity cursor-pointer z-20"
+          aria-label="Close modal"
+        >
+          <svg
+            aria-hidden="true"
+            focusable="false"
+            viewBox="0 0 24 24"
+            role="img"
+            className="w-5 h-5"
+            fill="none"
+          >
+            <path
+              stroke="#111111"
+              strokeWidth="1.75"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M18.75 5.25L5.25 18.75m0-13.5l13.5 13.5"
+            />
+          </svg>
+        </button>
+
+        {/* STEP 1: MOBILE NUMBER */}
+        {step === 'mobile' && (
+          <div>
+            {/* Centered Brand Logo */}
+            <div className="flex justify-center pt-1 pb-1">
+              <img
+                src="/Logo/Logo_Full.png"
+                alt="SONU Logo"
+                className="h-7 sm:h-8 w-auto object-contain"
+                loading="eager"
+                fetchPriority="high"
+                width={150}
+                height={32}
+              />
+            </div>
+
+            {/* Header: Log in to your account */}
+            <h2
+              className="text-[22px] sm:text-[24px] font-bold text-[#111111] text-center mt-3 tracking-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
+              style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+            >
+              Log in to your account
+            </h2>
+
+            {/* Subtitle */}
+            <p className="text-[14px] sm:text-[15px] text-[#707072] text-center mt-1.5 leading-normal">
+              Get personalised picks & faster checkout
+            </p>
+
+            {/* Input Form */}
+            <form onSubmit={handleGetOtp} className="mt-6">
+              {/* Rounded Rectangle Input Field with Notched Outline Floating Label */}
+              <div
+                onClick={() => mobileInputRef.current?.focus()}
+                className={`relative w-full h-[54px] sm:h-[56px] px-4 rounded-[8px] border transition-colors cursor-text bg-white flex items-center ${
+                  isMobileFloating ? 'border-[#111111]' : 'border-[#8d8d8d]'
+                }`}
+              >
+                {/* Floating Notched Label */}
+                <span
+                  className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${
+                    isMobileFloating
+                      ? '-top-2.5 left-3 px-1.5 bg-white text-[12px] text-[#111111] font-normal leading-none z-10'
+                      : 'top-1/2 -translate-y-1/2 left-4 text-[15px] sm:text-[16px] text-[#707072]'
+                  }`}
+                  style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                >
+                  Enter 10-digit mobile no.
+                </span>
+
+                {/* Input row containing +91 and Enter mobile no. placeholder */}
+                <div
+                  className={`flex items-center w-full transition-opacity duration-150 ${
+                    isMobileFloating ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                  }`}
+                >
+                  <span
+                    className="text-[15px] sm:text-[16px] text-[#111111] font-normal select-none pr-2 shrink-0"
+                    style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                  >
+                    +91
+                  </span>
+                  <input
+                    ref={mobileInputRef}
+                    type="tel"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    autoComplete="tel-national"
+                    value={mobileNumber}
+                    onChange={handleMobileChange}
+                    onFocus={() => setIsMobileFocused(true)}
+                    onBlur={() => setIsMobileFocused(false)}
+                    placeholder="Enter mobile no."
+                    maxLength={10}
+                    className="w-full bg-transparent text-[15px] sm:text-[16px] text-[#111111] placeholder-[#8d8d8d] font-normal outline-none p-0 tracking-normal"
+                    style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                  />
+                </div>
+              </div>
+
+              {/* Get OTP Button */}
+              <button
+                type="submit"
+                disabled={!isMobileValid}
+                className={`w-full py-3.5 sm:py-4 rounded-full mt-5 text-[15px] sm:text-[16px] font-medium transition-all ${
+                  isMobileValid
+                    ? 'bg-[#111111] hover:bg-black text-white cursor-pointer active:scale-[0.99] shadow-sm'
+                    : 'bg-[#e5e5e5] text-[#707072] cursor-not-allowed'
+                }`}
+                style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+              >
+                Get OTP
+              </button>
+            </form>
+
+            {/* Disclaimer & Policy Links */}
+            <p 
+              className="text-center text-[13px] sm:text-[14px] text-[#707072] mt-6 leading-relaxed max-w-[340px] mx-auto font-['Helvetica_Now_Text',sans-serif]"
+              style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+            >
+              By entering this site, you agree to the{' '}
+              <Link
+                href="/terms"
+                onClick={onClose}
+                className="underline font-medium text-[#000000] hover:text-neutral-700 transition-colors"
+                style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+              >
+                Terms & Conditions
+              </Link>{' '}
+              and{' '}
+              <Link
+                href="/privacy"
+                onClick={onClose}
+                className="underline font-medium text-[#000000] hover:text-neutral-700 transition-colors"
+                style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+              >
+                Privacy Policy
+              </Link>
+            </p>
+          </div>
+        )}
+
+        {/* STEP 2: OTP VERIFICATION */}
+        {step === 'otp' && (
+          <div>
+            {/* Centered Brand Logo */}
+            <div className="flex justify-center pt-1 pb-1">
+              <img
+                src="/Logo/Logo_Full.png"
+                alt="SONU Logo"
+                className="h-7 sm:h-8 w-auto object-contain"
+                loading="eager"
+                fetchPriority="high"
+                width={150}
+                height={32}
+              />
+            </div>
+
+            <h2
+              className="text-[22px] sm:text-[24px] font-bold text-[#111111] text-center mt-3 tracking-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
+              style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+            >
+              Verify with OTP
+            </h2>
+            <p className="text-[14px] text-[#707072] text-center mt-1">
+              Sent to +91 {mobileNumber}{' '}
+              <button
+                type="button"
+                onClick={() => setStep('mobile')}
+                className="text-[#111111] font-medium underline ml-1 cursor-pointer"
+              >
+                Edit
+              </button>
+            </p>
+
+            <form onSubmit={handleVerifyOtp} className="mt-6">
+              <div className="flex justify-center gap-2 sm:gap-2.5">
+                {otp.map((digit, idx) => (
+                  <input
+                    key={idx}
+                    id={`otp-input-${idx}`}
+                    type="tel"
+                    inputMode="numeric"
+                    maxLength={1}
+                    value={digit}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, '');
+                      const next = [...otp];
+                      next[idx] = val;
+                      setOtp(next);
+                      if (val && idx < 5) {
+                        document.getElementById(`otp-input-${idx + 1}`)?.focus();
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Backspace' && !otp[idx] && idx > 0) {
+                        document.getElementById(`otp-input-${idx - 1}`)?.focus();
+                      }
+                    }}
+                    className="w-11 h-12 sm:w-12 sm:h-13 text-center border border-[#8d8d8d] focus:border-[#111111] rounded-lg text-[18px] font-bold outline-none"
+                  />
+                ))}
+              </div>
+
+              <button
+                type="submit"
+                disabled={!isOtpValid}
+                className={`w-full py-3.5 sm:py-4 rounded-full mt-6 text-[15px] sm:text-[16px] font-medium transition-all ${
+                  isOtpValid
+                    ? 'bg-[#111111] hover:bg-black text-white cursor-pointer shadow-sm'
+                    : 'bg-[#e5e5e5] text-[#707072] cursor-not-allowed'
+                }`}
+                style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+              >
+                Verify & Continue
+              </button>
+
+              <div className="text-center mt-4">
+                {timer > 0 ? (
+                  <p className="text-[13px] text-[#707072]">
+                    Resend OTP in <span className="font-medium text-[#111111]">{timer}s</span>
+                  </p>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setTimer(30)}
+                    className="text-[13px] font-medium text-[#111111] underline cursor-pointer"
+                  >
+                    Resend OTP
+                  </button>
+                )}
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* STEP 3: "Almost there!" DETAILS COLLECTION */}
+        {step === 'details' && (
+          <div>
+            {/* Centered Brand Logo */}
+            <div className="flex justify-center pt-1 pb-1">
+              <img
+                src="/Logo/Logo_Full.png"
+                alt="SONU Logo"
+                className="h-7 sm:h-8 w-auto object-contain"
+                loading="eager"
+                fetchPriority="high"
+                width={150}
+                height={32}
+              />
+            </div>
+
+            {/* Header: Almost there! */}
+            <h2
+              className="text-[22px] sm:text-[24px] font-bold text-[#111111] text-center mt-3 tracking-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
+              style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+            >
+              Almost there!
+            </h2>
+
+            {/* Subtitle */}
+            <p className="text-[14px] sm:text-[15px] text-[#707072] text-center mt-1.5 leading-normal max-w-[320px] mx-auto">
+              A few details will help us personalise your experience.
+            </p>
+
+            {/* Form Fields with Notched Outline Floating Label Animation */}
+            <form onSubmit={handleSaveDetails} className="mt-6 space-y-3.5 sm:space-y-4">
+              {/* 1. First Name* */}
+              <div
+                className={`relative w-full h-[52px] sm:h-[54px] px-4 rounded-[8px] border transition-colors cursor-text bg-white flex items-center ${
+                  focusedField === 'firstName' ? 'border-[#111111]' : 'border-[#8d8d8d]'
+                }`}
+              >
+                <span
+                  className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${
+                    focusedField === 'firstName' || firstName.length > 0
+                      ? '-top-2.5 left-3 px-1.5 bg-white text-[12px] text-[#111111] font-normal leading-none z-10'
+                      : 'top-1/2 -translate-y-1/2 left-4 text-[15px] sm:text-[16px] text-[#707072]'
+                  }`}
+                  style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                >
+                  First Name*
+                </span>
+                <input
+                  type="text"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  onFocus={() => setFocusedField('firstName')}
+                  onBlur={() => setFocusedField(null)}
+                  className="w-full bg-transparent text-[15px] sm:text-[16px] text-[#111111] font-normal outline-none p-0"
+                  style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                />
+              </div>
+
+              {/* 2. Last Name* */}
+              <div
+                className={`relative w-full h-[52px] sm:h-[54px] px-4 rounded-[8px] border transition-colors cursor-text bg-white flex items-center ${
+                  focusedField === 'lastName' ? 'border-[#111111]' : 'border-[#8d8d8d]'
+                }`}
+              >
+                <span
+                  className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${
+                    focusedField === 'lastName' || lastName.length > 0
+                      ? '-top-2.5 left-3 px-1.5 bg-white text-[12px] text-[#111111] font-normal leading-none z-10'
+                      : 'top-1/2 -translate-y-1/2 left-4 text-[15px] sm:text-[16px] text-[#707072]'
+                  }`}
+                  style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                >
+                  Last Name*
+                </span>
+                <input
+                  type="text"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  onFocus={() => setFocusedField('lastName')}
+                  onBlur={() => setFocusedField(null)}
+                  className="w-full bg-transparent text-[15px] sm:text-[16px] text-[#111111] font-normal outline-none p-0"
+                  style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                />
+              </div>
+
+              {/* 3. Shopping Preference* (Dropdown with arrow) */}
+              <div ref={prefContainerRef} className="relative">
+                <div
+                  onClick={() => setIsPrefDropdownOpen((prev) => !prev)}
+                  className={`relative w-full h-[52px] sm:h-[54px] px-4 rounded-[8px] border transition-colors cursor-pointer bg-white flex items-center justify-between ${
+                    isPrefDropdownOpen || focusedField === 'preference' ? 'border-[#111111]' : 'border-[#8d8d8d]'
+                  }`}
+                >
+                  <span
+                    className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${
+                      preference.length > 0 || isPrefDropdownOpen
+                        ? '-top-2.5 left-3 px-1.5 bg-white text-[12px] text-[#111111] font-normal leading-none z-10'
+                        : 'top-1/2 -translate-y-1/2 left-4 text-[15px] sm:text-[16px] text-[#707072]'
+                    }`}
+                    style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                  >
+                    Shopping Preference*
+                  </span>
+
+                  {/* Display selected preference */}
+                  <span
+                    className={`text-[15px] sm:text-[16px] text-[#111111] font-normal ${
+                      preference ? 'opacity-100' : 'opacity-0'
+                    }`}
+                    style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                  >
+                    {preference}
+                  </span>
+
+                  {/* Solid Caret Arrow strictly matching Nike screenshot */}
+                  <svg
+                    className={`w-3.5 h-3.5 text-[#111111] transition-transform duration-200 shrink-0 ${
+                      isPrefDropdownOpen ? 'rotate-180' : ''
+                    }`}
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M7 10l5 5 5-5z" />
+                  </svg>
+                </div>
+
+                {/* Dropdown Options Menu */}
+                {isPrefDropdownOpen && (
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-[#e5e5e5] rounded-[10px] shadow-lg py-1.5 z-30">
+                    {["Men's", "Women's", "Unisex / All"].map((option) => (
+                      <button
+                        key={option}
+                        type="button"
+                        onClick={() => {
+                          setPreference(option);
+                          setIsPrefDropdownOpen(false);
+                        }}
+                        className={`w-full text-left px-4 py-2.5 text-[14px] sm:text-[15px] transition-colors cursor-pointer ${
+                          preference === option
+                            ? 'bg-[#f5f5f5] text-[#111111] font-medium'
+                            : 'text-[#222222] hover:bg-[#fafafa]'
+                        }`}
+                        style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                      >
+                        {option}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* 4. Date of Birth (DD-MM-YYYY)* with Calendar Icon */}
+              <div
+                className={`relative w-full h-[52px] sm:h-[54px] px-4 rounded-[8px] border transition-colors cursor-text bg-white flex items-center justify-between ${
+                  focusedField === 'dob' ? 'border-[#111111]' : 'border-[#8d8d8d]'
+                }`}
+              >
+                <span
+                  className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${
+                    focusedField === 'dob' || dob.length > 0
+                      ? '-top-2.5 left-3 px-1.5 bg-white text-[12px] text-[#111111] font-normal leading-none z-10'
+                      : 'top-1/2 -translate-y-1/2 left-4 text-[15px] sm:text-[16px] text-[#707072]'
+                  }`}
+                  style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                >
+                  Date of Birth (DD-MM-YYYY)*
+                </span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={dob}
+                  onChange={handleDobChange}
+                  onFocus={() => setFocusedField('dob')}
+                  onBlur={() => setFocusedField(null)}
+                  placeholder={focusedField === 'dob' ? 'DD-MM-YYYY' : ''}
+                  maxLength={10}
+                  className="w-full bg-transparent text-[15px] sm:text-[16px] text-[#111111] placeholder-[#c4c4c4] font-normal outline-none p-0"
+                  style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                />
+                {/* Calendar Icon matching Nike screenshot */}
+                <svg
+                  className="w-5 h-5 text-[#707072] shrink-0 ml-2 pointer-events-none"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+              </div>
+
+              {/* 5. Email Address* */}
+              <div
+                className={`relative w-full h-[52px] sm:h-[54px] px-4 rounded-[8px] border transition-colors cursor-text bg-white flex items-center ${
+                  focusedField === 'email' ? 'border-[#111111]' : 'border-[#8d8d8d]'
+                }`}
+              >
+                <span
+                  className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${
+                    focusedField === 'email' || email.length > 0
+                      ? '-top-2.5 left-3 px-1.5 bg-white text-[12px] text-[#111111] font-normal leading-none z-10'
+                      : 'top-1/2 -translate-y-1/2 left-4 text-[15px] sm:text-[16px] text-[#707072]'
+                  }`}
+                  style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                >
+                  Email Address*
+                </span>
+                <input
+                  type="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onFocus={() => setFocusedField('email')}
+                  onBlur={() => setFocusedField(null)}
+                  className="w-full bg-transparent text-[15px] sm:text-[16px] text-[#111111] font-normal outline-none p-0"
+                  style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                />
+              </div>
+
+              {/* Checkbox: Terms & Privacy strictly matching screenshot */}
+              <div className="flex items-start gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setAgreed((prev) => !prev)}
+                  className={`w-5 h-5 rounded-[4px] flex items-center justify-center shrink-0 mt-0.5 transition-colors cursor-pointer ${
+                    agreed
+                      ? 'bg-[#111111] text-white border border-[#111111]'
+                      : 'bg-white border-2 border-[#8d8d8d]'
+                  }`}
+                  aria-label="Agree to terms and conditions"
+                >
+                  {agreed && (
+                    <svg
+                      className="w-3.5 h-3.5"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  )}
+                </button>
+
+                <p
+                  className="text-[13px] sm:text-[14px] text-[#222222] leading-snug font-['Helvetica_Now_Text',sans-serif]"
+                  style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                >
+                  By entering this site, you agree to the{' '}
+                  <Link
+                    href="/terms"
+                    onClick={onClose}
+                    className="underline font-bold text-[#111111] hover:text-black transition-colors"
+                  >
+                    Terms & Conditions
+                  </Link>{' '}
+                  and{' '}
+                  <Link
+                    href="/privacy"
+                    onClick={onClose}
+                    className="underline font-bold text-[#111111] hover:text-black transition-colors"
+                  >
+                    Privacy Policy
+                  </Link>
+                </p>
+              </div>
+
+              {/* Verify Email Pill Button */}
+              <button
+                type="submit"
+                disabled={!isDetailsValid}
+                className={`w-full py-3.5 sm:py-4 rounded-full mt-4 text-[15px] sm:text-[16px] font-medium transition-all ${
+                  isDetailsValid
+                    ? 'bg-[#111111] hover:bg-black text-white cursor-pointer active:scale-[0.99] shadow-sm'
+                    : 'bg-[#e5e5e5] text-[#707072] cursor-not-allowed'
+                }`}
+                style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+              >
+                Verify Email
+              </button>
+            </form>
+          </div>
+        )}
+
+        {/* STEP 4: SUCCESS STATE */}
+        {step === 'success' && (
+          <div className="py-8 text-center">
+            <div className="w-14 h-14 bg-[#008a00] text-white rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg
+                className="w-7 h-7"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={3}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            <h3
+              className="text-[22px] font-bold text-[#111111] tracking-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
+              style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+            >
+              Welcome to SONU, {firstName || 'Shopper'}!
+            </h3>
+            <p className="text-[14px] text-[#707072] mt-1.5">
+              Your profile has been saved.
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
