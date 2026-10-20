@@ -33,6 +33,11 @@ export default function LoginModal({ isOpen, onClose }) {
   const [emailOtpError, setEmailOtpError] = useState('');
   const [emailSentNotice, setEmailSentNotice] = useState(false);
 
+  // Transition animation states (OTP -> Details)
+  const [otpVerifyState, setOtpVerifyState] = useState('idle'); // 'idle' | 'verified' | 'exiting'
+  const [isTransitioningOtp, setIsTransitioningOtp] = useState(false);
+  const [detailsSlideIn, setDetailsSlideIn] = useState(true);
+
   // Focused state for each field in Step 3
   const [focusedField, setFocusedField] = useState(null);
   const [isPrefDropdownOpen, setIsPrefDropdownOpen] = useState(false);
@@ -72,6 +77,9 @@ export default function LoginModal({ isOpen, onClose }) {
         setSentEmailCode('');
         setEmailOtp(['', '', '', '', '', '']);
         setEmailOtpError('');
+        setOtpVerifyState('idle');
+        setIsTransitioningOtp(false);
+        setDetailsSlideIn(true);
       }, 300);
     }
 
@@ -173,10 +181,30 @@ export default function LoginModal({ isOpen, onClose }) {
   };
 
   const handleVerifyOtp = (e) => {
-    e.preventDefault();
-    if (!isOtpValid) return;
-    // Advance directly to the "Almost there!" details collection step
-    setStep('details');
+    if (e) e.preventDefault();
+    if (!isOtpValid || otpVerifyState !== 'idle') return;
+
+    // 1. Show green tick ("Verified") on OTP section
+    setOtpVerifyState('verified');
+
+    // 2. Smoothly slide OTP to the right with fade-out and slide Details up from below with fade-in
+    setTimeout(() => {
+      setOtpVerifyState('exiting');
+      setIsTransitioningOtp(true);
+      setStep('details');
+      setDetailsSlideIn(false);
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setDetailsSlideIn(true);
+        });
+      });
+
+      setTimeout(() => {
+        setIsTransitioningOtp(false);
+        setOtpVerifyState('idle');
+      }, 600);
+    }, 450);
   };
 
   const handleDobChange = (e) => {
@@ -309,7 +337,7 @@ export default function LoginModal({ isOpen, onClose }) {
 
       {/* Login Modal Box / Bottom Sheet */}
       <div
-        className={`relative w-full max-w-[440px] max-h-[92vh] overflow-y-auto bg-white rounded-t-[28px] sm:rounded-[24px] px-6 sm:px-8 pt-7 pb-8 shadow-2xl z-10 transform transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        className={`relative w-full max-w-[440px] max-h-[92vh] overflow-x-hidden overflow-y-auto bg-white rounded-t-[28px] sm:rounded-[24px] px-6 sm:px-8 pt-7 pb-8 shadow-2xl z-10 transform transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
           isVisible ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-full sm:translate-y-8 opacity-0 sm:scale-95'
         }`}
         role="dialog"
@@ -464,8 +492,14 @@ export default function LoginModal({ isOpen, onClose }) {
         )}
 
         {/* STEP 2: MOBILE OTP VERIFICATION */}
-        {step === 'otp' && (
-          <div>
+        {(step === 'otp' || isTransitioningOtp) && (
+          <div
+            className={`transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] transform ${
+              isTransitioningOtp
+                ? 'absolute inset-x-6 sm:inset-x-8 top-7 pointer-events-none z-20 translate-x-full opacity-0'
+                : 'relative translate-x-0 opacity-100'
+            }`}
+          >
             {/* Centered Brand Logo */}
             <div className="flex justify-center pt-1 pb-1">
               <img
@@ -527,15 +561,34 @@ export default function LoginModal({ isOpen, onClose }) {
 
               <button
                 type="submit"
-                disabled={!isOtpValid}
-                className={`w-full py-3.5 sm:py-4 rounded-full mt-6 text-[15px] sm:text-[16px] font-medium transition-all ${
-                  isOtpValid
-                    ? 'bg-[#111111] hover:bg-black text-white cursor-pointer shadow-sm'
+                disabled={!isOtpValid || otpVerifyState !== 'idle'}
+                className={`w-full py-3.5 sm:py-4 rounded-full mt-6 text-[15px] sm:text-[16px] font-medium transition-all duration-300 flex items-center justify-center gap-2 shadow-sm ${
+                  otpVerifyState === 'verified'
+                    ? 'bg-[#008a00] text-white scale-[1.01]'
+                    : isOtpValid
+                    ? 'bg-[#111111] hover:bg-black text-white cursor-pointer active:scale-[0.99]'
                     : 'bg-[#e5e5e5] text-[#707072] cursor-not-allowed'
                 }`}
                 style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
               >
-                Verify & Continue
+                {otpVerifyState === 'verified' ? (
+                  <>
+                    <svg
+                      className="w-5 h-5 text-white animate-scaleCheck"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={3}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    <span>Verified</span>
+                  </>
+                ) : (
+                  'Verify & Continue'
+                )}
               </button>
 
               <div className="text-center mt-4">
@@ -559,7 +612,11 @@ export default function LoginModal({ isOpen, onClose }) {
 
         {/* STEP 3: "Almost there!" DETAILS COLLECTION */}
         {step === 'details' && (
-          <div>
+          <div
+            className={`transition-all duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] transform ${
+              detailsSlideIn ? 'translate-y-0 opacity-100' : 'translate-y-16 opacity-0'
+            }`}
+          >
             {/* Centered Brand Logo */}
             <div className="flex justify-center pt-1 pb-1">
               <img
