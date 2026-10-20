@@ -67,7 +67,23 @@ export default function CheckoutPage() {
 
         const storedAddress = localStorage.getItem('sonu_shipping_address');
         if (storedAddress) {
-          setAddress(JSON.parse(storedAddress));
+          try {
+            const parsed = JSON.parse(storedAddress);
+            setAddress((prev) => ({
+              ...prev,
+              ...parsed,
+              landmark: parsed.landmark || '',
+              houseNo: parsed.houseNo || '',
+              street: parsed.street || parsed.roadArea || '',
+              city: parsed.city || '',
+              state: parsed.state || prev.state || 'Maharashtra',
+              pincode: parsed.pincode || '',
+              firstName: parsed.firstName || prev.firstName || '',
+              lastName: parsed.lastName || prev.lastName || '',
+              mobile: parsed.mobile || prev.mobile || '',
+              email: parsed.email || prev.email || '',
+            }));
+          } catch (e) {}
         }
       } catch (err) {
         // ignore
@@ -91,7 +107,21 @@ export default function CheckoutPage() {
       const storedAddress = localStorage.getItem('sonu_shipping_address');
       if (storedAddress) {
         try {
-          setAddress(JSON.parse(storedAddress));
+          const parsed = JSON.parse(storedAddress);
+          setAddress((prev) => ({
+            ...prev,
+            ...parsed,
+            landmark: parsed.landmark || '',
+            houseNo: parsed.houseNo || '',
+            street: parsed.street || parsed.roadArea || '',
+            city: parsed.city || '',
+            state: parsed.state || prev.state || 'Maharashtra',
+            pincode: parsed.pincode || '',
+            firstName: parsed.firstName || prev.firstName || '',
+            lastName: parsed.lastName || prev.lastName || '',
+            mobile: parsed.mobile || prev.mobile || '',
+            email: parsed.email || prev.email || '',
+          }));
         } catch (e) {}
       }
     };
@@ -400,7 +430,7 @@ export default function CheckoutPage() {
               <label className="block text-[12px] text-[#707072] mb-1 font-medium">First Name*</label>
               <input
                 type="text"
-                value={address.firstName}
+                value={address.firstName || ''}
                 onChange={(e) => setAddress({ ...address, firstName: e.target.value })}
                 className={`w-full h-[50px] px-4 rounded-[8px] border text-[15px] outline-none transition-colors ${
                   addressErrors.firstName ? 'border-[#d32f2f]' : 'border-[#8d8d8d] focus:border-[#111111]'
@@ -414,7 +444,7 @@ export default function CheckoutPage() {
               <label className="block text-[12px] text-[#707072] mb-1 font-medium">Last Name*</label>
               <input
                 type="text"
-                value={address.lastName}
+                value={address.lastName || ''}
                 onChange={(e) => setAddress({ ...address, lastName: e.target.value })}
                 className={`w-full h-[50px] px-4 rounded-[8px] border text-[15px] outline-none transition-colors ${
                   addressErrors.lastName ? 'border-[#d32f2f]' : 'border-[#8d8d8d] focus:border-[#111111]'
@@ -435,7 +465,7 @@ export default function CheckoutPage() {
                 <input
                   type="tel"
                   maxLength={10}
-                  value={address.mobile}
+                  value={address.mobile || ''}
                   onChange={(e) =>
                     setAddress({ ...address, mobile: e.target.value.replace(/\D/g, '').slice(0, 10) })
                   }
@@ -454,7 +484,7 @@ export default function CheckoutPage() {
                 type="text"
                 maxLength={6}
                 inputMode="numeric"
-                value={address.pincode}
+                value={address.pincode || ''}
                 onChange={(e) =>
                   setAddress({ ...address, pincode: e.target.value.replace(/\D/g, '').slice(0, 6) })
                 }
@@ -475,7 +505,7 @@ export default function CheckoutPage() {
             </label>
             <input
               type="text"
-              value={address.houseNo}
+              value={address.houseNo || ''}
               onChange={(e) => setAddress({ ...address, houseNo: e.target.value })}
               className={`w-full h-[50px] px-4 rounded-[8px] border text-[15px] outline-none transition-colors ${
                 addressErrors.houseNo ? 'border-[#d32f2f]' : 'border-[#8d8d8d] focus:border-[#111111]'
@@ -493,7 +523,7 @@ export default function CheckoutPage() {
             </label>
             <input
               type="text"
-              value={address.street}
+              value={address.street || ''}
               onChange={(e) => setAddress({ ...address, street: e.target.value })}
               className={`w-full h-[50px] px-4 rounded-[8px] border text-[15px] outline-none transition-colors ${
                 addressErrors.street ? 'border-[#d32f2f]' : 'border-[#8d8d8d] focus:border-[#111111]'
@@ -510,7 +540,7 @@ export default function CheckoutPage() {
             <input
               type="text"
               placeholder="e.g. Near Apollo Hospital"
-              value={address.landmark}
+              value={address.landmark || ''}
               onChange={(e) => setAddress({ ...address, landmark: e.target.value })}
               className="w-full h-[50px] px-4 rounded-[8px] border border-[#8d8d8d] focus:border-[#111111] text-[15px] outline-none transition-colors"
             />
@@ -522,7 +552,7 @@ export default function CheckoutPage() {
               <label className="block text-[12px] text-[#707072] mb-1 font-medium">City / Town*</label>
               <input
                 type="text"
-                value={address.city}
+                value={address.city || ''}
                 onChange={(e) => setAddress({ ...address, city: e.target.value })}
                 className={`w-full h-[50px] px-4 rounded-[8px] border text-[15px] outline-none transition-colors ${
                   addressErrors.city ? 'border-[#d32f2f]' : 'border-[#8d8d8d] focus:border-[#111111]'

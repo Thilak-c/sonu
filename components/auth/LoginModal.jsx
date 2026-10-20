@@ -501,6 +501,7 @@ export default function LoginModal({ isOpen, onClose }) {
       houseNo: addrHouseNo.trim(),
       street: addrRoadArea.trim(),
       roadArea: addrRoadArea.trim(),
+      landmark: '',
       addressLine1: `${addrHouseNo.trim()}, ${addrRoadArea.trim()}`,
       deliveryEtd: deliveryEtd,
       isPrimary: true,
@@ -1508,21 +1509,8 @@ export default function LoginModal({ isOpen, onClose }) {
                       <span>Delivery not available for PIN code {addrPincode}</span>
                     </div>
                   ) : deliveryEtd ? (
-                    <div className="flex items-center gap-2 mt-2 px-1 text-[13px] text-[#111111]">
-                      <svg
-                        className="w-4 h-4 text-[#008a00] shrink-0"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <rect x="1" y="3" width="15" height="13" rx="1" />
-                        <polygon points="16 8 20 8 23 11 23 16 16 16 8" />
-                        <circle cx="5.5" cy="18.5" r="2.5" />
-                        <circle cx="18.5" cy="18.5" r="2.5" />
-                      </svg>
+                    <div className="flex items-center gap-2 px-1 text-[13px] text-[#111111]">
+                    
                       <span>
                         Expected delivery by <strong className="font-semibold text-[#111111]">{deliveryEtd}</strong>
                       </span>
