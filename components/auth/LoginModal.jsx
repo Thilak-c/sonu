@@ -31,6 +31,7 @@ export default function LoginModal({ isOpen, onClose }) {
   const [emailOtp, setEmailOtp] = useState(['', '', '', '', '', '']);
   const [emailTimer, setEmailTimer] = useState(30);
   const [emailOtpError, setEmailOtpError] = useState('');
+  const [emailSentNotice, setEmailSentNotice] = useState(false);
 
   // Focused state for each field in Step 3
   const [focusedField, setFocusedField] = useState(null);
@@ -131,7 +132,13 @@ export default function LoginModal({ isOpen, onClose }) {
     let interval = null;
     if (step === 'email-otp' && emailTimer > 0) {
       interval = setInterval(() => {
-        setEmailTimer((prev) => prev - 1);
+        setEmailTimer((prev) => {
+          if (prev <= 1) {
+            setEmailSentNotice(false);
+            return 0;
+          }
+          return prev - 1;
+        });
       }, 1000);
     }
     return () => clearInterval(interval);
@@ -218,34 +225,35 @@ export default function LoginModal({ isOpen, onClose }) {
     }
   };
 
-  // Resend email verification code
-  const handleResendEmailOtp = async () => {
-    if (emailTimer > 0 || isSendingEmail) return;
-    setIsSendingEmail(true);
+  // Resend email verification code - instantly displays "Sent"
+  const handleResendEmailOtp = () => {
+    if (emailTimer > 0) return;
+
+    // 1. Instant optimistic feedback with 0ms delay
+    setEmailSentNotice(true);
+    setEmailTimer(30);
     setEmailOtpError('');
 
-    try {
-      const res = await fetch('/api/auth/send-verification-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: email.trim(),
-          name: firstName.trim(),
-        }),
+    // 2. Dispatch background request to send new code
+    fetch('/api/auth/send-verification-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: email.trim(),
+        name: firstName.trim(),
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.code) {
+          setSentEmailCode(data.code);
+        } else if (!data.success) {
+          setEmailOtpError(data.error || 'Failed to resend code.');
+        }
+      })
+      .catch(() => {
+        setEmailOtpError('Failed to resend code. Please try again.');
       });
-
-      const data = await res.json();
-      if (data.success) {
-        setSentEmailCode(data.code || '');
-        setEmailTimer(30);
-      } else {
-        setEmailOtpError(data.error || 'Failed to resend code.');
-      }
-    } catch (err) {
-      setEmailOtpError('Failed to resend code. Please try again.');
-    } finally {
-      setIsSendingEmail(false);
-    }
   };
 
   // Complete profile saving after email code verification
@@ -956,7 +964,29 @@ export default function LoginModal({ isOpen, onClose }) {
               </button>
 
               <div className="text-center mt-4">
-                {emailTimer > 0 ? (
+                {emailSentNotice ? (
+                  <div className="space-y-1">
+                    <p className="text-[13px] text-[#008a00] font-medium flex items-center justify-center gap-1.5">
+                      <svg
+                        className="w-4 h-4 text-[#008a00]"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                      <span>Sent</span>
+                    </p>
+                    {emailTimer > 0 && (
+                      <p className="text-[12px] text-[#707072]">
+                        Resend code in <span className="font-medium text-[#111111]">{emailTimer}s</span>
+                      </p>
+                    )}
+                  </div>
+                ) : emailTimer > 0 ? (
                   <p className="text-[13px] text-[#707072]">
                     Resend code in <span className="font-medium text-[#111111]">{emailTimer}s</span>
                   </p>
@@ -964,7 +994,6 @@ export default function LoginModal({ isOpen, onClose }) {
                   <button
                     type="button"
                     onClick={handleResendEmailOtp}
-                    disabled={isSendingEmail}
                     className="text-[13px] font-medium text-[#111111] underline cursor-pointer"
                   >
                     Resend verification code
