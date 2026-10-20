@@ -86,14 +86,26 @@ export default function CheckoutPage() {
       }
     };
 
+    const handleAddressUpdate = () => {
+      loadUserProfile();
+      const storedAddress = localStorage.getItem('sonu_shipping_address');
+      if (storedAddress) {
+        try {
+          setAddress(JSON.parse(storedAddress));
+        } catch (e) {}
+      }
+    };
+
     window.addEventListener('cart-updated', syncCart);
     window.addEventListener('storage', syncCart);
     window.addEventListener('auth-changed', handleAuthChange);
+    window.addEventListener('address-updated', handleAddressUpdate);
 
     return () => {
       window.removeEventListener('cart-updated', syncCart);
       window.removeEventListener('storage', syncCart);
       window.removeEventListener('auth-changed', handleAuthChange);
+      window.removeEventListener('address-updated', handleAddressUpdate);
     };
   }, [checkoutStep]);
 
