@@ -15,8 +15,10 @@ export default function LoginModal({ isOpen, onClose }) {
   // Step 2: Mobile OTP
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [timer, setTimer] = useState(30);
+  const [otpVerifyState, setOtpVerifyState] = useState('idle'); // 'idle' | 'verified'
 
-  // Step 3: Details ("Almost there!")
+  // Step 3: Details ("Almost there!") - 100% VH full-screen overlay
+  const [detailsSlideIn, setDetailsSlideIn] = useState(false);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [preference, setPreference] = useState('');
@@ -32,11 +34,6 @@ export default function LoginModal({ isOpen, onClose }) {
   const [emailTimer, setEmailTimer] = useState(30);
   const [emailOtpError, setEmailOtpError] = useState('');
   const [emailSentNotice, setEmailSentNotice] = useState(false);
-
-  // Transition animation states (OTP -> Details)
-  const [otpVerifyState, setOtpVerifyState] = useState('idle'); // 'idle' | 'verified' | 'exiting'
-  const [isTransitioningOtp, setIsTransitioningOtp] = useState(false);
-  const [detailsSlideIn, setDetailsSlideIn] = useState(true);
 
   // Focused state for each field in Step 3
   const [focusedField, setFocusedField] = useState(null);
@@ -64,6 +61,8 @@ export default function LoginModal({ isOpen, onClose }) {
         setMobileNumber('');
         setIsMobileFocused(false);
         setOtp(['', '', '', '', '', '']);
+        setOtpVerifyState('idle');
+        setDetailsSlideIn(false);
         setFirstName('');
         setLastName('');
         setPreference('');
@@ -77,9 +76,7 @@ export default function LoginModal({ isOpen, onClose }) {
         setSentEmailCode('');
         setEmailOtp(['', '', '', '', '', '']);
         setEmailOtpError('');
-        setOtpVerifyState('idle');
-        setIsTransitioningOtp(false);
-        setDetailsSlideIn(true);
+        setEmailSentNotice(false);
       }, 300);
     }
 
@@ -180,17 +177,16 @@ export default function LoginModal({ isOpen, onClose }) {
     setTimer(30);
   };
 
+  // Verify mobile OTP: Shows green tick "Verified", then overlays 100% VH "Almost there!" on top
   const handleVerifyOtp = (e) => {
     if (e) e.preventDefault();
     if (!isOtpValid || otpVerifyState !== 'idle') return;
 
-    // 1. Show green tick ("Verified") on OTP section
+    // 1. Show green tick ("Verified") on OTP button
     setOtpVerifyState('verified');
 
-    // 2. Smoothly slide OTP to the right with fade-out and slide Details up from below with fade-in
+    // 2. Overlay 100% VH "Almost there!" on top without moving the OTP modal
     setTimeout(() => {
-      setOtpVerifyState('exiting');
-      setIsTransitioningOtp(true);
       setStep('details');
       setDetailsSlideIn(false);
 
@@ -201,10 +197,9 @@ export default function LoginModal({ isOpen, onClose }) {
       });
 
       setTimeout(() => {
-        setIsTransitioningOtp(false);
         setOtpVerifyState('idle');
-      }, 600);
-    }, 450);
+      }, 500);
+    }, 400);
   };
 
   const handleDobChange = (e) => {
@@ -323,6 +318,7 @@ export default function LoginModal({ isOpen, onClose }) {
   };
 
   const isMobileFloating = isMobileFocused || mobileNumber.length > 0;
+  const isOnboardingFullScreen = step === 'details' || step === 'email-otp' || step === 'success';
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center select-none font-['Helvetica_Now_Text',sans-serif]">
@@ -335,7 +331,7 @@ export default function LoginModal({ isOpen, onClose }) {
         aria-hidden="true"
       />
 
-      {/* Login Modal Box / Bottom Sheet */}
+      {/* 1. INITIAL MODAL BOX (STEP 1: Mobile & STEP 2: Phone OTP) */}
       <div
         className={`relative w-full max-w-[440px] max-h-[92vh] overflow-x-hidden overflow-y-auto bg-white rounded-t-[28px] sm:rounded-[24px] px-6 sm:px-8 pt-7 pb-8 shadow-2xl z-10 transform transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
           isVisible ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-full sm:translate-y-8 opacity-0 sm:scale-95'
@@ -344,7 +340,7 @@ export default function LoginModal({ isOpen, onClose }) {
         aria-modal="true"
         aria-label="Account verification and profile"
       >
-        {/* Top-Right Close Button (Plain Cross icon) */}
+        {/* Top-Right Close Button */}
         <button
           type="button"
           onClick={onClose}
@@ -491,15 +487,9 @@ export default function LoginModal({ isOpen, onClose }) {
           </div>
         )}
 
-        {/* STEP 2: MOBILE OTP VERIFICATION */}
-        {(step === 'otp' || isTransitioningOtp) && (
-          <div
-            className={`transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] transform ${
-              isTransitioningOtp
-                ? 'absolute inset-x-6 sm:inset-x-8 top-7 pointer-events-none z-10 translate-x-full opacity-0'
-                : 'relative translate-x-0 opacity-100 z-10'
-            }`}
-          >
+        {/* STEP 2: MOBILE OTP VERIFICATION (Zero movement, stays in place) */}
+        {(step === 'otp' || isOnboardingFullScreen) && (
+          <div>
             {/* Centered Brand Logo */}
             <div className="flex justify-center pt-1 pb-1">
               <img
@@ -609,515 +599,549 @@ export default function LoginModal({ isOpen, onClose }) {
             </form>
           </div>
         )}
+      </div>
 
-        {/* STEP 3: "Almost there!" DETAILS COLLECTION */}
-        {step === 'details' && (
-          <div
-            className={`relative z-30 bg-white transition-all duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] transform ${
-              detailsSlideIn ? 'translate-y-0 opacity-100' : 'translate-y-16 opacity-0'
-            }`}
+      {/* 2. 100% VH FULL-SCREEN OVERLAY FOR ONBOARDING (Almost There, Email OTP, Welcome) */}
+      {isOnboardingFullScreen && (
+        <div
+          className={`fixed inset-0 z-50 w-full h-[100dvh] bg-white overflow-y-auto px-6 sm:px-8 py-8 flex flex-col justify-start sm:justify-center transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform ${
+            detailsSlideIn ? 'translate-y-0' : 'translate-y-full'
+          }`}
+          role="dialog"
+          aria-modal="true"
+        >
+          {/* Top-Right Close Button */}
+          <button
+            type="button"
+            onClick={onClose}
+            className="absolute top-5 right-5 p-2 text-[#111111] hover:opacity-60 transition-opacity cursor-pointer z-30"
+            aria-label="Close modal"
           >
-            {/* Centered Brand Logo */}
-            <div className="flex justify-center pt-1 pb-1">
-              <img
-                src="/Logo/Logo_Full.png"
-                alt="SONU Logo"
-                className="h-7 sm:h-8 w-auto object-contain"
-                loading="eager"
-                fetchPriority="high"
-                width={150}
-                height={32}
-              />
-            </div>
-
-            {/* Header: Almost there! */}
-            <h2
-              className="text-[22px] sm:text-[24px] font-bold text-[#111111] text-center mt-3 tracking-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
-              style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+            <svg
+              aria-hidden="true"
+              focusable="false"
+              viewBox="0 0 24 24"
+              role="img"
+              className="w-5 h-5"
+              fill="none"
             >
-              Almost there!
-            </h2>
+              <path
+                stroke="#111111"
+                strokeWidth="1.75"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M18.75 5.25L5.25 18.75m0-13.5l13.5 13.5"
+              />
+            </svg>
+          </button>
 
-            {/* Subtitle */}
-            <p className="text-[14px] sm:text-[15px] text-[#707072] text-center mt-1.5 leading-normal max-w-[320px] mx-auto">
-              A few details will help us personalise your experience.
-            </p>
-
-            {/* Form Fields with Notched Outline Floating Label Animation */}
-            <form onSubmit={handleSendVerificationEmail} className="mt-6 space-y-3.5 sm:space-y-4">
-              {/* 1. First Name* */}
-              <div
-                className={`relative w-full h-[52px] sm:h-[54px] px-4 rounded-[8px] border transition-colors cursor-text bg-white flex items-center ${
-                  focusedField === 'firstName' ? 'border-[#111111]' : 'border-[#8d8d8d]'
-                }`}
-              >
-                <span
-                  className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${
-                    focusedField === 'firstName' || firstName.length > 0
-                      ? '-top-2.5 left-3 px-1.5 bg-white text-[12px] text-[#111111] font-normal leading-none z-10'
-                      : 'top-1/2 -translate-y-1/2 left-4 text-[15px] sm:text-[16px] text-[#707072]'
-                  }`}
-                  style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
-                >
-                  First Name*
-                </span>
-                <input
-                  type="text"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  onFocus={() => setFocusedField('firstName')}
-                  onBlur={() => setFocusedField(null)}
-                  className="w-full bg-transparent text-[15px] sm:text-[16px] text-[#111111] font-normal outline-none p-0"
-                  style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
-                />
-              </div>
-
-              {/* 2. Last Name* */}
-              <div
-                className={`relative w-full h-[52px] sm:h-[54px] px-4 rounded-[8px] border transition-colors cursor-text bg-white flex items-center ${
-                  focusedField === 'lastName' ? 'border-[#111111]' : 'border-[#8d8d8d]'
-                }`}
-              >
-                <span
-                  className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${
-                    focusedField === 'lastName' || lastName.length > 0
-                      ? '-top-2.5 left-3 px-1.5 bg-white text-[12px] text-[#111111] font-normal leading-none z-10'
-                      : 'top-1/2 -translate-y-1/2 left-4 text-[15px] sm:text-[16px] text-[#707072]'
-                  }`}
-                  style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
-                >
-                  Last Name*
-                </span>
-                <input
-                  type="text"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  onFocus={() => setFocusedField('lastName')}
-                  onBlur={() => setFocusedField(null)}
-                  className="w-full bg-transparent text-[15px] sm:text-[16px] text-[#111111] font-normal outline-none p-0"
-                  style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
-                />
-              </div>
-
-              {/* 3. Shopping Preference* (Dropdown with arrow) */}
-              <div ref={prefContainerRef} className="relative">
-                <div
-                  onClick={() => setIsPrefDropdownOpen((prev) => !prev)}
-                  className={`relative w-full h-[52px] sm:h-[54px] px-4 rounded-[8px] border transition-colors cursor-pointer bg-white flex items-center justify-between ${
-                    isPrefDropdownOpen || focusedField === 'preference' ? 'border-[#111111]' : 'border-[#8d8d8d]'
-                  }`}
-                >
-                  <span
-                    className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${
-                      preference.length > 0 || isPrefDropdownOpen
-                        ? '-top-2.5 left-3 px-1.5 bg-white text-[12px] text-[#111111] font-normal leading-none z-10'
-                        : 'top-1/2 -translate-y-1/2 left-4 text-[15px] sm:text-[16px] text-[#707072]'
-                    }`}
-                    style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
-                  >
-                    Shopping Preference*
-                  </span>
-
-                  {/* Display selected preference */}
-                  <span
-                    className={`text-[15px] sm:text-[16px] text-[#111111] font-normal ${
-                      preference ? 'opacity-100' : 'opacity-0'
-                    }`}
-                    style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
-                  >
-                    {preference}
-                  </span>
-
-                  {/* Solid Caret Arrow strictly matching Nike screenshot */}
-                  <svg
-                    className={`w-3.5 h-3.5 text-[#111111] transition-transform duration-200 shrink-0 ${
-                      isPrefDropdownOpen ? 'rotate-180' : ''
-                    }`}
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path d="M7 10l5 5 5-5z" />
-                  </svg>
+          <div className="w-full max-w-[440px] mx-auto my-auto py-2">
+            {/* STEP 3: "Almost there!" DETAILS COLLECTION */}
+            {step === 'details' && (
+              <div>
+                {/* Centered Brand Logo */}
+                <div className="flex justify-center pt-1 pb-1">
+                  <img
+                    src="/Logo/Logo_Full.png"
+                    alt="SONU Logo"
+                    className="h-7 sm:h-8 w-auto object-contain"
+                    loading="eager"
+                    fetchPriority="high"
+                    width={150}
+                    height={32}
+                  />
                 </div>
 
-                {/* Dropdown Options Menu */}
-                {isPrefDropdownOpen && (
-                  <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-[#e5e5e5] rounded-[10px] shadow-lg py-1.5 z-30">
-                    {["Men's", "Women's", "Unisex / All"].map((option) => (
-                      <button
-                        key={option}
-                        type="button"
-                        onClick={() => {
-                          setPreference(option);
-                          setIsPrefDropdownOpen(false);
-                        }}
-                        className={`w-full text-left px-4 py-2.5 text-[14px] sm:text-[15px] transition-colors cursor-pointer ${
-                          preference === option
-                            ? 'bg-[#f5f5f5] text-[#111111] font-medium'
-                            : 'text-[#222222] hover:bg-[#fafafa]'
+                {/* Header: Almost there! */}
+                <h2
+                  className="text-[22px] sm:text-[24px] font-bold text-[#111111] text-center mt-3 tracking-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
+                  style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                >
+                  Almost there!
+                </h2>
+
+                {/* Subtitle */}
+                <p className="text-[14px] sm:text-[15px] text-[#707072] text-center mt-1.5 leading-normal max-w-[320px] mx-auto">
+                  A few details will help us personalise your experience.
+                </p>
+
+                {/* Form Fields with Notched Outline Floating Label Animation */}
+                <form onSubmit={handleSendVerificationEmail} className="mt-6 space-y-3.5 sm:space-y-4">
+                  {/* 1. First Name* */}
+                  <div
+                    className={`relative w-full h-[52px] sm:h-[54px] px-4 rounded-[8px] border transition-colors cursor-text bg-white flex items-center ${
+                      focusedField === 'firstName' ? 'border-[#111111]' : 'border-[#8d8d8d]'
+                    }`}
+                  >
+                    <span
+                      className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${
+                        focusedField === 'firstName' || firstName.length > 0
+                          ? '-top-2.5 left-3 px-1.5 bg-white text-[12px] text-[#111111] font-normal leading-none z-10'
+                          : 'top-1/2 -translate-y-1/2 left-4 text-[15px] sm:text-[16px] text-[#707072]'
+                      }`}
+                      style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                    >
+                      First Name*
+                    </span>
+                    <input
+                      type="text"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      onFocus={() => setFocusedField('firstName')}
+                      onBlur={() => setFocusedField(null)}
+                      className="w-full bg-transparent text-[15px] sm:text-[16px] text-[#111111] font-normal outline-none p-0"
+                      style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                    />
+                  </div>
+
+                  {/* 2. Last Name* */}
+                  <div
+                    className={`relative w-full h-[52px] sm:h-[54px] px-4 rounded-[8px] border transition-colors cursor-text bg-white flex items-center ${
+                      focusedField === 'lastName' ? 'border-[#111111]' : 'border-[#8d8d8d]'
+                    }`}
+                  >
+                    <span
+                      className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${
+                        focusedField === 'lastName' || lastName.length > 0
+                          ? '-top-2.5 left-3 px-1.5 bg-white text-[12px] text-[#111111] font-normal leading-none z-10'
+                          : 'top-1/2 -translate-y-1/2 left-4 text-[15px] sm:text-[16px] text-[#707072]'
+                      }`}
+                      style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                    >
+                      Last Name*
+                    </span>
+                    <input
+                      type="text"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      onFocus={() => setFocusedField('lastName')}
+                      onBlur={() => setFocusedField(null)}
+                      className="w-full bg-transparent text-[15px] sm:text-[16px] text-[#111111] font-normal outline-none p-0"
+                      style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                    />
+                  </div>
+
+                  {/* 3. Shopping Preference* (Dropdown with arrow) */}
+                  <div ref={prefContainerRef} className="relative">
+                    <div
+                      onClick={() => setIsPrefDropdownOpen((prev) => !prev)}
+                      className={`relative w-full h-[52px] sm:h-[54px] px-4 rounded-[8px] border transition-colors cursor-pointer bg-white flex items-center justify-between ${
+                        isPrefDropdownOpen || focusedField === 'preference' ? 'border-[#111111]' : 'border-[#8d8d8d]'
+                      }`}
+                    >
+                      <span
+                        className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${
+                          preference.length > 0 || isPrefDropdownOpen
+                            ? '-top-2.5 left-3 px-1.5 bg-white text-[12px] text-[#111111] font-normal leading-none z-10'
+                            : 'top-1/2 -translate-y-1/2 left-4 text-[15px] sm:text-[16px] text-[#707072]'
                         }`}
                         style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
                       >
-                        {option}
-                      </button>
-                    ))}
+                        Shopping Preference*
+                      </span>
+
+                      {/* Display selected preference */}
+                      <span
+                        className={`text-[15px] sm:text-[16px] text-[#111111] font-normal ${
+                          preference ? 'opacity-100' : 'opacity-0'
+                        }`}
+                        style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                      >
+                        {preference}
+                      </span>
+
+                      {/* Solid Caret Arrow strictly matching Nike screenshot */}
+                      <svg
+                        className={`w-3.5 h-3.5 text-[#111111] transition-transform duration-200 shrink-0 ${
+                          isPrefDropdownOpen ? 'rotate-180' : ''
+                        }`}
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path d="M7 10l5 5 5-5z" />
+                      </svg>
+                    </div>
+
+                    {/* Dropdown Options Menu */}
+                    {isPrefDropdownOpen && (
+                      <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-[#e5e5e5] rounded-[10px] shadow-lg py-1.5 z-30">
+                        {["Men's", "Women's", "Unisex / All"].map((option) => (
+                          <button
+                            key={option}
+                            type="button"
+                            onClick={() => {
+                              setPreference(option);
+                              setIsPrefDropdownOpen(false);
+                            }}
+                            className={`w-full text-left px-4 py-2.5 text-[14px] sm:text-[15px] transition-colors cursor-pointer ${
+                              preference === option
+                                ? 'bg-[#f5f5f5] text-[#111111] font-medium'
+                                : 'text-[#222222] hover:bg-[#fafafa]'
+                            }`}
+                            style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                          >
+                            {option}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
 
-              {/* 4. Date of Birth (DD-MM-YYYY)* with Calendar Icon */}
-              <div
-                className={`relative w-full h-[52px] sm:h-[54px] px-4 rounded-[8px] border transition-colors cursor-text bg-white flex items-center justify-between ${
-                  focusedField === 'dob' ? 'border-[#111111]' : 'border-[#8d8d8d]'
-                }`}
-              >
-                <span
-                  className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${
-                    focusedField === 'dob' || dob.length > 0
-                      ? '-top-2.5 left-3 px-1.5 bg-white text-[12px] text-[#111111] font-normal leading-none z-10'
-                      : 'top-1/2 -translate-y-1/2 left-4 text-[15px] sm:text-[16px] text-[#707072]'
-                  }`}
-                  style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
-                >
-                  Date of Birth (DD-MM-YYYY)*
-                </span>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={dob}
-                  onChange={handleDobChange}
-                  onFocus={() => setFocusedField('dob')}
-                  onBlur={() => setFocusedField(null)}
-                  placeholder={focusedField === 'dob' ? 'DD-MM-YYYY' : ''}
-                  maxLength={10}
-                  className="w-full bg-transparent text-[15px] sm:text-[16px] text-[#111111] placeholder-[#c4c4c4] font-normal outline-none p-0"
-                  style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
-                />
-                {/* Calendar Icon matching Nike screenshot */}
-                <svg
-                  className="w-5 h-5 text-[#707072] shrink-0 ml-2 pointer-events-none"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                  <line x1="16" y1="2" x2="16" y2="6" />
-                  <line x1="8" y1="2" x2="8" y2="6" />
-                  <line x1="3" y1="10" x2="21" y2="10" />
-                </svg>
-              </div>
-
-              {/* 5. Email Address* */}
-              <div
-                className={`relative w-full h-[52px] sm:h-[54px] px-4 rounded-[8px] border transition-colors cursor-text bg-white flex items-center ${
-                  focusedField === 'email' ? 'border-[#111111]' : 'border-[#8d8d8d]'
-                }`}
-              >
-                <span
-                  className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${
-                    focusedField === 'email' || email.length > 0
-                      ? '-top-2.5 left-3 px-1.5 bg-white text-[12px] text-[#111111] font-normal leading-none z-10'
-                      : 'top-1/2 -translate-y-1/2 left-4 text-[15px] sm:text-[16px] text-[#707072]'
-                  }`}
-                  style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
-                >
-                  Email Address*
-                </span>
-                <input
-                  type="email"
-                  autoComplete="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  onFocus={() => setFocusedField('email')}
-                  onBlur={() => setFocusedField(null)}
-                  className="w-full bg-transparent text-[15px] sm:text-[16px] text-[#111111] font-normal outline-none p-0"
-                  style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
-                />
-              </div>
-
-              {/* Checkbox: Terms & Privacy strictly matching screenshot */}
-              <div className="flex items-start gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setAgreed((prev) => !prev)}
-                  className={`w-5 h-5 rounded-[4px] flex items-center justify-center shrink-0 mt-0.5 transition-colors cursor-pointer ${
-                    agreed
-                      ? 'bg-[#111111] text-white border border-[#111111]'
-                      : 'bg-white border-2 border-[#8d8d8d]'
-                  }`}
-                  aria-label="Agree to terms and conditions"
-                >
-                  {agreed && (
+                  {/* 4. Date of Birth (DD-MM-YYYY)* with Calendar Icon */}
+                  <div
+                    className={`relative w-full h-[52px] sm:h-[54px] px-4 rounded-[8px] border transition-colors cursor-text bg-white flex items-center justify-between ${
+                      focusedField === 'dob' ? 'border-[#111111]' : 'border-[#8d8d8d]'
+                    }`}
+                  >
+                    <span
+                      className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${
+                        focusedField === 'dob' || dob.length > 0
+                          ? '-top-2.5 left-3 px-1.5 bg-white text-[12px] text-[#111111] font-normal leading-none z-10'
+                          : 'top-1/2 -translate-y-1/2 left-4 text-[15px] sm:text-[16px] text-[#707072]'
+                      }`}
+                      style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                    >
+                      Date of Birth (DD-MM-YYYY)*
+                    </span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={dob}
+                      onChange={handleDobChange}
+                      onFocus={() => setFocusedField('dob')}
+                      onBlur={() => setFocusedField(null)}
+                      placeholder={focusedField === 'dob' ? 'DD-MM-YYYY' : ''}
+                      maxLength={10}
+                      className="w-full bg-transparent text-[15px] sm:text-[16px] text-[#111111] placeholder-[#c4c4c4] font-normal outline-none p-0"
+                      style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                    />
+                    {/* Calendar Icon matching Nike screenshot */}
                     <svg
-                      className="w-3.5 h-3.5"
+                      className="w-5 h-5 text-[#707072] shrink-0 ml-2 pointer-events-none"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
-                      strokeWidth="3.5"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                      <line x1="16" y1="2" x2="16" y2="6" />
+                      <line x1="8" y1="2" x2="8" y2="6" />
+                      <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
+                  </div>
+
+                  {/* 5. Email Address* */}
+                  <div
+                    className={`relative w-full h-[52px] sm:h-[54px] px-4 rounded-[8px] border transition-colors cursor-text bg-white flex items-center ${
+                      focusedField === 'email' ? 'border-[#111111]' : 'border-[#8d8d8d]'
+                    }`}
+                  >
+                    <span
+                      className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${
+                        focusedField === 'email' || email.length > 0
+                          ? '-top-2.5 left-3 px-1.5 bg-white text-[12px] text-[#111111] font-normal leading-none z-10'
+                          : 'top-1/2 -translate-y-1/2 left-4 text-[15px] sm:text-[16px] text-[#707072]'
+                      }`}
+                      style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                    >
+                      Email Address*
+                    </span>
+                    <input
+                      type="email"
+                      autoComplete="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      onFocus={() => setFocusedField('email')}
+                      onBlur={() => setFocusedField(null)}
+                      className="w-full bg-transparent text-[15px] sm:text-[16px] text-[#111111] font-normal outline-none p-0"
+                      style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                    />
+                  </div>
+
+                  {/* Checkbox: Terms & Privacy strictly matching screenshot */}
+                  <div className="flex items-start gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setAgreed((prev) => !prev)}
+                      className={`w-5 h-5 rounded-[4px] flex items-center justify-center shrink-0 mt-0.5 transition-colors cursor-pointer ${
+                        agreed
+                          ? 'bg-[#111111] text-white border border-[#111111]'
+                          : 'bg-white border-2 border-[#8d8d8d]'
+                      }`}
+                      aria-label="Agree to terms and conditions"
+                    >
+                      {agreed && (
+                        <svg
+                          className="w-3.5 h-3.5"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="3.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      )}
+                    </button>
+
+                    <p
+                      className="text-[13px] sm:text-[14px] text-[#222222] leading-snug font-['Helvetica_Now_Text',sans-serif]"
+                      style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                    >
+                      By entering this site, you agree to the{' '}
+                      <Link
+                        href="/terms"
+                        onClick={onClose}
+                        className="underline font-bold text-[#111111] hover:text-black transition-colors"
+                      >
+                        Terms & Conditions
+                      </Link>{' '}
+                      and{' '}
+                      <Link
+                        href="/privacy"
+                        onClick={onClose}
+                        className="underline font-bold text-[#111111] hover:text-black transition-colors"
+                      >
+                        Privacy Policy
+                      </Link>
+                    </p>
+                  </div>
+
+                  {/* Error message if email sending fails */}
+                  {emailError && (
+                    <p className="text-[13px] text-[#d32f2f] text-center mt-2 leading-tight">
+                      {emailError}
+                    </p>
+                  )}
+
+                  {/* Verify Email Pill Button */}
+                  <button
+                    type="submit"
+                    disabled={!isDetailsValid || isSendingEmail}
+                    className={`w-full py-3.5 sm:py-4 rounded-full mt-4 text-[15px] sm:text-[16px] font-medium transition-all flex items-center justify-center gap-2 ${
+                      isDetailsValid && !isSendingEmail
+                        ? 'bg-[#111111] hover:bg-black text-white cursor-pointer active:scale-[0.99] shadow-sm'
+                        : 'bg-[#e5e5e5] text-[#707072] cursor-not-allowed'
+                    }`}
+                    style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                  >
+                    {isSendingEmail ? (
+                      <>
+                        <svg
+                          className="animate-spin h-5 w-5 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          />
+                        </svg>
+                        <span>Sending verification email...</span>
+                      </>
+                    ) : (
+                      'Verify Email'
+                    )}
+                  </button>
+                </form>
+              </div>
+            )}
+
+            {/* STEP 4: EMAIL OTP VERIFICATION */}
+            {step === 'email-otp' && (
+              <div>
+                {/* Centered Brand Logo */}
+                <div className="flex justify-center pt-1 pb-1">
+                  <img
+                    src="/Logo/Logo_Full.png"
+                    alt="SONU Logo"
+                    className="h-7 sm:h-8 w-auto object-contain"
+                    loading="eager"
+                    fetchPriority="high"
+                    width={150}
+                    height={32}
+                  />
+                </div>
+
+                <h2
+                  className="text-[22px] sm:text-[24px] font-bold text-[#111111] text-center mt-3 tracking-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
+                  style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                >
+                  Verify your email
+                </h2>
+                <p className="text-[14px] text-[#707072] text-center mt-1 leading-normal max-w-[340px] mx-auto">
+                  Sent to <strong className="text-[#111111]">{email}</strong>{' '}
+                  <button
+                    type="button"
+                    onClick={() => setStep('details')}
+                    className="text-[#111111] font-medium underline ml-1 cursor-pointer"
+                  >
+                    Edit
+                  </button>
+                </p>
+
+                <form onSubmit={handleVerifyEmailOtp} className="mt-6">
+                  <div className="flex justify-center gap-2 sm:gap-2.5">
+                    {emailOtp.map((digit, idx) => (
+                      <input
+                        key={idx}
+                        id={`email-otp-input-${idx}`}
+                        type="tel"
+                        inputMode="numeric"
+                        maxLength={1}
+                        value={digit}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '');
+                          const next = [...emailOtp];
+                          next[idx] = val;
+                          setEmailOtp(next);
+                          setEmailOtpError('');
+                          if (val && idx < 5) {
+                            document.getElementById(`email-otp-input-${idx + 1}`)?.focus();
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Backspace' && !emailOtp[idx] && idx > 0) {
+                            document.getElementById(`email-otp-input-${idx - 1}`)?.focus();
+                          }
+                        }}
+                        className="w-11 h-12 sm:w-12 sm:h-13 text-center border border-[#8d8d8d] focus:border-[#111111] rounded-lg text-[18px] font-bold outline-none"
+                      />
+                    ))}
+                  </div>
+
+                  {emailOtpError && (
+                    <p className="text-[13px] text-[#d32f2f] text-center mt-3">
+                      {emailOtpError}
+                    </p>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={!isEmailOtpValid}
+                    className={`w-full py-3.5 sm:py-4 rounded-full mt-6 text-[15px] sm:text-[16px] font-medium transition-all ${
+                      isEmailOtpValid
+                        ? 'bg-[#111111] hover:bg-black text-white cursor-pointer shadow-sm active:scale-[0.99]'
+                        : 'bg-[#e5e5e5] text-[#707072] cursor-not-allowed'
+                    }`}
+                    style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                  >
+                    Verify & Complete
+                  </button>
+
+                  <div className="text-center mt-4">
+                    {emailSentNotice ? (
+                      <div className="space-y-1">
+                        <p className="text-[13px] text-[#008a00] font-medium flex items-center justify-center gap-1.5">
+                          <svg
+                            className="w-4 h-4 text-[#008a00]"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={2.5}
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                          <span>Sent</span>
+                        </p>
+                        {emailTimer > 0 && (
+                          <p className="text-[12px] text-[#707072]">
+                            Resend code in <span className="font-medium text-[#111111]">{emailTimer}s</span>
+                          </p>
+                        )}
+                      </div>
+                    ) : emailTimer > 0 ? (
+                      <p className="text-[13px] text-[#707072]">
+                        Resend code in <span className="font-medium text-[#111111]">{emailTimer}s</span>
+                      </p>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleResendEmailOtp}
+                        className="text-[13px] font-medium text-[#111111] underline cursor-pointer"
+                      >
+                        Resend verification code
+                      </button>
+                    )}
+                  </div>
+                </form>
+              </div>
+            )}
+
+            {/* STEP 5: SUCCESS STATE ("Welcome to Sonu Shoes.") */}
+            {step === 'success' && (
+              <div>
+                {/* Centered Brand Logo at top */}
+                <div className="flex justify-center pt-1 pb-1">
+                  <img
+                    src="/Logo/Logo_Full.png"
+                    alt="SONU Logo"
+                    className="h-7 sm:h-8 w-auto object-contain"
+                    loading="eager"
+                    fetchPriority="high"
+                    width={150}
+                    height={32}
+                  />
+                </div>
+
+                {/* Header: Welcome to Sonu Shoes. */}
+                <h2
+                  className="text-[22px] sm:text-[24px] font-bold text-[#111111] text-center mt-3 tracking-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
+                  style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                >
+                  Welcome to Sonu Shoes.
+                </h2>
+
+                {/* Subtitle */}
+                <p className="text-[14px] sm:text-[15px] text-[#707072] text-center mt-1.5 leading-normal">
+                  Your email has been verified. Welcome aboard{firstName ? `, ${firstName}` : ''}!
+                </p>
+
+                {/* Checkmark icon & Continue action replacing OTPs form */}
+                <div className="mt-8 text-center">
+                  <div className="w-14 h-14 bg-[#111111] text-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+                    <svg
+                      className="w-7 h-7"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={3}
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     >
                       <polyline points="20 6 9 17 4 12" />
                     </svg>
-                  )}
-                </button>
-
-                <p
-                  className="text-[13px] sm:text-[14px] text-[#222222] leading-snug font-['Helvetica_Now_Text',sans-serif]"
-                  style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
-                >
-                  By entering this site, you agree to the{' '}
-                  <Link
-                    href="/terms"
-                    onClick={onClose}
-                    className="underline font-bold text-[#111111] hover:text-black transition-colors"
-                  >
-                    Terms & Conditions
-                  </Link>{' '}
-                  and{' '}
-                  <Link
-                    href="/privacy"
-                    onClick={onClose}
-                    className="underline font-bold text-[#111111] hover:text-black transition-colors"
-                  >
-                    Privacy Policy
-                  </Link>
-                </p>
-              </div>
-
-              {/* Error message if email sending fails */}
-              {emailError && (
-                <p className="text-[13px] text-[#d32f2f] text-center mt-2 leading-tight">
-                  {emailError}
-                </p>
-              )}
-
-              {/* Verify Email Pill Button */}
-              <button
-                type="submit"
-                disabled={!isDetailsValid || isSendingEmail}
-                className={`w-full py-3.5 sm:py-4 rounded-full mt-4 text-[15px] sm:text-[16px] font-medium transition-all flex items-center justify-center gap-2 ${
-                  isDetailsValid && !isSendingEmail
-                    ? 'bg-[#111111] hover:bg-black text-white cursor-pointer active:scale-[0.99] shadow-sm'
-                    : 'bg-[#e5e5e5] text-[#707072] cursor-not-allowed'
-                }`}
-                style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
-              >
-                {isSendingEmail ? (
-                  <>
-                    <svg
-                      className="animate-spin h-5 w-5 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      />
-                    </svg>
-                    <span>Sending verification email...</span>
-                  </>
-                ) : (
-                  'Verify Email'
-                )}
-              </button>
-            </form>
-          </div>
-        )}
-
-        {/* STEP 4: EMAIL OTP VERIFICATION */}
-        {step === 'email-otp' && (
-          <div>
-            {/* Centered Brand Logo */}
-            <div className="flex justify-center pt-1 pb-1">
-              <img
-                src="/Logo/Logo_Full.png"
-                alt="SONU Logo"
-                className="h-7 sm:h-8 w-auto object-contain"
-                loading="eager"
-                fetchPriority="high"
-                width={150}
-                height={32}
-              />
-            </div>
-
-            <h2
-              className="text-[22px] sm:text-[24px] font-bold text-[#111111] text-center mt-3 tracking-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
-              style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
-            >
-              Verify your email
-            </h2>
-            <p className="text-[14px] text-[#707072] text-center mt-1 leading-normal max-w-[340px] mx-auto">
-              Sent to <strong className="text-[#111111]">{email}</strong>{' '}
-              <button
-                type="button"
-                onClick={() => setStep('details')}
-                className="text-[#111111] font-medium underline ml-1 cursor-pointer"
-              >
-                Edit
-              </button>
-            </p>
-
-            <form onSubmit={handleVerifyEmailOtp} className="mt-6">
-              <div className="flex justify-center gap-2 sm:gap-2.5">
-                {emailOtp.map((digit, idx) => (
-                  <input
-                    key={idx}
-                    id={`email-otp-input-${idx}`}
-                    type="tel"
-                    inputMode="numeric"
-                    maxLength={1}
-                    value={digit}
-                    onChange={(e) => {
-                      const val = e.target.value.replace(/\D/g, '');
-                      const next = [...emailOtp];
-                      next[idx] = val;
-                      setEmailOtp(next);
-                      setEmailOtpError('');
-                      if (val && idx < 5) {
-                        document.getElementById(`email-otp-input-${idx + 1}`)?.focus();
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Backspace' && !emailOtp[idx] && idx > 0) {
-                        document.getElementById(`email-otp-input-${idx - 1}`)?.focus();
-                      }
-                    }}
-                    className="w-11 h-12 sm:w-12 sm:h-13 text-center border border-[#8d8d8d] focus:border-[#111111] rounded-lg text-[18px] font-bold outline-none"
-                  />
-                ))}
-              </div>
-
-              {emailOtpError && (
-                <p className="text-[13px] text-[#d32f2f] text-center mt-3">
-                  {emailOtpError}
-                </p>
-              )}
-
-              <button
-                type="submit"
-                disabled={!isEmailOtpValid}
-                className={`w-full py-3.5 sm:py-4 rounded-full mt-6 text-[15px] sm:text-[16px] font-medium transition-all ${
-                  isEmailOtpValid
-                    ? 'bg-[#111111] hover:bg-black text-white cursor-pointer shadow-sm active:scale-[0.99]'
-                    : 'bg-[#e5e5e5] text-[#707072] cursor-not-allowed'
-                }`}
-                style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
-              >
-                Verify & Complete
-              </button>
-
-              <div className="text-center mt-4">
-                {emailSentNotice ? (
-                  <div className="space-y-1">
-                    <p className="text-[13px] text-[#008a00] font-medium flex items-center justify-center gap-1.5">
-                      <svg
-                        className="w-4 h-4 text-[#008a00]"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                      <span>Sent</span>
-                    </p>
-                    {emailTimer > 0 && (
-                      <p className="text-[12px] text-[#707072]">
-                        Resend code in <span className="font-medium text-[#111111]">{emailTimer}s</span>
-                      </p>
-                    )}
                   </div>
-                ) : emailTimer > 0 ? (
-                  <p className="text-[13px] text-[#707072]">
-                    Resend code in <span className="font-medium text-[#111111]">{emailTimer}s</span>
-                  </p>
-                ) : (
+
                   <button
                     type="button"
-                    onClick={handleResendEmailOtp}
-                    className="text-[13px] font-medium text-[#111111] underline cursor-pointer"
+                    onClick={onClose}
+                    className="w-full py-3.5 sm:py-4 rounded-full text-[15px] sm:text-[16px] font-medium bg-[#111111] hover:bg-black text-white cursor-pointer shadow-sm active:scale-[0.99] transition-all font-['Helvetica_Now_Text_Medium',sans-serif]"
+                    style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
                   >
-                    Resend verification code
+                    Continue
                   </button>
-                )}
+                </div>
               </div>
-            </form>
+            )}
           </div>
-        )}
-
-        {/* STEP 5: SUCCESS STATE ("Welcome to Sonu Shoes.") */}
-        {step === 'success' && (
-          <div>
-            {/* Centered Brand Logo at top */}
-            <div className="flex justify-center pt-1 pb-1">
-              <img
-                src="/Logo/Logo_Full.png"
-                alt="SONU Logo"
-                className="h-7 sm:h-8 w-auto object-contain"
-                loading="eager"
-                fetchPriority="high"
-                width={150}
-                height={32}
-              />
-            </div>
-
-            {/* Header: Welcome to Sonu Shoes. */}
-            <h2
-              className="text-[22px] sm:text-[24px] font-bold text-[#111111] text-center mt-3 tracking-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
-              style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
-            >
-              Welcome to Sonu Shoes.
-            </h2>
-
-            {/* Subtitle */}
-            <p className="text-[14px] sm:text-[15px] text-[#707072] text-center mt-1.5 leading-normal">
-              Your email has been verified. Welcome aboard{firstName ? `, ${firstName}` : ''}!
-            </p>
-
-            {/* Checkmark icon & Continue action replacing OTPs form */}
-            <div className="mt-8 text-center">
-              <div className="w-14 h-14 bg-[#111111] text-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
-                <svg
-                  className="w-7 h-7"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={3}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-              </div>
-
-              <button
-                type="button"
-                onClick={onClose}
-                className="w-full py-3.5 sm:py-4 rounded-full text-[15px] sm:text-[16px] font-medium bg-[#111111] hover:bg-black text-white cursor-pointer shadow-sm active:scale-[0.99] transition-all font-['Helvetica_Now_Text_Medium',sans-serif]"
-                style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
-              >
-                Continue
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
