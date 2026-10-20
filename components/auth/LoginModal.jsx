@@ -496,8 +496,8 @@ export default function LoginModal({ isOpen, onClose }) {
           <div
             className={`transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] transform ${
               isTransitioningOtp
-                ? 'absolute inset-x-6 sm:inset-x-8 top-7 pointer-events-none z-20 translate-x-full opacity-0'
-                : 'relative translate-x-0 opacity-100'
+                ? 'absolute inset-x-6 sm:inset-x-8 top-7 pointer-events-none z-10 translate-x-full opacity-0'
+                : 'relative translate-x-0 opacity-100 z-10'
             }`}
           >
             {/* Centered Brand Logo */}
@@ -613,7 +613,7 @@ export default function LoginModal({ isOpen, onClose }) {
         {/* STEP 3: "Almost there!" DETAILS COLLECTION */}
         {step === 'details' && (
           <div
-            className={`transition-all duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] transform ${
+            className={`relative z-30 bg-white transition-all duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] transform ${
               detailsSlideIn ? 'translate-y-0 opacity-100' : 'translate-y-16 opacity-0'
             }`}
           >
