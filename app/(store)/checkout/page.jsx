@@ -33,6 +33,8 @@ export default function CheckoutPage() {
   const [addressErrors, setAddressErrors] = useState({});
   const [isDeliveryEstimateOpen, setIsDeliveryEstimateOpen] = useState(false);
   const [isPriceDetailsOpen, setIsPriceDetailsOpen] = useState(true);
+  const [isPaymentOrderAddressOpen, setIsPaymentOrderAddressOpen] = useState(false);
+  const [isPaymentPriceDetailsOpen, setIsPaymentPriceDetailsOpen] = useState(true);
 
   // Payment State
   const [paymentMethod, setPaymentMethod] = useState('upi'); // 'upi' | 'card' | 'netbanking' | 'emi'
@@ -648,6 +650,24 @@ export default function CheckoutPage() {
 
   // STEP 3: PAYMENT METHOD SELECTION (EXACT DESIGN MATCH)
   if (checkoutStep === 'payment') {
+    const displayName =
+      address.name ||
+      `${address.firstName || ''} ${address.lastName || ''}`.trim() ||
+      'Thilak';
+    const displayPhone = address.mobile || '9182390192';
+    const displayPincode = address.pincode || '800013';
+    const displayHouse = address.houseNo || '33a';
+    const displayStreet = address.street || address.roadArea || "Pata lok, behind S'mart, Nehru Nagar";
+    const displayLandmark = address.landmark || '';
+    const displayAddressLine = [displayHouse, displayStreet, displayLandmark].filter(Boolean).join(', ');
+    const displayCity = (address.city || 'PATNA').toUpperCase();
+
+    const handleChangeAddress = () => {
+      window.dispatchEvent(
+        new CustomEvent('open-login-modal', { detail: { step: 'delivery-address' } })
+      );
+    };
+
     const popularBanks = [
       { id: 'AXIS', name: 'AXIS', icon: '/images/payments/bank-axis.svg' },
       { id: 'HDFC', name: 'HDFC', icon: '/images/payments/bank-hdfc.svg' },
@@ -1132,6 +1152,127 @@ export default function CheckoutPage() {
               </div>
             )}
           </div>
+
+          {/* ORDER INFORMATION (EXACT SCREENSHOT MATCH) */}
+          <div className="pt-5 space-y-3.5">
+            <h2
+              className="text-[18px] sm:text-[20px] font-bold text-[#111111] font-['Helvetica_Now_Text_Medium',sans-serif]"
+              style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+            >
+              Order Information
+            </h2>
+
+            {/* Deliver To Accordion */}
+            <div className="border border-[#e5e5e5] rounded-[16px] p-4 sm:p-5 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.02)] transition-all">
+              <div
+                onClick={() => setIsPaymentOrderAddressOpen(!isPaymentOrderAddressOpen)}
+                className="flex items-center justify-between cursor-pointer select-none"
+              >
+                <p
+                  className="text-[15px] sm:text-[16px] font-bold text-[#111111] font-['Helvetica_Now_Text_Medium',sans-serif]"
+                  style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                >
+                  Deliver to {displayName}, {displayPincode}
+                </p>
+                <img
+                  src={
+                    isPaymentOrderAddressOpen
+                      ? '/images/payments/caret-up.svg'
+                      : '/images/payments/caret-down.svg'
+                  }
+                  alt=""
+                  className="w-5 h-5 shrink-0"
+                />
+              </div>
+
+              {isPaymentOrderAddressOpen && (
+                <div className="mt-3.5 pt-3.5 border-t border-[#f0f0f0] text-[13px] text-[#707072] space-y-1">
+                  <p className="text-[#111111] font-medium">
+                    {displayName} &bull; +91 {displayPhone}
+                  </p>
+                  <p>{displayAddressLine}</p>
+                  <p>
+                    {displayCity} - {displayPincode}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleChangeAddress}
+                    className="mt-2 text-[13px] font-medium text-[#111111] underline hover:text-[#707072] cursor-pointer"
+                  >
+                    Change or Add Address
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Price Details Accordion */}
+            <div className="border border-[#e5e5e5] rounded-[16px] p-4 sm:p-5 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.02)] transition-all">
+              <div
+                onClick={() => setIsPaymentPriceDetailsOpen(!isPaymentPriceDetailsOpen)}
+                className="flex items-center justify-between cursor-pointer select-none"
+              >
+                <p
+                  className="text-[15px] sm:text-[16px] font-bold text-[#111111] font-['Helvetica_Now_Text_Medium',sans-serif]"
+                  style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                >
+                  Price Details
+                </p>
+                <img
+                  src={
+                    isPaymentPriceDetailsOpen
+                      ? '/images/payments/caret-up.svg'
+                      : '/images/payments/caret-down.svg'
+                  }
+                  alt=""
+                  className="w-5 h-5 shrink-0"
+                />
+              </div>
+
+              {isPaymentPriceDetailsOpen && (
+                <div className="mt-4 pt-3.5 border-t border-[#f0f0f0] space-y-3.5">
+                  <div className="flex items-center justify-between text-[14px] text-[#707072]">
+                    <span>Bag Total</span>
+                    <span className="text-[#111111] font-medium">
+                      ₹{subtotal.toLocaleString('en-IN')}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-[14px] text-[#707072]">
+                    <span className="flex items-center gap-1.5">
+                      Shipping Charges
+                      <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full border border-[#8d8d8d] text-[10px] text-[#8d8d8d]">
+                        i
+                      </span>
+                    </span>
+                    <div className="flex items-center gap-1.5 font-medium">
+                      <span className="line-through text-[#8d8d8d] text-[13px]">₹99</span>
+                      <span className="text-[#059669]">Free</span>
+                    </div>
+                  </div>
+                  <div className="pt-3 border-t border-[#f0f0f0] flex items-center justify-between">
+                    <span
+                      className="text-[15px] sm:text-[16px] font-bold text-[#111111] font-['Helvetica_Now_Text_Medium',sans-serif]"
+                      style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                    >
+                      You Pay
+                    </span>
+                    <span
+                      className="text-[15px] sm:text-[16px] font-bold text-[#111111] font-['Helvetica_Now_Text_Medium',sans-serif]"
+                      style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                    >
+                      ₹{subtotal.toLocaleString('en-IN')}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Full-width Divider & Powered by Flowify Agency */}
+        <div className="w-full border-t border-[#e5e5e5] mt-10 pt-6 pb-14 text-center">
+          <p className="text-[13px] text-[#707072] font-normal tracking-wide">
+            Powered by Flowify Agency
+          </p>
         </div>
       </div>
     );
