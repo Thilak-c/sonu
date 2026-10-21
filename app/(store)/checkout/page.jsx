@@ -183,36 +183,129 @@ export default function CheckoutPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Step 3 -> Step 4: Complete Payment & Place Order
-  const handlePlaceOrder = () => {
+  // Helper to load Razorpay checkout script
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      if (typeof window !== 'undefined' && window.Razorpay) {
+        resolve(true);
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.async = true;
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  // Step 3 -> Step 4: Open Razorpay Gateway & Complete Order
+  const handlePlaceOrder = async () => {
+    if (isPlacingOrder) return;
     setIsPlacingOrder(true);
 
-    setTimeout(() => {
-      const orderId = `SONU-IN-${Math.floor(100000 + Math.random() * 900000)}`;
-      const orderData = {
-        orderId,
-        items: [...cartItems],
-        totalAmount: subtotal,
-        address: { ...address },
-        paymentMethod,
-        placedAt: new Date().toISOString(),
-        estimatedDelivery: '3-5 business days',
-      };
-
-      try {
-        const pastOrders = JSON.parse(localStorage.getItem('sonu_orders') || '[]');
-        pastOrders.unshift(orderData);
-        localStorage.setItem('sonu_orders', JSON.stringify(pastOrders));
-      } catch (err) {
-        // ignore
+    try {
+      const isScriptLoaded = await loadRazorpayScript();
+      if (!isScriptLoaded) {
+        alert('Could not load payment gateway. Please check your internet connection.');
+        setIsPlacingOrder(false);
+        return;
       }
 
-      setConfirmedOrder(orderData);
-      clearCart();
+      // 1. Create order on backend via Razorpay Orders API
+      const res = await fetch('/api/razorpay/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: subtotal,
+          notes: {
+            customerName:
+              address.name ||
+              `${address.firstName || ''} ${address.lastName || ''}`.trim() ||
+              'Customer',
+            method: paymentMethod,
+          },
+        }),
+      });
+
+      const orderData = await res.json();
+      if (!res.ok || !orderData.orderId) {
+        throw new Error(orderData.error || 'Failed to create payment order');
+      }
+
+      const displayName =
+        address.name ||
+        `${address.firstName || ''} ${address.lastName || ''}`.trim() ||
+        'Customer';
+
+      // 2. Configure and open Razorpay modal
+      const options = {
+        key: orderData.keyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_ToeynJ0XXfrtyp',
+        amount: orderData.amount,
+        currency: orderData.currency || 'INR',
+        name: 'SONU',
+        description: `Order Payment (${totalQuantity} ${totalQuantity === 1 ? 'item' : 'items'})`,
+        image: '/images/brand/logo.svg',
+        order_id: orderData.orderId,
+        prefill: {
+          name: displayName,
+          email: address.email || '',
+          contact: address.mobile || '',
+        },
+        notes: {
+          address: `${address.houseNo || ''}, ${address.street || ''}, ${address.city || ''} - ${address.pincode || ''}`,
+          method: paymentMethod,
+        },
+        theme: {
+          color: '#111111',
+        },
+        modal: {
+          ondismiss: () => {
+            setIsPlacingOrder(false);
+          },
+        },
+        handler: function (response) {
+          const placedOrderId = `SONU-IN-${Math.floor(100000 + Math.random() * 900000)}`;
+          const confirmedData = {
+            orderId: placedOrderId,
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpayOrderId: response.razorpay_order_id,
+            razorpaySignature: response.razorpay_signature,
+            items: [...cartItems],
+            totalAmount: subtotal,
+            address: { ...address },
+            paymentMethod,
+            placedAt: new Date().toISOString(),
+            estimatedDelivery: '3-5 business days',
+          };
+
+          try {
+            const pastOrders = JSON.parse(localStorage.getItem('sonu_orders') || '[]');
+            pastOrders.unshift(confirmedData);
+            localStorage.setItem('sonu_orders', JSON.stringify(pastOrders));
+          } catch (err) {
+            // ignore
+          }
+
+          setConfirmedOrder(confirmedData);
+          clearCart();
+          setIsPlacingOrder(false);
+          setCheckoutStep('confirmation');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        },
+      };
+
+      const rzpInstance = new window.Razorpay(options);
+      rzpInstance.on('payment.failed', function (response) {
+        setIsPlacingOrder(false);
+        alert(`Payment failed: ${response.error?.description || 'Transaction declined'}`);
+      });
+      rzpInstance.open();
+    } catch (err) {
+      console.error('Razorpay checkout error:', err);
       setIsPlacingOrder(false);
-      setCheckoutStep('confirmation');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 900);
+      alert(err.message || 'Payment could not be initialized. Please try again.');
+    }
   };
 
   // Loading state
@@ -252,6 +345,11 @@ export default function CheckoutPage() {
           <p className="text-[14px] text-[#707072] mt-1.5">
             Order ID: <span className="text-[#111111] font-mono font-medium">{confirmedOrder.orderId}</span>
           </p>
+          {confirmedOrder.razorpayPaymentId && (
+            <p className="text-[12.5px] text-[#707072] mt-1 font-mono">
+              Payment ID: <span className="text-[#111111] font-medium">{confirmedOrder.razorpayPaymentId}</span>
+            </p>
+          )}
         </div>
 
         {/* Order Details Card */}
