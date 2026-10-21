@@ -36,7 +36,6 @@ export default function LoginModal({ isOpen, onClose }) {
   const [emailSentNotice, setEmailSentNotice] = useState(false);
 
   // Step 5 Welcome & Step 6 Delivery Address Transition States
-  const [welcomeSlideIn, setWelcomeSlideIn] = useState(false);
   const [isWelcomeFadingOut, setIsWelcomeFadingOut] = useState(false);
   const [isDeliveryAddressVisible, setIsDeliveryAddressVisible] = useState(false);
   const [addressSlideIn, setAddressSlideIn] = useState(false);
@@ -99,7 +98,6 @@ export default function LoginModal({ isOpen, onClose }) {
         setEmailOtp(['', '', '', '', '', '']);
         setEmailOtpError('');
         setEmailSentNotice(false);
-        setWelcomeSlideIn(false);
         setIsWelcomeFadingOut(false);
         setIsDeliveryAddressVisible(false);
         setAddressSlideIn(false);
@@ -400,17 +398,16 @@ export default function LoginModal({ isOpen, onClose }) {
     }
   };
 
-  // Transition from "Welcome to Sonu Shoes." -> Fade out -> ONLY THEN slide up Delivery Address
+  // Transition from "Welcome to Sonu Shoes." -> Fade out -> Slide up Delivery Address
   const handleTransitionToDeliveryAddress = () => {
     clearTimeout(closeTimerRef.current);
     // 1. Smoothly fade out the welcome message
     setIsWelcomeFadingOut(true);
 
-    // 2. Wait 550ms for the Welcome modal to completely fade out before mounting the next modal
+    // 2. Mount Delivery Address and slide up with identical incoming animation
     setTimeout(() => {
-      setStep('delivery-address');
       setIsDeliveryAddressVisible(true);
-      setWelcomeSlideIn(false);
+      setStep('delivery-address');
       setAddressSlideIn(false);
 
       // Autofill Name and Mobile from user profile or stored session
@@ -422,7 +419,7 @@ export default function LoginModal({ isOpen, onClose }) {
       setAddrMobile(mobileNumber || storedMobile || '');
 
       // Check Shiprocket ETD for default/entered pincode
-      if (addrPincode && addrPincode.length === 6) {
+      if (addrPincode.length === 6) {
         fetchShiprocketEtd(addrPincode);
       }
 
@@ -431,20 +428,16 @@ export default function LoginModal({ isOpen, onClose }) {
           setAddressSlideIn(true);
         });
       });
-    }, 550);
+    }, 450);
   };
 
-  // Complete profile saving after email code verification
-  const handleVerifyEmailOtp = (e) => {
+  // Complete profile saving after email code verification (Dev mode: accepts any 6-digit OTP)
+  const handleVerifyEmailOtp = (e, otpDigits = null) => {
     if (e) e.preventDefault();
-    const entered = emailOtp.join('');
+    const entered = (otpDigits || emailOtp).join('');
     if (entered.length !== 6) return;
 
-    // Verify against generated code if present
-    if (sentEmailCode && entered !== sentEmailCode) {
-      setEmailOtpError('Incorrect code. Please enter the 6-digit code sent to your email.');
-      return;
-    }
+    // Dev mode: Any random 6-digit OTP verifies successfully
 
     const userProfile = {
       firstName: firstName.trim(),
@@ -466,26 +459,13 @@ export default function LoginModal({ isOpen, onClose }) {
       // storage unavailable
     }
 
-    // 1. Dismiss 100% VH modal cleanly
-    setDetailsSlideIn(false);
+    setStep('success');
+    setIsWelcomeFadingOut(false);
 
-    // 2. Once the 100% VH modal slides away, show the small modal from below
-    setTimeout(() => {
-      setStep('success');
-      setIsWelcomeFadingOut(false);
-      setWelcomeSlideIn(false);
-
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          setWelcomeSlideIn(true);
-        });
-      });
-
-      // Welcome modal stays visible for 2 seconds, then smoothly fades out
-      closeTimerRef.current = setTimeout(() => {
-        handleTransitionToDeliveryAddress();
-      }, 2000);
-    }, 350);
+    // Smoothly fade out "Welcome to Sonu Shoes." after 2s and slide up Delivery Address
+    closeTimerRef.current = setTimeout(() => {
+      handleTransitionToDeliveryAddress();
+    }, 2000);
   };
 
   // Save Delivery Address and finalize onboarding
@@ -545,7 +525,9 @@ export default function LoginModal({ isOpen, onClose }) {
   const isMobileFloating = isMobileFocused || mobileNumber.length > 0;
   const isOnboardingFullScreen =
     step === 'details' ||
-    step === 'email-otp';
+    step === 'email-otp' ||
+    step === 'success' ||
+    step === 'delivery-address';
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center select-none font-['Helvetica_Now_Text',sans-serif]">
@@ -1234,13 +1216,33 @@ export default function LoginModal({ isOpen, onClose }) {
                         maxLength={1}
                         value={digit}
                         onChange={(e) => {
-                          const val = e.target.value.replace(/\D/g, '');
+                          const val = e.target.value.replace(/\D/g, '').slice(-1);
                           const next = [...emailOtp];
                           next[idx] = val;
                           setEmailOtp(next);
                           setEmailOtpError('');
                           if (val && idx < 5) {
                             document.getElementById(`email-otp-input-${idx + 1}`)?.focus();
+                          }
+                          if (val && idx === 5 && next.every((d) => d !== '')) {
+                            handleVerifyEmailOtp(null, next);
+                          }
+                        }}
+                        onPaste={(e) => {
+                          const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+                          if (pasted) {
+                            e.preventDefault();
+                            const next = [...emailOtp];
+                            for (let i = 0; i < 6; i++) {
+                              next[i] = pasted[i] || '';
+                            }
+                            setEmailOtp(next);
+                            setEmailOtpError('');
+                            const lastIdx = Math.min(pasted.length - 1, 5);
+                            document.getElementById(`email-otp-input-${Math.min(lastIdx + 1, 5)}`)?.focus();
+                            if (pasted.length === 6) {
+                              handleVerifyEmailOtp(null, next);
+                            }
                           }
                         }}
                         onKeyDown={(e) => {
@@ -1313,66 +1315,58 @@ export default function LoginModal({ isOpen, onClose }) {
               </div>
             )}
 
-          </div>
-        </div>
-      )}
+            {/* STEP 5: SUCCESS STATE ("Welcome to Sonu Shoes.") */}
+            {step === 'success' && (
+              <div
+                className={`transition-opacity duration-500 ease-out ${
+                  isWelcomeFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
+                }`}
+              >
+                {/* Centered Brand Logo at top */}
+                <div className="flex justify-center pt-1 pb-1">
+                  <img
+                    src="/Logo/Logo_Full.png"
+                    alt="SONU Logo"
+                    className="h-7 sm:h-8 w-auto object-contain"
+                    loading="eager"
+                    fetchPriority="high"
+                    width={150}
+                    height={32}
+                  />
+                </div>
 
-      {/* 2.5. SMALL POPUP MODAL: STEP 5 SUCCESS ("Welcome to Sonu Shoes.") APPEARS FROM BELOW */}
-      {step === 'success' && (
-        <div
-          className={`relative w-full max-w-full sm:max-w-[460px] bg-white rounded-t-[28px] sm:rounded-[24px] px-6 sm:px-8 pt-8 pb-8 shadow-2xl z-50 transform transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-            welcomeSlideIn && !isWelcomeFadingOut
-              ? 'translate-y-0 opacity-100 scale-100'
-              : isWelcomeFadingOut
-              ? 'opacity-0 scale-95 duration-500 pointer-events-none'
-              : 'translate-y-full opacity-0 scale-95 pointer-events-none'
-          }`}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Welcome to Sonu Shoes"
-        >
-          {/* Centered Brand Logo */}
-          <div className="flex justify-center pt-1 pb-1">
-            <img
-              src="/Logo/Logo_Full.png"
-              alt="SONU Logo"
-              className="h-7 sm:h-8 w-auto object-contain"
-              loading="eager"
-              fetchPriority="high"
-              width={150}
-              height={32}
-            />
-          </div>
+                {/* Header: Welcome to Sonu Shoes. */}
+                <h2
+                  className="text-[22px] sm:text-[24px] font-bold text-[#111111] text-center mt-3 tracking-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
+                  style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                >
+                  Welcome to Sonu Shoes.
+                </h2>
 
-          {/* Header: Welcome to Sonu Shoes. */}
-          <h2
-            className="text-[22px] sm:text-[24px] font-bold text-[#111111] text-center mt-3 tracking-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
-            style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
-          >
-            Welcome to Sonu Shoes.
-          </h2>
+                {/* Subtitle */}
+                <p className="text-[14px] sm:text-[15px] text-[#707072] text-center mt-1.5 leading-normal">
+                  Your email has been verified. Welcome aboard{firstName ? `, ${firstName}` : ''}!
+                </p>
 
-          {/* Subtitle */}
-          <p className="text-[14px] sm:text-[15px] text-[#707072] text-center mt-2 leading-normal font-['Helvetica_Now_Text',sans-serif]">
-            Your email has been verified. Welcome aboard{firstName ? `, ${firstName}` : ''}!
-          </p>
-
-          {/* Continue button */}
-          <div className="mt-8 text-center">
-            <button
-              type="button"
-              onClick={handleTransitionToDeliveryAddress}
-              className="w-full py-3.5 sm:py-4 rounded-full text-[15px] sm:text-[16px] font-medium bg-[#111111] hover:bg-black text-white cursor-pointer shadow-sm active:scale-[0.99] transition-all font-['Helvetica_Now_Text_Medium',sans-serif]"
-              style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
-            >
-              Continue
-            </button>
+                {/* Continue action smoothly triggers transition to Delivery Address */}
+                <div className="mt-8 text-center">
+                  <button
+                    type="button"
+                    onClick={handleTransitionToDeliveryAddress}
+                    className="w-full py-3.5 sm:py-4 rounded-full text-[15px] sm:text-[16px] font-medium bg-[#111111] hover:bg-black text-white cursor-pointer shadow-sm active:scale-[0.99] transition-all font-['Helvetica_Now_Text_Medium',sans-serif]"
+                    style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                  >
+                    Continue
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
 
       {/* 3. STEP 6: DELIVERY ADDRESS FULL-SCREEN SHEET (Matching User Screenshot Strictly) */}
-      {step === 'delivery-address' && (
+      {(step === 'delivery-address' || isDeliveryAddressVisible) && (
         <div
           className={`fixed inset-0 z-[60] w-full h-[100dvh] bg-white overflow-y-auto px-5 sm:px-8 py-6 flex flex-col justify-start transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform ${
             addressSlideIn ? 'translate-y-0' : 'translate-y-full'
