@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
+import { initDb } from '@/lib/mongodb';
 
 export async function POST(request) {
   try {
-    const { amount, receipt, notes } = await request.json();
+    const { amount, receipt, notes, items } = await request.json();
 
     if (!amount || amount <= 0) {
       return NextResponse.json(
@@ -18,6 +19,7 @@ export async function POST(request) {
 
     // Razorpay amount is in paise (1 INR = 100 paise)
     const amountInPaise = Math.round(Number(amount) * 100);
+    const receiptId = receipt || `rcpt_${Date.now()}`;
 
     const res = await fetch('https://api.razorpay.com/v1/orders', {
       method: 'POST',
@@ -28,7 +30,7 @@ export async function POST(request) {
       body: JSON.stringify({
         amount: amountInPaise,
         currency: 'INR',
-        receipt: receipt || `rcpt_${Date.now()}`,
+        receipt: receiptId,
         notes: notes || {},
       }),
     });
@@ -42,10 +44,48 @@ export async function POST(request) {
       );
     }
 
+    // Save initial order record into MongoDB BEFORE payment starts
+    try {
+      const db = await initDb();
+      await db.collection('orders').updateOne(
+        { razorpayOrderId: data.id },
+        {
+          $set: {
+            orderId: receiptId,
+            razorpayOrderId: data.id,
+            amount: Number(amount),
+            currency: data.currency || 'INR',
+            items: items || [],
+            customer: {
+              name: notes?.customerName || '',
+              email: (notes?.customerEmail || '').toLowerCase().trim(),
+              mobile: notes?.contact || '',
+              address: notes?.address || '',
+            },
+            payment: {
+              method: notes?.method || 'razorpay',
+              status: 'PENDING_PAYMENT',
+              razorpayOrderId: data.id,
+            },
+            status: 'PENDING',
+            updatedAt: new Date(),
+          },
+          $setOnInsert: {
+            createdAt: new Date(),
+          },
+        },
+        { upsert: true }
+      );
+      console.log(`[MongoDB] Initial order draft saved with Razorpay order ID ${data.id}`);
+    } catch (dbErr) {
+      console.error('[MongoDB] Warning: Failed to write initial order to DB:', dbErr);
+    }
+
     return NextResponse.json({
       orderId: data.id,
       amount: data.amount,
       currency: data.currency,
+      receipt: receiptId,
       keyId,
     });
   } catch (error) {

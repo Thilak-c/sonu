@@ -212,17 +212,21 @@ export default function CheckoutPage() {
         return;
       }
 
-      // 1. Create order on backend via Razorpay Orders API
+      // 1. Create order on backend via Razorpay Orders API & save draft in MongoDB
       const res = await fetch('/api/razorpay/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           amount: subtotal,
+          items: cartItems,
           notes: {
             customerName:
               address.name ||
               `${address.firstName || ''} ${address.lastName || ''}`.trim() ||
               'Customer',
+            customerEmail: address.email || '',
+            contact: displayContact,
+            address: `${address.houseNo || ''}, ${address.street || ''}, ${address.city || ''} - ${address.pincode || ''}`,
             method: paymentMethod,
           },
         }),
@@ -326,7 +330,7 @@ export default function CheckoutPage() {
             setIsPlacingOrder(false);
           },
         },
-        handler: function (response) {
+        handler: async function (response) {
           const placedOrderId = `SONU-IN-${Math.floor(100000 + Math.random() * 900000)}`;
           const confirmedData = {
             orderId: placedOrderId,
@@ -340,6 +344,17 @@ export default function CheckoutPage() {
             placedAt: new Date().toISOString(),
             estimatedDelivery: '3-5 business days',
           };
+
+          // 1. Save confirmed order directly into MongoDB
+          try {
+            await fetch('/api/orders', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(confirmedData),
+            });
+          } catch (dbErr) {
+            console.error('[MongoDB] Order save failed:', dbErr);
+          }
 
           try {
             const pastOrders = JSON.parse(localStorage.getItem('sonu_orders') || '[]');
@@ -404,87 +419,9 @@ export default function CheckoutPage() {
           >
             Thank you for your order!
           </h1>
-          <p className="text-[14px] text-[#707072] mt-1.5">
-            Order ID: <span className="text-[#111111] font-mono font-medium">{confirmedOrder.orderId}</span>
-          </p>
-          {confirmedOrder.razorpayPaymentId && (
-            <p className="text-[12.5px] text-[#707072] mt-1 font-mono">
-              Payment ID: <span className="text-[#111111] font-medium">{confirmedOrder.razorpayPaymentId}</span>
-            </p>
-          )}
+
         </div>
 
-        {/* Order Details Card */}
-        <div className="mt-8 bg-[#fafafa] border border-[#e5e5e5] rounded-[16px] p-5 sm:p-6 space-y-4">
-          <div className="flex justify-between items-start pb-4 border-b border-[#e5e5e5]">
-            <div>
-              <p className="text-[12px] uppercase tracking-wider text-[#707072] font-medium">Estimated Delivery</p>
-              <p className="text-[16px] font-bold text-[#111111] mt-0.5">3-5 Business Days</p>
-              <p className="text-[13px] text-[#008a00] font-medium mt-0.5">Free Express Shipping</p>
-            </div>
-            <div className="text-right">
-              <p className="text-[12px] uppercase tracking-wider text-[#707072] font-medium">Amount Paid</p>
-              <p className="text-[18px] font-bold text-[#111111] mt-0.5">
-                ₹ {confirmedOrder.totalAmount.toLocaleString('en-IN')}
-              </p>
-              <span className="inline-block px-2 py-0.5 bg-[#e8f5e9] text-[#008a00] rounded text-[11px] font-medium uppercase mt-0.5">
-                {confirmedOrder.paymentMethod.toUpperCase()}
-              </span>
-            </div>
-          </div>
-
-          {/* Delivery Address Snapshot */}
-          <div className="pb-4 border-b border-[#e5e5e5]">
-            <p className="text-[12px] uppercase tracking-wider text-[#707072] font-medium mb-1">Delivering To</p>
-            <p className="text-[14px] font-medium text-[#111111]">
-              {confirmedOrder.address.firstName} {confirmedOrder.address.lastName}
-            </p>
-            <p className="text-[13px] text-[#707072] leading-relaxed mt-0.5">
-              {confirmedOrder.address.houseNo}, {confirmedOrder.address.street}
-              {confirmedOrder.address.landmark ? `, Near ${confirmedOrder.address.landmark}` : ''}
-              <br />
-              {confirmedOrder.address.city}, {confirmedOrder.address.state} – {confirmedOrder.address.pincode}
-            </p>
-            <p className="text-[13px] text-[#707072] mt-1">Phone: +91 {confirmedOrder.address.mobile}</p>
-          </div>
-
-          {/* Items Summary */}
-          <div>
-            <p className="text-[12px] uppercase tracking-wider text-[#707072] font-medium mb-2.5">Items Ordered</p>
-            <div className="space-y-3">
-              {confirmedOrder.items.map((item, idx) => (
-                <div key={idx} className="flex items-center gap-3.5">
-                  <div className="w-14 h-14 bg-white border border-[#e5e5e5] rounded-[8px] shrink-0 p-1 flex items-center justify-center">
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-full h-full object-contain mix-blend-multiply"
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[14px] font-medium text-[#111111] truncate">{item.name}</p>
-                    <p className="text-[12px] text-[#707072]">
-                      Size: {item.size} • Qty: {item.quantity || 1}
-                    </p>
-                  </div>
-                  <p className="text-[14px] font-medium text-[#111111]">
-                    ₹ {((item.priceNumber || 13995) * (item.quantity || 1)).toLocaleString('en-IN')}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Action Button */}
-        <div className="mt-8 text-center">
-          <Link
-            href="/"
-            className="inline-block w-full py-4 bg-[#111111] hover:bg-black text-white text-[15px] font-medium rounded-full text-center transition-all shadow-sm"
-          >
-            Continue Shopping
-          </Link>
-        </div>
       </div>
     );
   }

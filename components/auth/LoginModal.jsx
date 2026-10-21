@@ -477,6 +477,13 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
       localStorage.setItem('sonu_user_email', userProfile.email);
       localStorage.setItem('sonu_user_profile', JSON.stringify(userProfile));
       window.dispatchEvent(new Event('auth-changed'));
+
+      // Sync user profile to MongoDB
+      fetch('/api/user/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userProfile),
+      }).catch((e) => console.error('[MongoDB] User profile sync error:', e));
     } catch (err) {
       // storage unavailable
     }
@@ -533,6 +540,19 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
       }
       window.dispatchEvent(new Event('auth-changed'));
       window.dispatchEvent(new Event('address-updated'));
+
+      // Sync delivery address to MongoDB
+      const storedEmail = typeof window !== 'undefined' ? localStorage.getItem('sonu_user_email') || '' : '';
+      fetch('/api/user/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: finalName,
+          mobile: finalMobile,
+          email: storedEmail,
+          address: shippingAddress,
+        }),
+      }).catch((e) => console.error('[MongoDB] Address sync error:', e));
     } catch (err) {
       // storage unavailable
     }
