@@ -723,19 +723,11 @@ export default function CheckoutPage() {
                   </p>
                 </div>
               </div>
-              <svg
-                className={`w-4 h-4 text-[#111111] transition-transform duration-200 shrink-0 ${
-                  selectedPaymentAccordion === 'upi' ? 'rotate-180' : ''
-                }`}
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <polyline points="6 9 12 15 18 9" />
-              </svg>
+              <img
+                src={selectedPaymentAccordion === 'upi' ? '/images/payments/caret-up.svg' : '/images/payments/caret-down.svg'}
+                alt=""
+                className="w-5 h-5 shrink-0"
+              />
             </div>
 
             {selectedPaymentAccordion === 'upi' && (
@@ -900,19 +892,11 @@ export default function CheckoutPage() {
                   </p>
                 </div>
               </div>
-              <svg
-                className={`w-4 h-4 text-[#111111] transition-transform duration-200 shrink-0 ${
-                  selectedPaymentAccordion === 'card' ? 'rotate-180' : ''
-                }`}
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <polyline points="6 9 12 15 18 9" />
-              </svg>
+              <img
+                src={selectedPaymentAccordion === 'card' ? '/images/payments/caret-up.svg' : '/images/payments/caret-down.svg'}
+                alt=""
+                className="w-5 h-5 shrink-0"
+              />
             </div>
 
             {selectedPaymentAccordion === 'card' && (
@@ -958,6 +942,7 @@ export default function CheckoutPage() {
                   }
                   className="w-full h-[48px] px-3.5 rounded-[10px] border border-[#8d8d8d] focus:border-[#111111] text-[14px] outline-none"
                 />
+
                 <button
                   type="button"
                   disabled={isPlacingOrder}
@@ -1009,27 +994,24 @@ export default function CheckoutPage() {
                   </p>
                 </div>
               </div>
-              <svg
-                className={`w-4 h-4 text-[#111111] transition-transform duration-200 shrink-0 ${
-                  selectedPaymentAccordion === 'netbanking' ? 'rotate-180' : ''
-                }`}
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <polyline points="6 9 12 15 18 9" />
-              </svg>
+              <img
+                src={selectedPaymentAccordion === 'netbanking' ? '/images/payments/caret-up.svg' : '/images/payments/caret-down.svg'}
+                alt=""
+                className="w-5 h-5 shrink-0"
+              />
             </div>
 
             {selectedPaymentAccordion === 'netbanking' && (
               <div className="mt-4 pt-3.5 border-t border-[#f0f0f0] space-y-3">
                 {/* Bank of India Alert */}
-                <div className="p-3 bg-[#fff8e1] rounded-[10px] text-[12.5px] text-[#795548] flex items-center gap-2">
+                <div className="p-3 bg-[#fff8e1] rounded-[10px] text-[12.5px] text-[#795548] flex items-center gap-2.5">
+                  <img
+                    src="/images/payments/alert.svg"
+                    alt=""
+                    className="w-4 h-4 shrink-0"
+                  />
                   <span>
-                    Bank of India is experiencing a low success rate. Kindly use another way to pay.
+                    Bank of India are experiencing a low success rate. Kindly use another way to pay.
                   </span>
                 </div>
 
@@ -1055,17 +1037,15 @@ export default function CheckoutPage() {
                           {b.name}
                         </span>
                       </div>
-                      <div
-                        className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                      <img
+                        src={
                           selectedBank === b.id
-                            ? 'border-[#111111]'
-                            : 'border-[#8d8d8d]'
-                        }`}
-                      >
-                        {selectedBank === b.id && (
-                          <div className="w-2 h-2 rounded-full bg-[#111111]" />
-                        )}
-                      </div>
+                            ? '/images/payments/radio-selected.svg'
+                            : '/images/payments/radio-unselected.svg'
+                        }
+                        alt=""
+                        className="w-5 h-5 shrink-0"
+                      />
                     </div>
                   ))}
                 </div>
@@ -1121,19 +1101,11 @@ export default function CheckoutPage() {
                   </p>
                 </div>
               </div>
-              <svg
-                className={`w-4 h-4 text-[#111111] transition-transform duration-200 shrink-0 ${
-                  selectedPaymentAccordion === 'emi' ? 'rotate-180' : ''
-                }`}
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <polyline points="6 9 12 15 18 9" />
-              </svg>
+              <img
+                src={selectedPaymentAccordion === 'emi' ? '/images/payments/caret-up.svg' : '/images/payments/caret-down.svg'}
+                alt=""
+                className="w-5 h-5 shrink-0"
+              />
             </div>
 
             {selectedPaymentAccordion === 'emi' && (
