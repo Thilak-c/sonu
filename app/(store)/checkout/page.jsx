@@ -238,7 +238,16 @@ export default function CheckoutPage() {
         `${address.firstName || ''} ${address.lastName || ''}`.trim() ||
         'Customer';
 
-      // 2. Configure and open Razorpay modal
+      // Sequence blocks to always show full detailed payment options
+      const sequenceMap = {
+        card: ['block.cards', 'block.upi', 'block.netbanking', 'block.wallets_emi'],
+        netbanking: ['block.netbanking', 'block.cards', 'block.upi', 'block.wallets_emi'],
+        emi: ['block.wallets_emi', 'block.cards', 'block.upi', 'block.netbanking'],
+        upi: ['block.upi', 'block.cards', 'block.netbanking', 'block.wallets_emi'],
+      };
+      const activeSequence = sequenceMap[paymentMethod] || sequenceMap.card;
+
+      // 2. Configure and open Razorpay modal with full options
       const options = {
         key: orderData.keyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_ToeynJ0XXfrtyp',
         amount: orderData.amount,
@@ -247,19 +256,52 @@ export default function CheckoutPage() {
         description: `Order Payment (${totalQuantity} ${totalQuantity === 1 ? 'item' : 'items'})`,
         image: '/images/brand/logo.svg',
         order_id: orderData.orderId,
+        one_click_checkout: false,
+        remember_customer: false,
         prefill: {
           name: displayName,
           email: address.email || '',
-          contact: address.mobile || '',
         },
         notes: {
+          contact: address.mobile || '',
           address: `${address.houseNo || ''}, ${address.street || ''}, ${address.city || ''} - ${address.pincode || ''}`,
           method: paymentMethod,
+        },
+        config: {
+          display: {
+            blocks: {
+              cards: {
+                name: 'Cards (Credit / Debit)',
+                instruments: [{ method: 'card' }],
+              },
+              upi: {
+                name: 'UPI / QR (Google Pay, PhonePe, Paytm)',
+                instruments: [{ method: 'upi' }],
+              },
+              netbanking: {
+                name: 'Net Banking (All Indian Banks)',
+                instruments: [{ method: 'netbanking' }],
+              },
+              wallets_emi: {
+                name: 'Wallets & EMI Options',
+                instruments: [
+                  { method: 'wallet' },
+                  { method: 'emi' },
+                  { method: 'paylater' },
+                ],
+              },
+            },
+            sequence: activeSequence,
+            preferences: {
+              show_default_blocks: true,
+            },
+          },
         },
         theme: {
           color: '#111111',
         },
         modal: {
+          confirm_close: true,
           ondismiss: () => {
             setIsPlacingOrder(false);
           },
