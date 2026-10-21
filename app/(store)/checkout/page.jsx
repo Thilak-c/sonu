@@ -35,7 +35,10 @@ export default function CheckoutPage() {
   const [isPriceDetailsOpen, setIsPriceDetailsOpen] = useState(true);
 
   // Payment State
-  const [paymentMethod, setPaymentMethod] = useState('upi'); // 'upi' | 'card' | 'cod'
+  const [paymentMethod, setPaymentMethod] = useState('upi'); // 'upi' | 'card' | 'netbanking' | 'emi'
+  const [selectedPaymentAccordion, setSelectedPaymentAccordion] = useState('upi');
+  const [selectedUpiApp, setSelectedUpiApp] = useState('gpay'); // 'gpay' | 'phonepe' | 'paytm' | 'other'
+  const [selectedBank, setSelectedBank] = useState('AXIS');
   const [upiId, setUpiId] = useState('');
   const [cardDetails, setCardDetails] = useState({ number: '', expiry: '', cvv: '', name: '' });
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
@@ -643,131 +646,286 @@ export default function CheckoutPage() {
     );
   }
 
-  // STEP 3: PAYMENT METHOD SELECTION
+  // STEP 3: PAYMENT METHOD SELECTION (EXACT DESIGN MATCH)
   if (checkoutStep === 'payment') {
+    const popularBanks = [
+      { id: 'AXIS', name: 'AXIS', icon: '/images/payments/bank-axis.svg' },
+      { id: 'HDFC', name: 'HDFC', icon: '/images/payments/bank-hdfc.svg' },
+      { id: 'ICICI', name: 'ICICI', icon: '/images/payments/bank-icici.svg' },
+      { id: 'KOTAK', name: 'KOTAK', icon: '/images/payments/bank-kotak.svg' },
+      { id: 'SBI', name: 'SBI', icon: '/images/payments/bank-sbi.svg' },
+      { id: 'YES', name: 'YES', icon: '/images/payments/bank-yes.svg' },
+      { id: 'Other', name: 'Other Bank', icon: '/images/payments/bank-other.svg' },
+    ];
+
     return (
-      <div className="w-full max-w-[540px] mx-auto px-5 sm:px-6 pt-4 sm:pt-6 pb-28 font-['Helvetica_Now_Text',sans-serif] text-[#111111]">
-        {/* Back Button */}
-        <div className="flex items-center justify-between pb-4 border-b border-[#e5e5e5]">
-          <button
-            type="button"
-            onClick={() => setCheckoutStep('address')}
-            className="text-[14px] font-medium text-[#707072] hover:text-[#111111] flex items-center gap-1.5 cursor-pointer transition-colors"
-          >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to Address
-          </button>
-          <span className="text-[12px] font-medium uppercase tracking-wider text-[#707072]">
-            Step 2 of 2
-          </span>
-        </div>
-
-        {/* Heading */}
-        <div className="mt-5 mb-6">
-          <h1
-            className="text-[24px] sm:text-[26px] font-bold tracking-tight text-[#111111] font-['Helvetica_Now_Text_Medium',sans-serif]"
-            style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
-          >
-            Select Payment
-          </h1>
-          <p className="text-[14px] text-[#707072] mt-1">
-            Choose how you would like to pay for your footwear.
-          </p>
-        </div>
-
-        {/* Delivery Address Snapshot Card */}
-        <div className="p-4 rounded-[12px] border border-[#e5e5e5] bg-[#fafafa] flex justify-between items-start mb-6">
-          <div>
-            <p className="text-[12px] uppercase tracking-wider text-[#707072] font-medium">Deliver To</p>
-            <p className="text-[14px] font-medium text-[#111111] mt-0.5">
-              {address.firstName} {address.lastName} (+91 {address.mobile})
-            </p>
-            <p className="text-[12px] text-[#707072] mt-0.5 leading-relaxed">
-              {address.houseNo}, {address.street}, {address.city} – {address.pincode}
-            </p>
+      <div className="min-h-screen bg-white font-['Helvetica_Now_Text',sans-serif] text-[#111111]">
+        {/* Top Sticky Header */}
+        <div className="sticky top-0 z-30 bg-white border-b border-[#f0f0f0]">
+          <div className="max-w-[480px] sm:max-w-[500px] mx-auto px-4 h-14 flex items-center gap-3.5">
+            <button
+              type="button"
+              onClick={() => setCheckoutStep('address')}
+              className="w-9 h-9 -ml-1.5 flex items-center justify-center text-[#111111] hover:text-[#707072] cursor-pointer transition-colors"
+              aria-label="Back to Address"
+            >
+              <svg
+                className="w-5 h-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <h1
+              className="text-[18px] sm:text-[19px] font-bold text-[#111111] tracking-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
+              style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+            >
+              Select payment option
+            </h1>
           </div>
-          <button
-            type="button"
-            onClick={() => setCheckoutStep('address')}
-            className="text-[13px] font-medium text-[#111111] underline cursor-pointer ml-3 shrink-0"
-          >
-            Edit
-          </button>
         </div>
 
-        {/* Payment Methods */}
-        <div className="space-y-3">
+        {/* Content Container */}
+        <div className="max-w-[480px] sm:max-w-[500px] mx-auto px-4 pt-5 pb-24 space-y-3.5">
           {/* Option 1: UPI */}
-          <div
-            onClick={() => setPaymentMethod('upi')}
-            className={`p-4 rounded-[12px] border transition-all cursor-pointer ${
-              paymentMethod === 'upi' ? 'border-[#111111] bg-[#fafafa]' : 'border-[#e5e5e5] hover:border-[#8d8d8d]'
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div
-                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                    paymentMethod === 'upi' ? 'border-[#111111]' : 'border-[#8d8d8d]'
-                  }`}
-                >
-                  {paymentMethod === 'upi' && <div className="w-2.5 h-2.5 rounded-full bg-[#111111]" />}
-                </div>
+          <div className="border border-[#e5e5e5] rounded-[16px] p-4 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.02)] transition-all">
+            <div
+              onClick={() => {
+                setPaymentMethod('upi');
+                setSelectedPaymentAccordion(
+                  selectedPaymentAccordion === 'upi' ? '' : 'upi'
+                );
+              }}
+              className="flex items-center justify-between cursor-pointer select-none"
+            >
+              <div className="flex items-center gap-3.5">
+                <span className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0">
+                  <img
+                    src="/images/payments/upi.svg"
+                    alt="UPI"
+                    className="w-6 h-6 object-contain"
+                  />
+                </span>
                 <div>
-                  <p className="text-[15px] font-medium text-[#111111]">UPI (Google Pay, PhonePe, Paytm)</p>
-                  <p className="text-[12px] text-[#707072]">Instant, secure payment via any UPI app</p>
+                  <p
+                    className="text-[16px] font-bold text-[#111111] leading-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
+                    style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                  >
+                    UPI
+                  </p>
+                  <p className="text-[13px] text-[#707072] mt-0.5">
+                    Google Pay, PhonePe, Paytm & more
+                  </p>
                 </div>
               </div>
-              <span className="text-[11px] font-medium uppercase px-2 py-0.5 bg-[#e8f5e9] text-[#008a00] rounded">
-                Recommended
-              </span>
+              <svg
+                className={`w-4 h-4 text-[#111111] transition-transform duration-200 shrink-0 ${
+                  selectedPaymentAccordion === 'upi' ? 'rotate-180' : ''
+                }`}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
             </div>
 
-            {paymentMethod === 'upi' && (
-              <div className="mt-3.5 pt-3.5 border-t border-[#e5e5e5]">
-                <input
-                  type="text"
-                  placeholder="Enter UPI ID (e.g. mobile@okhdfcbank)"
-                  value={upiId}
-                  onChange={(e) => setUpiId(e.target.value)}
-                  className="w-full h-[46px] px-3.5 rounded-[8px] border border-[#8d8d8d] focus:border-[#111111] text-[14px] outline-none"
-                />
+            {selectedPaymentAccordion === 'upi' && (
+              <div className="mt-4 pt-3 border-t border-[#f0f0f0]">
+                {/* 4 UPI Apps Grid */}
+                <div className="grid grid-cols-4 gap-2 sm:gap-2.5">
+                  {/* Google Pay */}
+                  <div
+                    onClick={() => setSelectedUpiApp('gpay')}
+                    className="flex flex-col items-center cursor-pointer select-none group"
+                  >
+                    <div
+                      className={`w-14 h-14 sm:w-16 sm:h-16 rounded-[14px] bg-white flex items-center justify-center p-2.5 transition-all ${
+                        selectedUpiApp === 'gpay'
+                          ? 'border-2 border-[#111111] shadow-sm'
+                          : 'border border-[#e5e5e5] hover:border-[#8d8d8d]'
+                      }`}
+                    >
+                      <img
+                        src="/images/payments/googlePay.svg"
+                        alt="Google Pay"
+                        className="w-7 h-7 sm:w-8 sm:h-8 object-contain"
+                      />
+                    </div>
+                    <p className="text-[12px] font-medium text-[#111111] text-center mt-1.5 leading-tight">
+                      Google Pay
+                    </p>
+                  </div>
+
+                  {/* PhonePe */}
+                  <div
+                    onClick={() => setSelectedUpiApp('phonepe')}
+                    className="flex flex-col items-center cursor-pointer select-none group"
+                  >
+                    <div
+                      className={`w-14 h-14 sm:w-16 sm:h-16 rounded-[14px] bg-white flex items-center justify-center p-2.5 transition-all ${
+                        selectedUpiApp === 'phonepe'
+                          ? 'border-2 border-[#111111] shadow-sm'
+                          : 'border border-[#e5e5e5] hover:border-[#8d8d8d]'
+                      }`}
+                    >
+                      <img
+                        src="/images/payments/phonePe.svg"
+                        alt="PhonePe"
+                        className="w-7 h-7 sm:w-8 sm:h-8 object-contain"
+                      />
+                    </div>
+                    <p className="text-[12px] font-medium text-[#111111] text-center mt-1.5 leading-tight">
+                      PhonePe
+                    </p>
+                  </div>
+
+                  {/* Paytm */}
+                  <div
+                    onClick={() => setSelectedUpiApp('paytm')}
+                    className="flex flex-col items-center cursor-pointer select-none group"
+                  >
+                    <div
+                      className={`w-14 h-14 sm:w-16 sm:h-16 rounded-[14px] bg-white flex items-center justify-center p-2.5 transition-all ${
+                        selectedUpiApp === 'paytm'
+                          ? 'border-2 border-[#111111] shadow-sm'
+                          : 'border border-[#e5e5e5] hover:border-[#8d8d8d]'
+                      }`}
+                    >
+                      <img
+                        src="/images/payments/paytm.svg"
+                        alt="Paytm"
+                        className="w-7 h-7 sm:w-8 sm:h-8 object-contain"
+                      />
+                    </div>
+                    <p className="text-[12px] font-medium text-[#111111] text-center mt-1.5 leading-tight">
+                      Paytm
+                    </p>
+                  </div>
+
+                  {/* Other UPI */}
+                  <div
+                    onClick={() => setSelectedUpiApp('other')}
+                    className="flex flex-col items-center cursor-pointer select-none group"
+                  >
+                    <div
+                      className={`w-14 h-14 sm:w-16 sm:h-16 rounded-[14px] bg-white flex items-center justify-center p-2.5 transition-all ${
+                        selectedUpiApp === 'other'
+                          ? 'border-2 border-[#111111] shadow-sm'
+                          : 'border border-[#e5e5e5] hover:border-[#8d8d8d]'
+                      }`}
+                    >
+                      <img
+                        src="/images/payments/otherUpi.svg"
+                        alt="Other UPI"
+                        className="w-7 h-7 sm:w-8 sm:h-8 object-contain"
+                      />
+                    </div>
+                    <p className="text-[12px] font-medium text-[#111111] text-center mt-1.5 leading-tight">
+                      Other UPI
+                    </p>
+                  </div>
+                </div>
+
+                {/* Optional input when Other UPI is selected */}
+                {selectedUpiApp === 'other' && (
+                  <div className="mt-4">
+                    <input
+                      type="text"
+                      placeholder="Enter UPI ID (e.g. mobile@okhdfcbank)"
+                      value={upiId}
+                      onChange={(e) => setUpiId(e.target.value)}
+                      className="w-full h-[48px] px-3.5 rounded-[10px] border border-[#8d8d8d] focus:border-[#111111] text-[14px] outline-none"
+                    />
+                  </div>
+                )}
+
+                {/* Pay Button matching screenshot */}
+                <button
+                  type="button"
+                  disabled={isPlacingOrder}
+                  onClick={handlePlaceOrder}
+                  className="w-full py-4 mt-5 rounded-full bg-[#111111] hover:bg-black active:scale-[0.99] text-white text-[16px] font-medium transition-all shadow-sm cursor-pointer disabled:opacity-75 flex items-center justify-center gap-2 font-['Helvetica_Now_Text_Medium',sans-serif]"
+                  style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                >
+                  {isPlacingOrder ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Processing Payment...</span>
+                    </>
+                  ) : (
+                    `Pay ₹${subtotal.toLocaleString('en-IN')}`
+                  )}
+                </button>
               </div>
             )}
           </div>
 
-          {/* Option 2: Credit / Debit Card */}
-          <div
-            onClick={() => setPaymentMethod('card')}
-            className={`p-4 rounded-[12px] border transition-all cursor-pointer ${
-              paymentMethod === 'card' ? 'border-[#111111] bg-[#fafafa]' : 'border-[#e5e5e5] hover:border-[#8d8d8d]'
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <div
-                className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                  paymentMethod === 'card' ? 'border-[#111111]' : 'border-[#8d8d8d]'
+          {/* Option 2: Credit/ Debit Card */}
+          <div className="border border-[#e5e5e5] rounded-[16px] p-4 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.02)] transition-all">
+            <div
+              onClick={() => {
+                setPaymentMethod('card');
+                setSelectedPaymentAccordion(
+                  selectedPaymentAccordion === 'card' ? '' : 'card'
+                );
+              }}
+              className="flex items-center justify-between cursor-pointer select-none"
+            >
+              <div className="flex items-center gap-3.5">
+                <span className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0">
+                  <img
+                    src="/images/payments/card.svg"
+                    alt="Credit/ Debit Card"
+                    className="w-6 h-6 object-contain"
+                  />
+                </span>
+                <div>
+                  <p
+                    className="text-[16px] font-bold text-[#111111] leading-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
+                    style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                  >
+                    Credit/ Debit Card
+                  </p>
+                  <p className="text-[13px] text-[#707072] mt-0.5">
+                    Visa, Mastercard, Rupay & more
+                  </p>
+                </div>
+              </div>
+              <svg
+                className={`w-4 h-4 text-[#111111] transition-transform duration-200 shrink-0 ${
+                  selectedPaymentAccordion === 'card' ? 'rotate-180' : ''
                 }`}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
               >
-                {paymentMethod === 'card' && <div className="w-2.5 h-2.5 rounded-full bg-[#111111]" />}
-              </div>
-              <div>
-                <p className="text-[15px] font-medium text-[#111111]">Credit / Debit Card</p>
-                <p className="text-[12px] text-[#707072]">Visa, MasterCard, RuPay, Maestro</p>
-              </div>
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
             </div>
 
-            {paymentMethod === 'card' && (
-              <div className="mt-3.5 pt-3.5 border-t border-[#e5e5e5] space-y-3">
+            {selectedPaymentAccordion === 'card' && (
+              <div className="mt-4 pt-3.5 border-t border-[#f0f0f0] space-y-3">
                 <input
                   type="text"
                   maxLength={19}
                   placeholder="Card Number"
                   value={cardDetails.number}
-                  onChange={(e) => setCardDetails({ ...cardDetails, number: e.target.value })}
-                  className="w-full h-[46px] px-3.5 rounded-[8px] border border-[#8d8d8d] focus:border-[#111111] text-[14px] outline-none"
+                  onChange={(e) =>
+                    setCardDetails({ ...cardDetails, number: e.target.value })
+                  }
+                  className="w-full h-[48px] px-3.5 rounded-[10px] border border-[#8d8d8d] focus:border-[#111111] text-[14px] outline-none"
                 />
                 <div className="grid grid-cols-2 gap-3">
                   <input
@@ -775,80 +933,232 @@ export default function CheckoutPage() {
                     maxLength={5}
                     placeholder="MM / YY"
                     value={cardDetails.expiry}
-                    onChange={(e) => setCardDetails({ ...cardDetails, expiry: e.target.value })}
-                    className="w-full h-[46px] px-3.5 rounded-[8px] border border-[#8d8d8d] focus:border-[#111111] text-[14px] outline-none"
+                    onChange={(e) =>
+                      setCardDetails({ ...cardDetails, expiry: e.target.value })
+                    }
+                    className="w-full h-[48px] px-3.5 rounded-[10px] border border-[#8d8d8d] focus:border-[#111111] text-[14px] outline-none"
                   />
                   <input
                     type="password"
                     maxLength={4}
                     placeholder="CVV"
                     value={cardDetails.cvv}
-                    onChange={(e) => setCardDetails({ ...cardDetails, cvv: e.target.value })}
-                    className="w-full h-[46px] px-3.5 rounded-[8px] border border-[#8d8d8d] focus:border-[#111111] text-[14px] outline-none"
+                    onChange={(e) =>
+                      setCardDetails({ ...cardDetails, cvv: e.target.value })
+                    }
+                    className="w-full h-[48px] px-3.5 rounded-[10px] border border-[#8d8d8d] focus:border-[#111111] text-[14px] outline-none"
                   />
                 </div>
+                <input
+                  type="text"
+                  placeholder="Name on Card"
+                  value={cardDetails.name}
+                  onChange={(e) =>
+                    setCardDetails({ ...cardDetails, name: e.target.value })
+                  }
+                  className="w-full h-[48px] px-3.5 rounded-[10px] border border-[#8d8d8d] focus:border-[#111111] text-[14px] outline-none"
+                />
+                <button
+                  type="button"
+                  disabled={isPlacingOrder}
+                  onClick={handlePlaceOrder}
+                  className="w-full py-4 mt-4 rounded-full bg-[#111111] hover:bg-black active:scale-[0.99] text-white text-[16px] font-medium transition-all shadow-sm cursor-pointer disabled:opacity-75 flex items-center justify-center gap-2 font-['Helvetica_Now_Text_Medium',sans-serif]"
+                  style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                >
+                  {isPlacingOrder ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Processing Payment...</span>
+                    </>
+                  ) : (
+                    `Pay ₹${subtotal.toLocaleString('en-IN')}`
+                  )}
+                </button>
               </div>
             )}
           </div>
 
-          {/* Option 3: Cash on Delivery */}
-          <div
-            onClick={() => setPaymentMethod('cod')}
-            className={`p-4 rounded-[12px] border transition-all cursor-pointer ${
-              paymentMethod === 'cod' ? 'border-[#111111] bg-[#fafafa]' : 'border-[#e5e5e5] hover:border-[#8d8d8d]'
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <div
-                className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                  paymentMethod === 'cod' ? 'border-[#111111]' : 'border-[#8d8d8d]'
-                }`}
-              >
-                {paymentMethod === 'cod' && <div className="w-2.5 h-2.5 rounded-full bg-[#111111]" />}
-              </div>
-              <div>
-                <p className="text-[15px] font-medium text-[#111111]">Cash on Delivery (COD)</p>
-                <p className="text-[12px] text-[#707072]">Pay in cash or UPI upon delivery</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Price Breakdown */}
-        <div className="mt-8 pt-5 border-t border-[#e5e5e5] space-y-2 text-[14px]">
-          <div className="flex justify-between text-[#707072]">
-            <span>Bag Total ({totalQuantity} items)</span>
-            <span>₹ {subtotal.toLocaleString('en-IN')}</span>
-          </div>
-          <div className="flex justify-between text-[#707072]">
-            <span>Shipping</span>
-            <span className="text-[#008a00] font-medium">Free</span>
-          </div>
-          <div className="flex justify-between text-[17px] font-bold text-[#111111] pt-2 border-t border-[#e5e5e5]">
-            <span>Total Payable</span>
-            <span>₹ {subtotal.toLocaleString('en-IN')}</span>
-          </div>
-        </div>
-
-        {/* Fixed Bottom Bar: Place Order */}
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#e5e5e5] h-[88px] flex items-center px-5 sm:px-6 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-          <div className="max-w-[540px] mx-auto w-full">
-            <button
-              type="button"
-              disabled={isPlacingOrder}
-              onClick={handlePlaceOrder}
-              className="w-full py-4 rounded-full bg-[#111111] hover:bg-black active:scale-[0.99] text-white text-[16px] font-medium transition-all shadow-sm cursor-pointer flex items-center justify-center gap-2 font-['Helvetica_Now_Text_Medium',sans-serif]"
-              style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+          {/* Option 3: Net Banking */}
+          <div className="border border-[#e5e5e5] rounded-[16px] p-4 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.02)] transition-all">
+            <div
+              onClick={() => {
+                setPaymentMethod('netbanking');
+                setSelectedPaymentAccordion(
+                  selectedPaymentAccordion === 'netbanking' ? '' : 'netbanking'
+                );
+              }}
+              className="flex items-center justify-between cursor-pointer select-none"
             >
-              {isPlacingOrder ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Confirming Order...</span>
-                </>
-              ) : (
-                `Place Order • ₹ ${subtotal.toLocaleString('en-IN')}`
-              )}
-            </button>
+              <div className="flex items-center gap-3.5">
+                <span className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0">
+                  <img
+                    src="/images/payments/netbanking.svg"
+                    alt="Net Banking"
+                    className="w-6 h-6 object-contain"
+                  />
+                </span>
+                <div>
+                  <p
+                    className="text-[16px] font-bold text-[#111111] leading-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
+                    style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                  >
+                    Net Banking
+                  </p>
+                  <p className="text-[13px] text-[#707072] mt-0.5">
+                    Pay through your favourite bank
+                  </p>
+                </div>
+              </div>
+              <svg
+                className={`w-4 h-4 text-[#111111] transition-transform duration-200 shrink-0 ${
+                  selectedPaymentAccordion === 'netbanking' ? 'rotate-180' : ''
+                }`}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </div>
+
+            {selectedPaymentAccordion === 'netbanking' && (
+              <div className="mt-4 pt-3.5 border-t border-[#f0f0f0] space-y-3">
+                {/* Bank of India Alert */}
+                <div className="p-3 bg-[#fff8e1] rounded-[10px] text-[12.5px] text-[#795548] flex items-center gap-2">
+                  <span>
+                    Bank of India is experiencing a low success rate. Kindly use another way to pay.
+                  </span>
+                </div>
+
+                {/* Popular Banks List */}
+                <div className="space-y-1.5 pt-1">
+                  {popularBanks.map((b) => (
+                    <div
+                      key={b.id}
+                      onClick={() => setSelectedBank(b.id)}
+                      className={`flex items-center justify-between p-3 rounded-[10px] cursor-pointer transition-colors ${
+                        selectedBank === b.id
+                          ? 'bg-[#f7f7f7] border border-[#111111]'
+                          : 'hover:bg-[#fafafa] border border-transparent'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={b.icon}
+                          alt={b.name}
+                          className="w-6 h-6 object-contain"
+                        />
+                        <span className="text-[14px] font-medium text-[#111111]">
+                          {b.name}
+                        </span>
+                      </div>
+                      <div
+                        className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                          selectedBank === b.id
+                            ? 'border-[#111111]'
+                            : 'border-[#8d8d8d]'
+                        }`}
+                      >
+                        {selectedBank === b.id && (
+                          <div className="w-2 h-2 rounded-full bg-[#111111]" />
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  disabled={isPlacingOrder}
+                  onClick={handlePlaceOrder}
+                  className="w-full py-4 mt-4 rounded-full bg-[#111111] hover:bg-black active:scale-[0.99] text-white text-[16px] font-medium transition-all shadow-sm cursor-pointer disabled:opacity-75 flex items-center justify-center gap-2 font-['Helvetica_Now_Text_Medium',sans-serif]"
+                  style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                >
+                  {isPlacingOrder ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Processing Payment...</span>
+                    </>
+                  ) : (
+                    `Pay ₹${subtotal.toLocaleString('en-IN')}`
+                  )}
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Option 4: EMI */}
+          <div className="border border-[#e5e5e5] rounded-[16px] p-4 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.02)] transition-all">
+            <div
+              onClick={() => {
+                setPaymentMethod('emi');
+                setSelectedPaymentAccordion(
+                  selectedPaymentAccordion === 'emi' ? '' : 'emi'
+                );
+              }}
+              className="flex items-center justify-between cursor-pointer select-none"
+            >
+              <div className="flex items-center gap-3.5">
+                <span className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0">
+                  <img
+                    src="/images/payments/emi.svg"
+                    alt="EMI"
+                    className="w-6 h-6 object-contain"
+                  />
+                </span>
+                <div>
+                  <p
+                    className="text-[16px] font-bold text-[#111111] leading-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
+                    style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                  >
+                    EMI
+                  </p>
+                  <p className="text-[13px] text-[#707072] mt-0.5">
+                    Easy Installment Options
+                  </p>
+                </div>
+              </div>
+              <svg
+                className={`w-4 h-4 text-[#111111] transition-transform duration-200 shrink-0 ${
+                  selectedPaymentAccordion === 'emi' ? 'rotate-180' : ''
+                }`}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </div>
+
+            {selectedPaymentAccordion === 'emi' && (
+              <div className="mt-4 pt-3.5 border-t border-[#f0f0f0] space-y-4">
+                <div className="p-3 bg-[#e8f5e9] rounded-[10px] text-[13px] text-[#008a00] font-medium flex items-center gap-2">
+                  <span>10% Instant Discount up to ₹1,500 on HDFC CC EMI</span>
+                </div>
+                <button
+                  type="button"
+                  disabled={isPlacingOrder}
+                  onClick={handlePlaceOrder}
+                  className="w-full py-4 rounded-full bg-[#111111] hover:bg-black active:scale-[0.99] text-white text-[16px] font-medium transition-all shadow-sm cursor-pointer disabled:opacity-75 flex items-center justify-center gap-2 font-['Helvetica_Now_Text_Medium',sans-serif]"
+                  style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                >
+                  {isPlacingOrder ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Processing Payment...</span>
+                    </>
+                  ) : (
+                    `Pay ₹${subtotal.toLocaleString('en-IN')}`
+                  )}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
