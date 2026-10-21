@@ -17,9 +17,14 @@ export default function Header() {
   const searchInputRef = useRef(null);
   const router = useRouter();
 
+  const [loginModalStep, setLoginModalStep] = useState('mobile');
+
   // Listen for global open-login-modal events
   useEffect(() => {
-    const handleOpenLogin = () => setIsLoginOpen(true);
+    const handleOpenLogin = (e) => {
+      setLoginModalStep(e?.detail?.step || 'mobile');
+      setIsLoginOpen(true);
+    };
     window.addEventListener('open-login-modal', handleOpenLogin);
     return () => window.removeEventListener('open-login-modal', handleOpenLogin);
   }, []);
@@ -406,7 +411,7 @@ export default function Header() {
       </div>
 
       {/* Global Login Modal */}
-      <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
+      <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} initialStep={loginModalStep} />
     </>
   );
 }

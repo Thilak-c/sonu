@@ -3,9 +3,9 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 
-export default function LoginModal({ isOpen, onClose }) {
+export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) {
   // Step: 'mobile' | 'otp' | 'details' | 'email-otp' | 'success' | 'delivery-address'
-  const [step, setStep] = useState('mobile');
+  const [step, setStep] = useState(initialStep);
 
   // Step 1: Mobile
   const [mobileNumber, setMobileNumber] = useState('');
@@ -70,6 +70,28 @@ export default function LoginModal({ isOpen, onClose }) {
   useEffect(() => {
     if (isOpen) {
       clearTimeout(closeTimerRef.current);
+      if (initialStep === 'delivery-address') {
+        setStep('delivery-address');
+        setIsDeliveryAddressVisible(true);
+        setAddressSlideIn(true);
+        try {
+          const stored = localStorage.getItem('sonu_shipping_address');
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            setAddrPincode(parsed.pincode || '');
+            setAddrHouseNo(parsed.houseNo || '');
+            setAddrRoadArea(parsed.roadArea || parsed.street || '');
+            setAddrName(parsed.name || '');
+            setAddrMobile(parsed.mobile || '');
+            setDetectedCity(parsed.city || '');
+            setDetectedState(parsed.state || '');
+            setDeliveryEtd(parsed.deliveryEtd || '');
+            setPincodeServiceable(true);
+          }
+        } catch (e) {}
+      } else {
+        setStep('mobile');
+      }
       setIsMounted(true);
       requestAnimationFrame(() => {
         setIsVisible(true);

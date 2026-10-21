@@ -31,6 +31,8 @@ export default function CheckoutPage() {
     state: 'Maharashtra',
   });
   const [addressErrors, setAddressErrors] = useState({});
+  const [isDeliveryEstimateOpen, setIsDeliveryEstimateOpen] = useState(false);
+  const [isPriceDetailsOpen, setIsPriceDetailsOpen] = useState(true);
 
   // Payment State
   const [paymentMethod, setPaymentMethod] = useState('upi'); // 'upi' | 'card' | 'cod'
@@ -163,35 +165,15 @@ export default function CheckoutPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Step 2 -> Step 3: Validate Address & Proceed to Payment
+  // Step 2 -> Step 3: Proceed to Payment
   const handleProceedToPayment = (e) => {
     e?.preventDefault();
-    const errors = {};
-
-    if (!address.firstName.trim()) errors.firstName = 'First name is required';
-    if (!address.lastName.trim()) errors.lastName = 'Last name is required';
-    if (!address.mobile.trim() || address.mobile.replace(/\D/g, '').length !== 10) {
-      errors.mobile = 'Enter a valid 10-digit mobile number';
-    }
-    if (!address.pincode.trim() || address.pincode.replace(/\D/g, '').length !== 6) {
-      errors.pincode = 'Enter a valid 6-digit PIN code';
-    }
-    if (!address.houseNo.trim()) errors.houseNo = 'House / Flat / Building is required';
-    if (!address.street.trim()) errors.street = 'Street / Area is required';
-    if (!address.city.trim()) errors.city = 'City is required';
-
-    if (Object.keys(errors).length > 0) {
-      setAddressErrors(errors);
+    if (!address.pincode && !address.mobile) {
+      window.dispatchEvent(
+        new CustomEvent('open-login-modal', { detail: { step: 'delivery-address' } })
+      );
       return;
     }
-
-    setAddressErrors({});
-    try {
-      localStorage.setItem('sonu_shipping_address', JSON.stringify(address));
-    } catch (err) {
-      // storage unavailable
-    }
-
     setCheckoutStep('payment');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -371,237 +353,289 @@ export default function CheckoutPage() {
     );
   }
 
-  // STEP 2: SHIPPING & DELIVERY ADDRESS FORM
+  // STEP 2: SELECT ADDRESS & PAY (EXACT DESIGN MATCH)
   if (checkoutStep === 'address') {
-    const indianStates = [
-      'Maharashtra',
-      'Delhi',
-      'Karnataka',
-      'Tamil Nadu',
-      'Telangana',
-      'Gujarat',
-      'Haryana',
-      'Uttar Pradesh',
-      'West Bengal',
-      'Rajasthan',
-      'Kerala',
-      'Punjab',
-      'Madhya Pradesh',
-      'Goa',
-    ];
+    const displayName =
+      address.name ||
+      `${address.firstName || ''} ${address.lastName || ''}`.trim() ||
+      (typeof window !== 'undefined' ? localStorage.getItem('sonu_user_name') : '') ||
+      'Thilak';
+    const displayMobile =
+      address.mobile ||
+      (typeof window !== 'undefined' ? localStorage.getItem('sonu_user_mobile') : '') ||
+      '8008439762';
+    const displayPincode = address.pincode || '800013';
+    const displayHouse = address.houseNo || '33a';
+    const displayStreet = address.street || address.roadArea || "Pata lok, behind S'mart, Nehru Nagar";
+    const displayLandmark = address.landmark || '';
+    const displayAddressLine = [displayHouse, displayStreet, displayLandmark].filter(Boolean).join(', ');
+    const displayCity = (address.city || 'PATNA').toUpperCase();
+    const displayCityStatePin = `${displayCity}-${displayPincode}`;
+
+    const handleChangeAddress = () => {
+      window.dispatchEvent(
+        new CustomEvent('open-login-modal', { detail: { step: 'delivery-address' } })
+      );
+    };
 
     return (
-      <div className="w-full max-w-[540px] mx-auto px-5 sm:px-6 pt-4 sm:pt-6 pb-28 font-['Helvetica_Now_Text',sans-serif] text-[#111111]">
-        {/* Back Button & Stepper Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-[#e5e5e5]">
-          <button
-            type="button"
-            onClick={() => setCheckoutStep('bag')}
-            className="text-[14px] font-medium text-[#707072] hover:text-[#111111] flex items-center gap-1.5 cursor-pointer transition-colors"
-          >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to Bag
-          </button>
-          <span className="text-[12px] font-medium uppercase tracking-wider text-[#707072]">
-            Step 1 of 2
-          </span>
-        </div>
-
-        {/* Heading */}
-        <div className="mt-5 mb-6">
-          <h1
-            className="text-[24px] sm:text-[26px] font-bold tracking-tight text-[#111111] font-['Helvetica_Now_Text_Medium',sans-serif]"
-            style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
-          >
-            Delivery Address
-          </h1>
-          <p className="text-[14px] text-[#707072] mt-1">
-            Where should we send your order?
-          </p>
-        </div>
-
-        {/* Address Form */}
-        <form onSubmit={handleProceedToPayment} className="space-y-4">
-          {/* Row: First Name & Last Name */}
-          <div className="grid grid-cols-2 gap-3.5">
-            <div>
-              <label className="block text-[12px] text-[#707072] mb-1 font-medium">First Name*</label>
-              <input
-                type="text"
-                value={address.firstName || ''}
-                onChange={(e) => setAddress({ ...address, firstName: e.target.value })}
-                className={`w-full h-[50px] px-4 rounded-[8px] border text-[15px] outline-none transition-colors ${
-                  addressErrors.firstName ? 'border-[#d32f2f]' : 'border-[#8d8d8d] focus:border-[#111111]'
-                }`}
-              />
-              {addressErrors.firstName && (
-                <span className="text-[11px] text-[#d32f2f] mt-1 block">{addressErrors.firstName}</span>
-              )}
-            </div>
-            <div>
-              <label className="block text-[12px] text-[#707072] mb-1 font-medium">Last Name*</label>
-              <input
-                type="text"
-                value={address.lastName || ''}
-                onChange={(e) => setAddress({ ...address, lastName: e.target.value })}
-                className={`w-full h-[50px] px-4 rounded-[8px] border text-[15px] outline-none transition-colors ${
-                  addressErrors.lastName ? 'border-[#d32f2f]' : 'border-[#8d8d8d] focus:border-[#111111]'
-                }`}
-              />
-              {addressErrors.lastName && (
-                <span className="text-[11px] text-[#d32f2f] mt-1 block">{addressErrors.lastName}</span>
-              )}
-            </div>
-          </div>
-
-          {/* Row: Mobile & PIN code */}
-          <div className="grid grid-cols-2 gap-3.5">
-            <div>
-              <label className="block text-[12px] text-[#707072] mb-1 font-medium">Mobile Number*</label>
-              <div className="relative flex items-center">
-                <span className="absolute left-3.5 text-[14px] text-[#707072]">+91</span>
-                <input
-                  type="tel"
-                  maxLength={10}
-                  value={address.mobile || ''}
-                  onChange={(e) =>
-                    setAddress({ ...address, mobile: e.target.value.replace(/\D/g, '').slice(0, 10) })
-                  }
-                  className={`w-full h-[50px] pl-12 pr-3 rounded-[8px] border text-[15px] outline-none transition-colors ${
-                    addressErrors.mobile ? 'border-[#d32f2f]' : 'border-[#8d8d8d] focus:border-[#111111]'
-                  }`}
-                />
-              </div>
-              {addressErrors.mobile && (
-                <span className="text-[11px] text-[#d32f2f] mt-1 block">{addressErrors.mobile}</span>
-              )}
-            </div>
-            <div>
-              <label className="block text-[12px] text-[#707072] mb-1 font-medium">PIN Code*</label>
-              <input
-                type="text"
-                maxLength={6}
-                inputMode="numeric"
-                value={address.pincode || ''}
-                onChange={(e) =>
-                  setAddress({ ...address, pincode: e.target.value.replace(/\D/g, '').slice(0, 6) })
-                }
-                className={`w-full h-[50px] px-4 rounded-[8px] border text-[15px] outline-none transition-colors ${
-                  addressErrors.pincode ? 'border-[#d32f2f]' : 'border-[#8d8d8d] focus:border-[#111111]'
-                }`}
-              />
-              {addressErrors.pincode && (
-                <span className="text-[11px] text-[#d32f2f] mt-1 block">{addressErrors.pincode}</span>
-              )}
-            </div>
-          </div>
-
-          {/* Flat / House No / Building */}
-          <div>
-            <label className="block text-[12px] text-[#707072] mb-1 font-medium">
-              Flat, House No., Building, Apartment*
-            </label>
-            <input
-              type="text"
-              value={address.houseNo || ''}
-              onChange={(e) => setAddress({ ...address, houseNo: e.target.value })}
-              className={`w-full h-[50px] px-4 rounded-[8px] border text-[15px] outline-none transition-colors ${
-                addressErrors.houseNo ? 'border-[#d32f2f]' : 'border-[#8d8d8d] focus:border-[#111111]'
-              }`}
-            />
-            {addressErrors.houseNo && (
-              <span className="text-[11px] text-[#d32f2f] mt-1 block">{addressErrors.houseNo}</span>
-            )}
-          </div>
-
-          {/* Area / Street */}
-          <div>
-            <label className="block text-[12px] text-[#707072] mb-1 font-medium">
-              Area, Street, Sector, Village*
-            </label>
-            <input
-              type="text"
-              value={address.street || ''}
-              onChange={(e) => setAddress({ ...address, street: e.target.value })}
-              className={`w-full h-[50px] px-4 rounded-[8px] border text-[15px] outline-none transition-colors ${
-                addressErrors.street ? 'border-[#d32f2f]' : 'border-[#8d8d8d] focus:border-[#111111]'
-              }`}
-            />
-            {addressErrors.street && (
-              <span className="text-[11px] text-[#d32f2f] mt-1 block">{addressErrors.street}</span>
-            )}
-          </div>
-
-          {/* Landmark */}
-          <div>
-            <label className="block text-[12px] text-[#707072] mb-1 font-medium">Landmark (Optional)</label>
-            <input
-              type="text"
-              placeholder="e.g. Near Apollo Hospital"
-              value={address.landmark || ''}
-              onChange={(e) => setAddress({ ...address, landmark: e.target.value })}
-              className="w-full h-[50px] px-4 rounded-[8px] border border-[#8d8d8d] focus:border-[#111111] text-[15px] outline-none transition-colors"
-            />
-          </div>
-
-          {/* Row: City & State */}
-          <div className="grid grid-cols-2 gap-3.5">
-            <div>
-              <label className="block text-[12px] text-[#707072] mb-1 font-medium">City / Town*</label>
-              <input
-                type="text"
-                value={address.city || ''}
-                onChange={(e) => setAddress({ ...address, city: e.target.value })}
-                className={`w-full h-[50px] px-4 rounded-[8px] border text-[15px] outline-none transition-colors ${
-                  addressErrors.city ? 'border-[#d32f2f]' : 'border-[#8d8d8d] focus:border-[#111111]'
-                }`}
-              />
-              {addressErrors.city && (
-                <span className="text-[11px] text-[#d32f2f] mt-1 block">{addressErrors.city}</span>
-              )}
-            </div>
-            <div>
-              <label className="block text-[12px] text-[#707072] mb-1 font-medium">State*</label>
-              <select
-                value={address.state}
-                onChange={(e) => setAddress({ ...address, state: e.target.value })}
-                className="w-full h-[50px] px-3.5 rounded-[8px] border border-[#8d8d8d] focus:border-[#111111] bg-white text-[15px] outline-none cursor-pointer"
+      <div className="min-h-screen bg-white font-['Helvetica_Now_Text',sans-serif] text-[#111111]">
+        {/* Top Sticky Header */}
+        <div className="sticky top-0 z-30 bg-white border-b border-[#f0f0f0]">
+          <div className="max-w-[480px] sm:max-w-[500px] mx-auto px-4 h-14 flex items-center gap-3.5">
+            <button
+              type="button"
+              onClick={() => setCheckoutStep('bag')}
+              className="w-9 h-9 -ml-1.5 flex items-center justify-center text-[#111111] hover:text-[#707072] cursor-pointer transition-colors"
+              aria-label="Back to Bag"
+            >
+              <svg
+                className="w-5 h-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
               >
-                {indianStates.map((st) => (
-                  <option key={st} value={st}>
-                    {st}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </form>
-
-        {/* Free Delivery Banner */}
-        <div className="mt-6 p-4 rounded-[12px] bg-[#f7f7f7] border border-[#e5e5e5] flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-[#008a00] text-white flex items-center justify-center shrink-0">
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <div>
-            <p className="text-[13px] font-bold text-[#111111]">Free Standard Delivery</p>
-            <p className="text-[12px] text-[#707072]">Estimated arrival in 3-5 business days across India.</p>
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <h1
+              className="text-[18px] sm:text-[19px] font-bold text-[#111111] tracking-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
+              style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+            >
+              Select Address & Pay
+            </h1>
           </div>
         </div>
 
-        {/* Fixed Bottom Bar: Continue to Payment */}
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#e5e5e5] h-[88px] flex items-center px-5 sm:px-6 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-          <div className="max-w-[540px] mx-auto w-full">
+        {/* Main Content Area */}
+        <div className="max-w-[480px] sm:max-w-[500px] mx-auto px-4 pt-4 pb-28 space-y-5">
+          {/* 1. Address Summary Card */}
+          <div className="border border-[#e5e5e5] rounded-[16px] p-4 sm:p-5 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.02)]">
+            <h2
+              className="text-[15px] sm:text-[16px] font-bold text-[#111111] leading-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
+              style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+            >
+              Deliver to {displayName}, {displayPincode}
+            </h2>
+
+            <div className="text-[13px] sm:text-[13.5px] text-[#707072] mt-2 space-y-0.5 leading-relaxed font-['Helvetica_Now_Text',sans-serif]">
+              <p className="line-clamp-2">{displayAddressLine}...</p>
+              <p>{displayCityStatePin}</p>
+              <p>+91-{displayMobile}</p>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleChangeAddress}
+              className="w-full py-3 mt-4 rounded-full border border-[#111111] text-[14px] font-medium text-[#111111] bg-white hover:bg-[#f7f7f7] active:scale-[0.99] transition-all cursor-pointer font-['Helvetica_Now_Text_Medium',sans-serif]"
+              style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+            >
+              Change or Add Address
+            </button>
+          </div>
+
+          {/* 2. Offers for you */}
+          <div>
+            <div className="flex items-center justify-between pb-2">
+              <h2
+                className="text-[16px] sm:text-[17px] font-bold text-[#111111] font-['Helvetica_Now_Text_Medium',sans-serif]"
+                style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+              >
+                Offers for you
+              </h2>
+              <button
+                type="button"
+                className="text-[13px] font-medium text-[#111111] hover:underline cursor-pointer font-['Helvetica_Now_Text_Medium',sans-serif]"
+                style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+              >
+                View all
+              </button>
+            </div>
+
+            <div className="border border-[#e5e5e5] rounded-[14px] p-4 bg-white flex items-center justify-between shadow-[0_1px_4px_rgba(0,0,0,0.02)]">
+              <div>
+                <p className="text-[12.5px] font-medium leading-none">
+                  <span className="text-[#008a00] font-semibold">Cashback</span>{' '}
+                  <span className="text-[#707072]">HDFC EMI Bank Of...</span>
+                </p>
+                <p
+                  className="text-[14px] sm:text-[14.5px] font-bold text-[#111111] mt-1.5 font-['Helvetica_Now_Text_Medium',sans-serif]"
+                  style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                >
+                  10% off upto ₹1,500 ...
+                </p>
+              </div>
+              <div className="flex flex-col items-end text-[11.5px] text-[#707072] shrink-0 pl-3">
+                <span className="leading-tight">1 of 1</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-[#111111] mt-1" />
+              </div>
+            </div>
+          </div>
+
+          {/* 3. Order Information */}
+          <div>
+            <h2
+              className="text-[16px] sm:text-[17px] font-bold text-[#111111] pb-2.5 font-['Helvetica_Now_Text_Medium',sans-serif]"
+              style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+            >
+              Order Information
+            </h2>
+
+            <div className="space-y-3">
+              {/* Accordion 1: Delivery Estimate */}
+              <div className="border border-[#e5e5e5] rounded-[14px] bg-white overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.02)]">
+                <button
+                  type="button"
+                  onClick={() => setIsDeliveryEstimateOpen(!isDeliveryEstimateOpen)}
+                  className="w-full p-4 flex items-center justify-between text-left cursor-pointer hover:bg-[#fafafa] transition-colors"
+                >
+                  <span
+                    className="text-[15px] font-bold text-[#111111] font-['Helvetica_Now_Text_Medium',sans-serif]"
+                    style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                  >
+                    Delivery Estimate
+                  </span>
+                  <svg
+                    className={`w-4 h-4 text-[#111111] transition-transform duration-200 ${
+                      isDeliveryEstimateOpen ? 'rotate-180' : ''
+                    }`}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                </button>
+                {isDeliveryEstimateOpen && (
+                  <div className="px-4 pb-4 pt-1 border-t border-[#f0f0f0] text-[13px] text-[#707072] space-y-1">
+                    <div className="flex items-center gap-2 text-[#111111]">
+                      <svg
+                        className="w-4 h-4 text-[#008a00] shrink-0"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <rect x="1" y="3" width="15" height="13" rx="1" />
+                        <polygon points="16 8 20 8 23 11 23 16 16 8" />
+                        <circle cx="5.5" cy="18.5" r="2.5" />
+                        <circle cx="18.5" cy="18.5" r="2.5" />
+                      </svg>
+                      <span>
+                        Expected delivery by{' '}
+                        <strong className="font-semibold text-[#111111]">
+                          {address.deliveryEtd || '3-5 business days'}
+                        </strong>
+                      </span>
+                    </div>
+                    <p className="text-[12px] text-[#8d8d8d] pl-6">
+                      Standard surface shipping across India via Shiprocket
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Accordion 2: Price Details */}
+              <div className="border border-[#e5e5e5] rounded-[14px] bg-white overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.02)]">
+                <button
+                  type="button"
+                  onClick={() => setIsPriceDetailsOpen(!isPriceDetailsOpen)}
+                  className="w-full p-4 flex items-center justify-between text-left cursor-pointer hover:bg-[#fafafa] transition-colors"
+                >
+                  <span
+                    className="text-[15px] font-bold text-[#111111] font-['Helvetica_Now_Text_Medium',sans-serif]"
+                    style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                  >
+                    Price Details
+                  </span>
+                  <svg
+                    className={`w-4 h-4 text-[#111111] transition-transform duration-200 ${
+                      isPriceDetailsOpen ? 'rotate-180' : ''
+                    }`}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="18 15 12 9 6 15" />
+                  </svg>
+                </button>
+
+                {isPriceDetailsOpen && (
+                  <div className="px-4 pb-4 pt-1 border-t border-[#f0f0f0] space-y-2.5 text-[13.5px]">
+                    <div className="flex justify-between items-center text-[#707072]">
+                      <span>Bag Total</span>
+                      <span className="text-[#111111] font-medium">
+                        ₹{subtotal.toLocaleString('en-IN')}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center text-[#707072]">
+                      <span className="flex items-center gap-1.5">
+                        Shipping Charges
+                        <svg
+                          className="w-3.5 h-3.5 text-[#8d8d8d]"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                        >
+                          <circle cx="12" cy="12" r="10" />
+                          <line x1="12" y1="16" x2="12" y2="12" />
+                          <line x1="12" y1="8" x2="12.01" y2="8" />
+                        </svg>
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <span className="line-through text-[#8d8d8d]">₹99</span>
+                        <span className="text-[#008a00] font-medium">Free</span>
+                      </span>
+                    </div>
+                    <div className="border-b border-[#f0f0f0] my-2" />
+                    <div className="flex justify-between items-center text-[15px] font-bold text-[#111111]">
+                      <span
+                        className="font-['Helvetica_Now_Text_Medium',sans-serif]"
+                        style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                      >
+                        You Pay
+                      </span>
+                      <span
+                        className="font-['Helvetica_Now_Text_Medium',sans-serif]"
+                        style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                      >
+                        ₹{subtotal.toLocaleString('en-IN')}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* 4. Footer Note and Proceed to Pay CTA */}
+          <div className="pt-4 pb-4">
+            <p
+              className="text-center text-[12.5px] text-[#8d8d8d] font-normal mb-4 font-['Helvetica_Now_Text',sans-serif]"
+              style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+            >
+              Powered by Flowify Agency
+            </p>
+
             <button
               type="button"
               onClick={handleProceedToPayment}
               className="w-full py-4 rounded-full bg-[#111111] hover:bg-black active:scale-[0.99] text-white text-[16px] font-medium transition-all shadow-sm cursor-pointer font-['Helvetica_Now_Text_Medium',sans-serif]"
               style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
             >
-              Continue to Payment
+              Proceed to Pay
             </button>
           </div>
         </div>
