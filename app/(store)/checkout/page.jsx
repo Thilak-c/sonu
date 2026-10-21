@@ -238,6 +238,25 @@ export default function CheckoutPage() {
         `${address.firstName || ''} ${address.lastName || ''}`.trim() ||
         'Customer';
 
+      // Retrieve mobile number from state or local storage
+      let phone = address.mobile || '';
+      if (!phone && typeof window !== 'undefined') {
+        try {
+          phone = localStorage.getItem('sonu_user_mobile') || '';
+          if (!phone) {
+            const storedAddr = JSON.parse(localStorage.getItem('sonu_shipping_address') || '{}');
+            phone = storedAddr.mobile || storedAddr.phone || '';
+          }
+          if (!phone) {
+            const storedProf = JSON.parse(localStorage.getItem('sonu_user_profile') || '{}');
+            phone = storedProf.mobile || '';
+          }
+        } catch (e) {
+          // ignore
+        }
+      }
+      const displayContact = (phone || '9182390192').replace(/\D/g, '').slice(-10);
+
       // Sequence blocks to always show full detailed payment options
       const sequenceMap = {
         card: ['block.cards', 'block.upi', 'block.netbanking', 'block.wallets_emi'],
@@ -261,9 +280,10 @@ export default function CheckoutPage() {
         prefill: {
           name: displayName,
           email: address.email || '',
+          contact: displayContact,
         },
         notes: {
-          contact: address.mobile || '',
+          contact: displayContact,
           address: `${address.houseNo || ''}, ${address.street || ''}, ${address.city || ''} - ${address.pincode || ''}`,
           method: paymentMethod,
         },
