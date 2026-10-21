@@ -35,7 +35,7 @@ export default function HomePage() {
       {
         '@type': 'Organization',
         '@id': 'https://sonu.shoes/#organization',
-        name: 'SONU Footwear',
+        name: 'SONU Shoes',
         url: 'https://sonu.shoes',
         logo: 'https://sonu.shoes/Logo/Logo_Full.png',
         slogan: 'For the long way home',
@@ -46,7 +46,7 @@ export default function HomePage() {
         '@type': 'WebSite',
         '@id': 'https://sonu.shoes/#website',
         url: 'https://sonu.shoes',
-        name: 'SONU Footwear',
+        name: 'SONU Shoes',
         publisher: {
           '@id': 'https://sonu.shoes/#organization',
         },

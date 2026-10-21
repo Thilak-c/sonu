@@ -4,7 +4,7 @@ export const metadata = {
   metadataBase: new URL('https://sonu.shoes'),
   title: {
     default: 'SONU — Premium Footwear | For the Long Way Home',
-    template: '%s | SONU Footwear',
+    template: '%s | SONU Shoes',
   },
   description:
     'SONU crafts small-run, precision-engineered footwear designed for all-day comfort and timeless minimalism. Discover handcrafted sneakers built for the long way home.',
@@ -18,7 +18,7 @@ export const metadata = {
     'everyday walking shoes',
     'designer footwear',
   ],
-  authors: [{ name: 'SONU Footwear' }],
+  authors: [{ name: 'SONU Shoes' }],
   creator: 'SONU',
   publisher: 'SONU',
   formatDetection: {
@@ -31,13 +31,13 @@ export const metadata = {
     description:
       'Small-run, precision-engineered footwear built for timeless street style and ergonomic comfort.',
     url: 'https://sonu.shoes',
-    siteName: 'SONU Footwear',
+    siteName: 'SONU Shoes',
     images: [
       {
         url: '/Logo/Logo_Full.png',
         width: 1200,
         height: 630,
-        alt: 'SONU Footwear Brand Logo',
+        alt: 'SONU Shoes Brand Logo',
       },
     ],
     locale: 'en_US',

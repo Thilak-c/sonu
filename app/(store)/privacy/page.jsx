@@ -1,9 +1,9 @@
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Privacy Policy | SONU Footwear India',
+  title: 'Privacy Policy | SONU Shoes India',
   description:
-    'Read the official Privacy Policy for SONU Footwear in India. Learn how we collect, protect, and process your personal information under the Digital Personal Data Protection Act (DPDPA).',
+    'Read the official Privacy Policy for SONU Shoes in India. Learn how we collect, protect, and process your personal information under the Digital Personal Data Protection Act (DPDPA).',
   keywords: [
     'SONU privacy policy',
     'footwear privacy policy india',
@@ -17,20 +17,20 @@ export const metadata = {
     canonical: 'https://sonu.shoes/privacy',
   },
   openGraph: {
-    title: 'Privacy Policy | SONU Footwear India',
+    title: 'Privacy Policy | SONU Shoes India',
     description:
-      'Official Data Protection, Privacy, and Customer Grievance Redressal Policy for SONU Footwear.',
+      'Official Data Protection, Privacy, and Customer Grievance Redressal Policy for SONU Shoes.',
     url: 'https://sonu.shoes/privacy',
-    siteName: 'SONU Footwear',
+    siteName: 'SONU Shoes',
     images: ['/Logo/Logo_Full.png'],
     locale: 'en_IN',
     type: 'website',
   },
   twitter: {
     card: 'summary',
-    title: 'Privacy Policy — SONU Footwear',
+    title: 'Privacy Policy — SONU Shoes',
     description:
-      'Official Data Protection and Privacy Policy for SONU Footwear in India.',
+      'Official Data Protection and Privacy Policy for SONU Shoes in India.',
     images: ['/Logo/Logo_Full.png'],
   },
   robots: {
@@ -47,9 +47,9 @@ export default function PrivacyPage() {
         '@type': 'WebPage',
         '@id': 'https://sonu.shoes/privacy#webpage',
         url: 'https://sonu.shoes/privacy',
-        name: 'Privacy Policy | SONU Footwear India',
+        name: 'Privacy Policy | SONU Shoes India',
         description:
-          'Official Privacy and Data Protection Policy for SONU Footwear in India under the Digital Personal Data Protection Act of 2023.',
+          'Official Privacy and Data Protection Policy for SONU Shoes in India under the Digital Personal Data Protection Act of 2023.',
         publisher: {
           '@id': 'https://sonu.shoes/#organization',
         },
@@ -75,7 +75,7 @@ export default function PrivacyPage() {
       {
         '@type': 'Organization',
         '@id': 'https://sonu.shoes/#organization',
-        name: 'SONU Footwear',
+        name: 'SONU Shoes',
         url: 'https://sonu.shoes',
         logo: 'https://sonu.shoes/Logo/Logo_Full.png',
         contactPoint: {

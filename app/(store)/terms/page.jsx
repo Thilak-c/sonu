@@ -1,9 +1,9 @@
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Terms and Conditions of Sale – India | SONU Footwear',
+  title: 'Terms and Conditions of Sale – India | SONU Shoes',
   description:
-    'Read the official Terms and Conditions of Sale and Terms of Use for SONU Footwear in India. Understand our ordering, shipping, 14-day returns, and consumer policies.',
+    'Read the official Terms and Conditions of Sale and Terms of Use for SONU Shoes in India. Understand our ordering, shipping, 14-day returns, and consumer policies.',
   keywords: [
     'SONU terms and conditions',
     'terms of sale india',
@@ -18,20 +18,20 @@ export const metadata = {
     canonical: 'https://sonu.shoes/terms',
   },
   openGraph: {
-    title: 'Terms and Conditions of Sale – India | SONU Footwear',
+    title: 'Terms and Conditions of Sale – India | SONU Shoes',
     description:
-      'Official Terms and Conditions of Sale and Website Terms of Use for SONU Footwear in India.',
+      'Official Terms and Conditions of Sale and Website Terms of Use for SONU Shoes in India.',
     url: 'https://sonu.shoes/terms',
-    siteName: 'SONU Footwear',
+    siteName: 'SONU Shoes',
     images: ['/Logo/Logo_Full.png'],
     locale: 'en_IN',
     type: 'website',
   },
   twitter: {
     card: 'summary',
-    title: 'Terms and Conditions — SONU Footwear India',
+    title: 'Terms and Conditions — SONU Shoes India',
     description:
-      'Official Terms and Conditions of Sale and Website Terms of Use for SONU Footwear in India.',
+      'Official Terms and Conditions of Sale and Website Terms of Use for SONU Shoes in India.',
     images: ['/Logo/Logo_Full.png'],
   },
   robots: {
@@ -48,9 +48,9 @@ export default function TermsPage() {
         '@type': 'WebPage',
         '@id': 'https://sonu.shoes/terms#webpage',
         url: 'https://sonu.shoes/terms',
-        name: 'Terms and Conditions of Sale – India | SONU Footwear',
+        name: 'Terms and Conditions of Sale – India | SONU Shoes',
         description:
-          'Official Terms and Conditions of Sale and Website Terms of Use for SONU Footwear in India.',
+          'Official Terms and Conditions of Sale and Website Terms of Use for SONU Shoes in India.',
         publisher: {
           '@id': 'https://sonu.shoes/#organization',
         },
@@ -76,7 +76,7 @@ export default function TermsPage() {
       {
         '@type': 'Organization',
         '@id': 'https://sonu.shoes/#organization',
-        name: 'SONU Footwear',
+        name: 'SONU Shoes',
         url: 'https://sonu.shoes',
         logo: 'https://sonu.shoes/Logo/Logo_Full.png',
         contactPoint: {

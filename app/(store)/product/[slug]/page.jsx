@@ -13,7 +13,7 @@ export async function generateMetadata({ params }) {
   const product = FRESH_DROPS.find((p) => p.id === slug) || FRESH_DROPS[0];
 
   return {
-    title: `${product.name} — ${product.category} | SONU Footwear`,
+    title: `${product.name} — ${product.category} | SONU Shoes`,
     description: `${product.description} Handcrafted in small runs with ergonomic comfort soles.`,
     keywords: [
       product.name,
@@ -38,7 +38,7 @@ export async function generateMetadata({ params }) {
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${product.name} — SONU Footwear`,
+      title: `${product.name} — SONU Shoes`,
       description: product.description,
       images: [product.image],
     },
@@ -72,7 +72,7 @@ export default async function ProductDetailPage({ params }) {
       url: `https://sonu.shoes/product/${product.id}`,
       seller: {
         '@type': 'Organization',
-        name: 'SONU Footwear',
+        name: 'SONU Shoes',
       },
     },
   };
