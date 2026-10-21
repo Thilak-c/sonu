@@ -400,16 +400,17 @@ export default function LoginModal({ isOpen, onClose }) {
     }
   };
 
-  // Transition from "Welcome to Sonu Shoes." -> Fade out -> Slide up Delivery Address
+  // Transition from "Welcome to Sonu Shoes." -> Fade out -> ONLY THEN slide up Delivery Address
   const handleTransitionToDeliveryAddress = () => {
     clearTimeout(closeTimerRef.current);
     // 1. Smoothly fade out the welcome message
     setIsWelcomeFadingOut(true);
 
-    // 2. Mount Delivery Address and slide up with identical incoming animation
+    // 2. Wait 550ms for the Welcome modal to completely fade out before mounting the next modal
     setTimeout(() => {
-      setIsDeliveryAddressVisible(true);
       setStep('delivery-address');
+      setIsDeliveryAddressVisible(true);
+      setWelcomeSlideIn(false);
       setAddressSlideIn(false);
 
       // Autofill Name and Mobile from user profile or stored session
@@ -421,7 +422,7 @@ export default function LoginModal({ isOpen, onClose }) {
       setAddrMobile(mobileNumber || storedMobile || '');
 
       // Check Shiprocket ETD for default/entered pincode
-      if (addrPincode.length === 6) {
+      if (addrPincode && addrPincode.length === 6) {
         fetchShiprocketEtd(addrPincode);
       }
 
@@ -430,7 +431,7 @@ export default function LoginModal({ isOpen, onClose }) {
           setAddressSlideIn(true);
         });
       });
-    }, 450);
+    }, 550);
   };
 
   // Complete profile saving after email code verification
@@ -480,11 +481,11 @@ export default function LoginModal({ isOpen, onClose }) {
         });
       });
 
-      // Smoothly fade out "Welcome to Sonu Shoes." after 2.5s and slide up Delivery Address
+      // Welcome modal stays visible for 2 seconds, then smoothly fades out
       closeTimerRef.current = setTimeout(() => {
         handleTransitionToDeliveryAddress();
-      }, 2500);
-    }, 400);
+      }, 2000);
+    }, 350);
   };
 
   // Save Delivery Address and finalize onboarding
@@ -1319,12 +1320,12 @@ export default function LoginModal({ isOpen, onClose }) {
       {/* 2.5. SMALL POPUP MODAL: STEP 5 SUCCESS ("Welcome to Sonu Shoes.") APPEARS FROM BELOW */}
       {step === 'success' && (
         <div
-          className={`relative w-full max-w-[440px] bg-white rounded-t-[28px] sm:rounded-[24px] px-6 sm:px-8 pt-8 pb-8 shadow-2xl z-50 transform transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          className={`relative w-full max-w-full sm:max-w-[460px] bg-white rounded-t-[28px] sm:rounded-[24px] px-6 sm:px-8 pt-8 pb-8 shadow-2xl z-50 transform transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
             welcomeSlideIn && !isWelcomeFadingOut
               ? 'translate-y-0 opacity-100 scale-100'
               : isWelcomeFadingOut
-              ? 'opacity-0 scale-95 duration-300'
-              : 'translate-y-full opacity-0 scale-95'
+              ? 'opacity-0 scale-95 duration-500 pointer-events-none'
+              : 'translate-y-full opacity-0 scale-95 pointer-events-none'
           }`}
           role="dialog"
           aria-modal="true"
@@ -1371,7 +1372,7 @@ export default function LoginModal({ isOpen, onClose }) {
       )}
 
       {/* 3. STEP 6: DELIVERY ADDRESS FULL-SCREEN SHEET (Matching User Screenshot Strictly) */}
-      {(step === 'delivery-address' || isDeliveryAddressVisible) && (
+      {step === 'delivery-address' && (
         <div
           className={`fixed inset-0 z-[60] w-full h-[100dvh] bg-white overflow-y-auto px-5 sm:px-8 py-6 flex flex-col justify-start transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform ${
             addressSlideIn ? 'translate-y-0' : 'translate-y-full'
