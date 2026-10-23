@@ -599,7 +599,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
                         (prev) => (prev - 1 + productImages.length) % productImages.length
                       )
                     }
-                    className="w-9 h-9 rounded-full bg-white hover:bg-neutral-100 flex items-center justify-center shadow-xs transition-all cursor-pointer"
+                    className="w-9 h-9 rounded-full bg-white hover:bg-neutral-100 flex items-center justify-center  transition-all cursor-pointer"
                     aria-label="Previous image"
                   >
                     <ChevronLeft className="w-4 h-4 text-[#111111]" />
@@ -609,7 +609,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
                     onClick={() =>
                       setCurrentImageIndex((prev) => (prev + 1) % productImages.length)
                     }
-                    className="w-9 h-9 rounded-full bg-white hover:bg-neutral-100 flex items-center justify-center shadow-xs transition-all cursor-pointer"
+                    className="w-9 h-9 rounded-full bg-white hover:bg-neutral-100 flex items-center justify-center  transition-all cursor-pointer"
                     aria-label="Next image"
                   >
                     <ChevronRight className="w-4 h-4 text-[#111111]" />
@@ -748,7 +748,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
                       onClick={() => setSelectedSize(size)}
                       className={`h-[52px] sm:h-[54px] rounded-[8px] flex items-center justify-center text-[15px] sm:text-[16px] font-medium transition-all cursor-pointer ${
                         isSelected
-                          ? 'border-2 border-[#111111] bg-white text-[#111111] shadow-xs'
+                          ? 'border-2 border-[#111111] bg-white text-[#111111] '
                           : 'border border-[#e5e5e5] bg-white text-[#111111] hover:border-[#111111]'
                       }`}
                     >
@@ -764,7 +764,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
               <button
                 type="button"
                 onClick={handleAddToBag}
-                className="w-full h-[58px] sm:h-[62px] rounded-full text-white text-[16px] font-medium transition-all shadow-xs active:scale-[0.99] cursor-pointer bg-[#111111] hover:bg-black font-['Helvetica_Now_Text_Medium',sans-serif] flex items-center justify-center"
+                className="w-full h-[58px] sm:h-[62px] rounded-full text-white text-[16px] font-medium transition-all  active:scale-[0.99] cursor-pointer bg-[#111111] hover:bg-black font-['Helvetica_Now_Text_Medium',sans-serif] flex items-center justify-center"
                 style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
               >
                 Add to Bag
@@ -1008,7 +1008,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
 
           <div
             ref={moreCarouselRef}
-            className="flex gap-4 sm:gap-6 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory scroll-smooth"
+            className="flex gap-[4px] sm:gap-[5px] overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory scroll-smooth"
           >
             {(allCatalog.filter((p) => (p.id || p.slug) !== (product.id || product.slug)).length > 0
               ? allCatalog.filter((p) => (p.id || p.slug) !== (product.id || product.slug))
@@ -1025,7 +1025,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
                 <div
                   key={`more-${pid}-${idx}`}
                   onClick={() => router.push(`/product/${pid}`)}
-                  className="w-[75vw] sm:w-[calc((100%-24px)/2)] lg:w-[calc((100%-48px)/3)] shrink-0 snap-start select-none cursor-pointer group"
+                  className="w-[75vw] sm:w-[calc((100%-5px)/2)] lg:w-[calc((100%-10px)/3)] shrink-0 snap-start select-none cursor-pointer group"
                 >
                   <div className="aspect-square relative p-0 flex items-center justify-center overflow-hidden">
                     <img
@@ -1040,7 +1040,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
                         e.stopPropagation();
                         toggleCardWishlist(pid);
                       }}
-                      className="absolute top-3.5 right-3.5 w-9 h-9 rounded-full bg-white shadow-xs flex items-center justify-center text-[#111111] hover:bg-neutral-50 transition-colors cursor-pointer z-10"
+                      className="absolute top-3.5 right-3.5 w-9 h-9 rounded-full bg-white  flex items-center justify-center text-[#111111] hover:bg-neutral-50 transition-colors cursor-pointer z-10"
                       aria-label="Save to Wishlist"
                     >
                       <Heart
@@ -1105,7 +1105,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
 
             <div
               ref={recentCarouselRef}
-              className="flex gap-4 sm:gap-6 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory scroll-smooth"
+              className="flex gap-[4px] sm:gap-[5px] overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory scroll-smooth"
             >
               {recentlyViewed.map((item, idx) => {
                 const pid = item.id || item.itemId;
@@ -1115,7 +1115,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
                   <div
                     key={`rv-${pid}-${idx}`}
                     onClick={() => router.push(`/product/${pid}`)}
-                    className="w-[75vw] sm:w-[calc((100%-24px)/2)] lg:w-[calc((100%-48px)/3)] shrink-0 snap-start select-none cursor-pointer group"
+                    className="w-[75vw] sm:w-[calc((100%-5px)/2)] lg:w-[calc((100%-10px)/3)] shrink-0 snap-start select-none cursor-pointer group"
                   >
                     <div className="aspect-square relative p-0 flex items-center justify-center overflow-hidden">
                       <img
@@ -1130,7 +1130,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
                           e.stopPropagation();
                           toggleCardWishlist(pid);
                         }}
-                        className="absolute top-3.5 right-3.5 w-9 h-9 rounded-full bg-white shadow-xs flex items-center justify-center text-[#111111] hover:bg-neutral-50 transition-colors cursor-pointer z-10"
+                        className="absolute top-3.5 right-3.5 w-9 h-9 rounded-full bg-white  flex items-center justify-center text-[#111111] hover:bg-neutral-50 transition-colors cursor-pointer z-10"
                         aria-label="Save to Wishlist"
                       >
                         <Heart
@@ -1654,7 +1654,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
             <div className="mb-6">
               <div className="relative inline-flex items-center bg-[#f5f5f5] rounded-full p-1 h-[44px]">
                 <div
-                  className={`absolute top-1 bottom-1 w-[52px] rounded-full bg-white border border-[#111111] shadow-xs transition-all duration-300 ease-in-out ${
+                  className={`absolute top-1 bottom-1 w-[52px] rounded-full bg-white border border-[#111111]  transition-all duration-300 ease-in-out ${
                     unit === 'in' ? 'left-1' : 'left-[55px]'
                   }`}
                 />
