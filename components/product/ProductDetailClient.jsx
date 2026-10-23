@@ -637,25 +637,6 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
               </div>
             )}
 
-            {/* Mobile Thumbnails Row */}
-            {productImages.length > 1 && (
-              <div className="grid lg:hidden grid-cols-4 gap-2.5 my-2">
-                {productImages.map((img, idx) => (
-                  <button
-                    key={`mob-thumb-${idx}`}
-                    type="button"
-                    onClick={() => setCurrentImageIndex(idx)}
-                    className={`aspect-square rounded-[8px] p-0 overflow-hidden flex items-center justify-center cursor-pointer transition-all ${
-                      currentImageIndex === idx
-                        ? 'border-[1.5px] border-[#111111] shadow-xs'
-                        : 'border border-neutral-200 hover:border-neutral-400'
-                    }`}
-                  >
-                    <img src={img} alt="" className="w-full h-full object-contain" />
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
 
           {/* Right Column: Details, Sizes, CTAs, Delivery, Accordions */}
