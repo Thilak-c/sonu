@@ -2,44 +2,48 @@ import Link from 'next/link';
 
 const FEATURED_ITEMS = [
   {
-    id: 'sonu-01-pool',
-    name: 'The 01',
-    subtitle: 'Low Profile Classic',
-    colorway: 'Pool',
-    price: '₹8,900',
+    id: 'sonu-hybrid-women',
+    name: 'SONU Hybrid RN',
+    subtitle: 'Road Running Shoe',
+    colorway: 'Vivid Purple',
+    price: '₹13,995',
     tag: 'Signature Run',
-    image: '/images/model-01-low.webp',
-    alt: 'The 01 Pool handcrafted teal leather sneaker',
+    image: '/images/ad22b92Nike-HQ2593-502_1.avif',
+    alt: 'SONU Hybrid RN road running shoe in vivid purple',
+    link: '/product/drop-hybrid-women',
   },
   {
-    id: 'sonu-02-clay',
-    name: 'The 02',
-    subtitle: 'Lightweight City Runner',
-    colorway: 'Clay',
-    price: '₹9,400',
+    id: 'sonu-stealth-rn',
+    name: 'SONU Stealth RN',
+    subtitle: 'High-Tempo Runner',
+    colorway: 'Black / Chrome',
+    price: '₹13,995',
     tag: 'Trending',
-    image: '/images/model-02-runner.webp',
-    alt: 'The 02 Clay orange suede and breathable mesh trainer',
+    image: '/images/ad22b92Nike-HJ1101-003_1.avif',
+    alt: 'SONU Stealth RN road running shoe in black and smoke grey',
+    link: '/product/drop-hybrid-men',
   },
   {
-    id: 'sonu-03-court',
-    name: 'The 03',
-    subtitle: 'Vulcanized Court Shoe',
-    colorway: 'White Court',
-    price: '₹8,200',
+    id: 'sonu-pure-low',
+    name: 'SONU Pure Low',
+    subtitle: 'Everyday Court Shoe',
+    colorway: 'Pure White',
+    price: '₹11,495',
     tag: 'Essentials',
-    image: '/images/model-03-court.webp',
-    alt: 'The 03 Court white canvas sneaker with vulcanized gum sole',
+    image: '/images/1e462d9Nike-IO3815-102_1.avif',
+    alt: 'SONU Pure Low minimalist white leather shoe',
+    link: '/product/drop-court-studio',
   },
   {
-    id: 'sonu-04-trail',
-    name: 'The 04',
-    subtitle: 'All-Terrain Comfort',
-    colorway: 'Forest Gum',
-    price: '₹9,800',
+    id: 'sonu-offpath-trail',
+    name: 'SONU Off-Path Trail',
+    subtitle: 'All-Terrain Traction',
+    colorway: 'Earth Brown',
+    price: '₹14,995',
     tag: 'New Drop',
-    image: '/images/model-04-trail.webp',
-    alt: 'The 04 Trail off-path ergonomic outdoor footwear',
+    image: '/images/ad22b92Nike-IQ3439-211_1.avif',
+    alt: 'SONU Off-Path Trail outdoor sneaker in earth brown',
+    link: '/product/drop-offpath-trail',
   },
 ];
 
@@ -72,7 +76,7 @@ export default function FeaturedSection() {
         {FEATURED_ITEMS.map((item) => (
           <Link
             key={item.id}
-            href="/checkout"
+            href={item.link || '/checkout'}
             className="group flex-shrink-0 w-[240px] sm:w-[280px] bg-[#f7f7f7] rounded-2xl p-4 flex flex-col justify-between hover:bg-[#f1f1f1] transition-all"
           >
             <div className="flex items-center justify-between">
