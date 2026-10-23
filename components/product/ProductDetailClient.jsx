@@ -520,7 +520,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
   return (
     <div className="w-full bg-white select-none font-['Helvetica_Now_Text',sans-serif] text-[#111111] pb-20">
       {/* Main Container */}
-      <div className="w-full px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
+      <div className="w-full px-5 sm:px-6 lg:px-8 pt-4 sm:pt-6">
         <div className="max-w-[1200px] xl:max-w-[1240px] mx-auto">
 
         {/* Mobile Header (Hidden on Desktop) */}
@@ -1008,7 +1008,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
 
           <div
             ref={moreCarouselRef}
-            className="flex gap-1 sm:gap-3 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0"
+            className="flex gap-4 sm:gap-6 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory scroll-smooth"
           >
             {(allCatalog.filter((p) => (p.id || p.slug) !== (product.id || product.slug)).length > 0
               ? allCatalog.filter((p) => (p.id || p.slug) !== (product.id || product.slug))
@@ -1051,7 +1051,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
                     </button>
                   </div>
 
-                  <div className="pt-3">
+                  <div className="pt-3 px-1 sm:px-0">
                     <h4
                       className="text-[16px] sm:text-[17px] font-medium text-[#111111] leading-snug line-clamp-1 font-['Helvetica_Now_Text_Medium',sans-serif]"
                       style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
@@ -1105,7 +1105,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
 
             <div
               ref={recentCarouselRef}
-              className="flex gap-4 sm:gap-6 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0"
+              className="flex gap-4 sm:gap-6 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory scroll-smooth"
             >
               {recentlyViewed.map((item, idx) => {
                 const pid = item.id || item.itemId;
@@ -1141,7 +1141,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
                       </button>
                     </div>
 
-                    <div className="pt-3">
+                    <div className="pt-3 px-1 sm:px-0">
                       <span className="text-[#c83200] text-[13px] font-medium leading-none block mb-1">
                         Just In
                       </span>
