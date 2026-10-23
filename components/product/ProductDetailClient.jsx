@@ -585,7 +585,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
               <FallbackImage
                 src={activeImage}
                 alt={product.name}
-                className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
+                className="w-full h-full object-contain"
                 logoSize="w-8 h-8"
               />
 
@@ -1031,7 +1031,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
                     <img
                       src={item.image || item.mainImage}
                       alt={item.name}
-                      className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-contain"
                     />
                     <button
                       type="button"
@@ -1121,7 +1121,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
                       <img
                         src={item.image || item.mainImage}
                         alt={item.name}
-                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-contain"
                       />
                       <button
                         type="button"
