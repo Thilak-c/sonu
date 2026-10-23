@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -40,6 +40,8 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
   // Delivery & Pincode State
   const [deliveryPincode, setDeliveryPincode] = useState('800013');
   const [deliveryCity, setDeliveryCity] = useState('PATNA');
+  const [deliveryDays, setDeliveryDays] = useState(4);
+  const [isPincodeLoading, setIsPincodeLoading] = useState(false);
   const [isPincodeMounted, setIsPincodeMounted] = useState(false);
   const [isPincodeVisible, setIsPincodeVisible] = useState(false);
   const [inputPincode, setInputPincode] = useState('');
@@ -90,27 +92,103 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
     }
   }, [initialProduct]);
 
-  // Load saved shipping address and wishlist from localStorage
+  // Auto-detect location via IP Geolocation or saved localStorage address, and compute expected delivery date
   useEffect(() => {
-    const timer = setTimeout(() => {
+    let isCancelled = false;
+
+    // Load wishlist
+    try {
+      const savedWishlist =
+        localStorage.getItem('sonu_wishlist') ||
+        localStorage.getItem('aw_wishlist');
+      if (savedWishlist) setWishlistMap(JSON.parse(savedWishlist));
+    } catch {
+      // ignore
+    }
+
+    const checkPincodeService = async (pin, currentCity) => {
+      try {
+        const sRes = await fetch(`/api/shiprocket/serviceability?pincode=${pin}`);
+        if (sRes.ok) {
+          const sData = await sRes.json();
+          if (!isCancelled && sData?.data) {
+            if (sData.data.city && !currentCity) {
+              setDeliveryCity(sData.data.city.toUpperCase());
+            }
+            if (sData.data.estimatedDays) {
+              const days = parseInt(sData.data.estimatedDays, 10);
+              if (!isNaN(days) && days > 0) {
+                setDeliveryDays(days);
+              }
+            }
+          }
+        }
+      } catch {
+        // keep default delivery timeline
+      }
+    };
+
+    const detectLocation = async () => {
+      let activePincode = null;
+      let activeCity = null;
+
+      // 1. Check if user already saved an address
       try {
         const saved =
           localStorage.getItem('sonu_shipping_address') ||
           localStorage.getItem('aw_shipping_address');
         if (saved) {
           const parsed = JSON.parse(saved);
-          if (parsed.pincode) setDeliveryPincode(parsed.pincode);
-          if (parsed.city) setDeliveryCity(parsed.city.toUpperCase());
+          if (parsed.pincode && /^\d{6}$/.test(parsed.pincode)) {
+            activePincode = parsed.pincode;
+            if (parsed.city) activeCity = parsed.city.toUpperCase();
+          }
         }
-        const savedWishlist =
-          localStorage.getItem('sonu_wishlist') ||
-          localStorage.getItem('aw_wishlist');
-        if (savedWishlist) setWishlistMap(JSON.parse(savedWishlist));
       } catch {
         // ignore
       }
-    }, 0);
-    return () => clearTimeout(timer);
+
+      // 2. If no saved address, auto-detect location via IP Geolocation
+      if (!activePincode) {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 4000);
+          const response = await fetch('https://ipapi.co/json/', { signal: controller.signal });
+          clearTimeout(timeoutId);
+          if (response.ok) {
+            const loc = await response.json();
+            if (loc && !loc.error) {
+              if (loc.postal && /^\d{6}$/.test(loc.postal.replace(/\D/g, ''))) {
+                activePincode = loc.postal.replace(/\D/g, '');
+              }
+              if (loc.city) {
+                activeCity = loc.city.toUpperCase();
+              }
+            }
+          }
+        } catch (err) {
+          console.warn('IP Geolocation fallback used:', err);
+        }
+      }
+
+      // 3. Fallback defaults if detection was blocked or unavailable
+      if (!activePincode) activePincode = '800013';
+      if (!activeCity) activeCity = 'PATNA';
+
+      if (!isCancelled) {
+        setDeliveryPincode(activePincode);
+        setDeliveryCity(activeCity);
+      }
+
+      // 4. Fetch expected delivery date for the active pincode
+      await checkPincodeService(activePincode, activeCity);
+    };
+
+    detectLocation();
+
+    return () => {
+      isCancelled = true;
+    };
   }, []);
 
   // Sync isFavourite state for this product
@@ -186,15 +264,15 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
     });
   };
 
-  const deliveryDateFormatted = (() => {
+  const deliveryDateFormatted = useMemo(() => {
     const d = new Date();
-    d.setDate(d.getDate() + 4);
+    d.setDate(d.getDate() + (deliveryDays || 4));
     return d.toLocaleDateString('en-IN', {
       weekday: 'short',
       day: 'numeric',
       month: 'short',
     });
-  })();
+  }, [deliveryDays]);
 
   // Sync initial and ongoing cart count
   useEffect(() => {
@@ -1322,24 +1400,56 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
                 />
                 <button
                   type="button"
-                  onClick={() => {
+                  disabled={inputPincode.length !== 6 || isPincodeLoading}
+                  onClick={async () => {
                     if (inputPincode.length === 6) {
-                      setDeliveryPincode(inputPincode);
+                      setIsPincodeLoading(true);
+                      const cleanPin = inputPincode;
+                      setDeliveryPincode(cleanPin);
+                      let newCity = deliveryCity;
                       try {
-                        localStorage.setItem(
-                          'sonu_shipping_address',
-                          JSON.stringify({ pincode: inputPincode, city: deliveryCity })
-                        );
+                        const sRes = await fetch(`/api/shiprocket/serviceability?pincode=${cleanPin}`);
+                        if (sRes.ok) {
+                          const sData = await sRes.json();
+                          if (sData?.data) {
+                            if (sData.data.city) {
+                              newCity = sData.data.city.toUpperCase();
+                              setDeliveryCity(newCity);
+                            }
+                            if (sData.data.estimatedDays) {
+                              const days = parseInt(sData.data.estimatedDays, 10);
+                              if (!isNaN(days) && days > 0) setDeliveryDays(days);
+                            }
+                          }
+                        } else {
+                          const pRes = await fetch(`https://api.postalpincode.in/pincode/${cleanPin}`);
+                          if (pRes.ok) {
+                            const pData = await pRes.json();
+                            const district = pData?.[0]?.PostOffice?.[0]?.District;
+                            if (district) {
+                              newCity = district.toUpperCase();
+                              setDeliveryCity(newCity);
+                            }
+                          }
+                        }
                       } catch {
                         // ignore
+                      } finally {
+                        try {
+                          localStorage.setItem(
+                            'sonu_shipping_address',
+                            JSON.stringify({ pincode: cleanPin, city: newCity })
+                          );
+                        } catch {}
+                        setIsPincodeLoading(false);
+                        closePincodeModal();
                       }
-                      closePincodeModal();
                     }
                   }}
-                  className="px-5 py-3 rounded-[12px] bg-[#111111] text-white text-[14px] font-medium hover:bg-black active:scale-[0.98] transition-all cursor-pointer font-['Helvetica_Now_Text_Medium',sans-serif]"
+                  className="px-5 py-3 rounded-[12px] bg-[#111111] text-white text-[14px] font-medium hover:bg-black active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed font-['Helvetica_Now_Text_Medium',sans-serif]"
                   style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
                 >
-                  Check
+                  {isPincodeLoading ? 'Checking...' : 'Check'}
                 </button>
               </div>
               <p className="text-[12.5px] text-[#707072]">
