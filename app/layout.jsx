@@ -7,7 +7,7 @@ export const metadata = {
     template: '%s | SONU Shoes',
   },
   description:
-    'SONU crafts small-run, precision-engineered footwear designed for all-day comfort and timeless minimalism. Discover handcrafted sneakers built for the long way home.',
+    'Sonu Shoes crafts small-run, precision-engineered footwear designed for all-day comfort and timeless minimalism. Discover handcrafted sneakers built for the long way home.',
   keywords: [
     'SONU shoes',
     'premium footwear',

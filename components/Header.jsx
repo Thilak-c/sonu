@@ -112,9 +112,78 @@ export default function Header() {
             </Link>
           </div>
 
-          {/* Right section: Search, Bag, Hamburger */}
-          <div className="flex items-center gap-3.5">
-            {/* Search Button */}
+          {/* Right section */}
+          {/* Desktop: Search Pill, Heart (Favourites), Bag (Cart) */}
+          <div className="hidden md:flex items-center gap-3">
+            {/* Search Pill */}
+            <button
+              type="button"
+              onClick={() => {
+                setSearchOpen(true);
+                searchInputRef.current?.focus();
+              }}
+              className="group w-[170px] lg:w-[180px] h-10 rounded-full bg-[#f5f5f5] hover:bg-[#e5e5e5] px-3.5 flex items-center gap-2.5 transition-colors cursor-pointer text-left"
+              aria-label="Search"
+            >
+              <svg  focusable="false" viewBox="0 0 24 24" role="img" width="22px" height="22px" fill="none" className="shrink-0">
+                <path stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" d="M13.962 16.296a6.716 6.716 0 01-3.462.954 6.728 6.728 0 01-4.773-1.977A6.728 6.728 0 013.75 10.5c0-1.864.755-3.551 1.977-4.773A6.728 6.728 0 0110.5 3.75c1.864 0 3.551.755 4.773 1.977A6.728 6.728 0 0117.25 10.5a6.726 6.726 0 01-.921 3.407c-.517.882-.434 1.988.289 2.711l3.853 3.853" />
+              </svg>
+              <span className="text-[15px] text-[#707072] font-normal group-hover:text-[#111111] transition-colors leading-none">
+                Search
+              </span>
+            </button>
+
+            {/* Favourites Heart Button */}
+            <Link
+              href="/#fresh-drops"
+              className="w-10 h-10 rounded-full hover:bg-neutral-100 flex items-center justify-center text-[#111111] transition-colors cursor-pointer"
+              aria-label="Favourites"
+            >
+              <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" role="img" width="22px" height="22px" fill="none">
+                <path
+                  stroke="#111111"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M16.794 3.75c1.324 0 2.568.516 3.504 1.451a4.96 4.96 0 010 7.008L12 20.5l-8.298-8.291a4.96 4.96 0 010-7.008 4.934 4.934 0 013.504-1.451c1.324 0 2.569.515 3.504 1.45L12 6.49l1.29-1.29a4.934 4.934 0 013.504-1.45z"
+                />
+              </svg>
+            </Link>
+
+            {/* Bag Button with Item Count inside bag */}
+            <Link
+              href="/checkout"
+              className="w-10 h-10 rounded-full hover:bg-neutral-100 flex items-center justify-center text-[#111111] transition-colors relative cursor-pointer"
+              aria-label={`Open Bag (${cartCount})`}
+            >
+              <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" role="img" width="22px" height="22px" fill="none">
+                <path
+                  stroke="#111111"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M8.25 8.25V6a2.25 2.25 0 012.25-2.25h3a2.25 2.25 0 012.25 2.25v2.25M3.75 8.25h16.5v10.5a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V8.25z"
+                />
+                {cartCount > 0 && (
+                  <text
+                    x="12"
+                    y="14.8"
+                    textAnchor="middle"
+                    dominantBaseline="central"
+                    fill="#111111"
+                    fontSize="9"
+                    fontWeight="700"
+                    style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                  >
+                    {cartCount}
+                  </text>
+                )}
+              </svg>
+            </Link>
+          </div>
+
+          {/* Mobile Right Section: Search Icon, Bag, Hamburger */}
+          <div className="flex md:hidden items-center gap-3.5">
             <button
               type="button"
               onClick={() => {
@@ -130,14 +199,19 @@ export default function Header() {
               </svg>
             </button>
 
-            {/* Bag Button */}
             <Link
               href="/checkout"
               className="relative transition-colors flex items-center justify-center text-[#111111] w-6 h-6"
               aria-label={`Open Bag (${cartCount})`}
             >
               <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" role="img" width="24px" height="24px" fill="none">
-                <path stroke="#111111" strokeWidth="1.5" d="M8.25 8.25V6a2.25 2.25 0 012.25-2.25h3a2.25 2.25 0 110 4.5H3.75v8.25a3.75 3.75 0 003.75 3.75h9a3.75 3.75 0 003.75-3.75V8.25H17.5" />
+                <path
+                  stroke="#111111"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M8.25 8.25V6a2.25 2.25 0 012.25-2.25h3a2.25 2.25 0 012.25 2.25v2.25M3.75 8.25h16.5v10.5a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V8.25z"
+                />
                 {cartCount > 0 && (
                   <text
                     x="12"
@@ -147,7 +221,7 @@ export default function Header() {
                     fill="#111111"
                     fontSize="9"
                     fontWeight="700"
-                    style={{ fontFamily: "'Helvetica Now Text Medium', 'Helvetica Now Text', sans-serif" }}
+                    style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
                   >
                     {cartCount}
                   </text>
@@ -155,11 +229,10 @@ export default function Header() {
               </svg>
             </Link>
 
-            {/* Hamburger Button */}
             <button
               type="button"
               onClick={() => setMenuOpen(true)}
-              className=" transition-colors flex items-center justify-center text-[#111111]"
+              className="transition-colors flex items-center justify-center text-[#111111]"
               aria-label="Open Navigation Menu"
               aria-expanded={menuOpen}
             >

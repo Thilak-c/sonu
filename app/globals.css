@@ -67,3 +67,39 @@ html, body {
   scrollbar-width: none !important;  /* Firefox */
 }
 
+/* Global Fast & Natural Page Fade Transitions */
+@keyframes pageFadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes pageFadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.animate-page-in {
+  animation: pageFadeIn 150ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Native View Transitions for supported browsers */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root) {
+  animation: 120ms cubic-bezier(0.4, 0, 1, 1) both pageFadeOut;
+}
+
+::view-transition-new(root) {
+  animation: 150ms cubic-bezier(0, 0, 0.2, 1) both pageFadeIn;
+}
+

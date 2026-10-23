@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { FRESH_DROPS } from '@/components/home/freshDropsData';
+import { getProductById, getAllProducts } from '@/lib/products';
 import ProductDetailClient from '@/components/product/ProductDetailClient';
 
 export async function generateStaticParams() {
@@ -10,7 +11,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const product = FRESH_DROPS.find((p) => p.id === slug) || FRESH_DROPS[0];
+  const product = (await getProductById(slug)) || FRESH_DROPS.find((p) => p.id === slug) || FRESH_DROPS[0];
 
   return {
     title: `${product.name} — ${product.category} | SONU Shoes`,
@@ -28,11 +29,11 @@ export async function generateMetadata({ params }) {
     openGraph: {
       title: `${product.name} | ${product.category} — SONU`,
       description: product.description,
-      url: `https://sonu.shoes/product/${product.id}`,
+      url: `https://sonu.shoes/product/${product.id || slug}`,
       images: [
         {
-          url: product.image,
-          alt: product.alt,
+          url: product.image || product.mainImage,
+          alt: product.alt || product.name,
         },
       ],
     },
@@ -40,14 +41,17 @@ export async function generateMetadata({ params }) {
       card: 'summary_large_image',
       title: `${product.name} — SONU Shoes`,
       description: product.description,
-      images: [product.image],
+      images: [product.image || product.mainImage],
     },
   };
 }
 
 export default async function ProductDetailPage({ params }) {
   const { slug } = await params;
-  const product = FRESH_DROPS.find((p) => p.id === slug);
+  const [product, allCatalog] = await Promise.all([
+    getProductById(slug),
+    getAllProducts(),
+  ]);
 
   if (!product) {
     notFound();
@@ -57,7 +61,7 @@ export default async function ProductDetailPage({ params }) {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.name,
-    image: `https://sonu.shoes${product.image}`,
+    image: `https://sonu.shoes${product.image || product.mainImage}`,
     description: product.description,
     brand: {
       '@type': 'Brand',
@@ -69,7 +73,7 @@ export default async function ProductDetailPage({ params }) {
       priceCurrency: 'INR',
       price: product.priceNumber || 13995,
       availability: 'https://schema.org/InStock',
-      url: `https://sonu.shoes/product/${product.id}`,
+      url: `https://sonu.shoes/product/${product.id || slug}`,
       seller: {
         '@type': 'Organization',
         name: 'SONU Shoes',
@@ -97,7 +101,7 @@ export default async function ProductDetailPage({ params }) {
         '@type': 'ListItem',
         position: 3,
         name: product.name,
-        item: `https://sonu.shoes/product/${product.id}`,
+        item: `https://sonu.shoes/product/${product.id || slug}`,
       },
     ],
   };
@@ -112,7 +116,7 @@ export default async function ProductDetailPage({ params }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
-      <ProductDetailClient product={product} />
+      <ProductDetailClient product={product} initialCatalog={allCatalog} />
     </>
   );
 }

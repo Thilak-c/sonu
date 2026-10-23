@@ -4,25 +4,25 @@ const SPORTS_CATEGORIES = [
   {
     id: 'running',
     name: 'Running',
-    image: '/images/model-02-runner.webp',
+    image: '/asset/Urban Sprint on Blue Concrete.webp',
     alt: 'SONU Running Footwear',
   },
   {
     id: 'basketball',
     name: 'Basketball',
-    image: '/images/model-03-court.webp',
+    image: '/asset/Intense Indoor Basketball Drive.webp',
     alt: 'SONU Basketball Footwear',
   },
   {
     id: 'sportswear',
     name: 'Sportswear',
-    image: '/images/model-01-low.webp',
+    image: '/asset/Cinematic Streetwear on Concrete Steps.webp',
     alt: 'SONU Sportswear Footwear',
   },
   {
     id: 'training',
     name: 'Training',
-    image: '/images/model-04-trail.webp',
+    image: '/asset/Industrial Overpass Barbell Split Squat.webp',
     alt: 'SONU Training Footwear',
   },
 ];
