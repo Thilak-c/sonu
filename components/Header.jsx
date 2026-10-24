@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
-import { getCartItems } from './cart/cartStore';
+import { getCartItems, preloadCartImages, preloadPaymentImages } from './cart/cartStore';
 import LoginModal from './auth/LoginModal';
 
 export default function Header() {
@@ -15,9 +15,50 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const searchInputRef = useRef(null);
-  const router = useRouter();
-
   const [loginModalStep, setLoginModalStep] = useState('mobile');
+
+  // Smart Sticky Navbar State (Universal hide on scroll down, reveal on scroll up)
+  const [isVisible, setIsVisible] = useState(true);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const lastScrollYRef = useRef(0);
+
+  useEffect(() => {
+    let ticking = false;
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY || window.pageYOffset || 0;
+          const prevScrollY = lastScrollYRef.current;
+          const diff = currentScrollY - prevScrollY;
+
+          // Track whether page has scrolled away from top
+          setIsScrolled(currentScrollY > 15);
+
+          // Always show at top of page or rubber-band bounce
+          if (currentScrollY <= 15) {
+            setIsVisible(true);
+          } else if (searchOpen || menuOpen) {
+            // Keep visible if search or menu drawer is open
+            setIsVisible(true);
+          } else if (diff > 6) {
+            // Scrolling down -> slide out with page
+            setIsVisible(false);
+          } else if (diff < -6) {
+            // Scrolling up -> pop up / slide down
+            setIsVisible(true);
+          }
+
+          lastScrollYRef.current = currentScrollY;
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [searchOpen, menuOpen]);
 
   // Listen for global open-login-modal events
   useEffect(() => {
@@ -29,12 +70,16 @@ export default function Header() {
     return () => window.removeEventListener('open-login-modal', handleOpenLogin);
   }, []);
 
-  // Sync cart count reactively
+  // Sync cart count reactively and preload images simultaneously
   useEffect(() => {
     const updateCount = () => {
       const items = getCartItems();
       const count = items.reduce((acc, it) => acc + (it.quantity || 1), 0);
       setCartCount(count);
+      if (items.length > 0) {
+        preloadCartImages();
+        preloadPaymentImages();
+      }
     };
     updateCount();
     window.addEventListener('cart-updated', updateCount);
@@ -95,7 +140,11 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full bg-white border-b border-white transition-all duration-200">
+      <header
+        className={`sticky top-0 z-40 w-full bg-white transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          isVisible ? 'translate-y-0' : '-translate-y-full'
+        }`}
+      >
         <div className="max-w-[1440px] mx-auto px-6 sm:px-10 h-16 sm:h-20 flex items-center justify-between">
           {/* Left section: Logo only */}
           <div className="flex items-center">
@@ -153,6 +202,14 @@ export default function Header() {
             {/* Bag Button with Item Count inside bag */}
             <Link
               href="/checkout"
+              onMouseEnter={() => {
+                preloadCartImages();
+                preloadPaymentImages();
+              }}
+              onTouchStart={() => {
+                preloadCartImages();
+                preloadPaymentImages();
+              }}
               className="w-10 h-10 rounded-full hover:bg-neutral-100 flex items-center justify-center text-[#111111] transition-colors relative cursor-pointer"
               aria-label={`Open Bag (${cartCount})`}
             >
@@ -201,6 +258,14 @@ export default function Header() {
 
             <Link
               href="/checkout"
+              onMouseEnter={() => {
+                preloadCartImages();
+                preloadPaymentImages();
+              }}
+              onTouchStart={() => {
+                preloadCartImages();
+                preloadPaymentImages();
+              }}
               className="relative transition-colors flex items-center justify-center text-[#111111] w-6 h-6"
               aria-label={`Open Bag (${cartCount})`}
             >

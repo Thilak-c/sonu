@@ -1,3 +1,4 @@
+node_modules
 node_modules/
 dist/
 .next/
@@ -7,8 +8,14 @@ data/
 *.sqlite-wal
 .env
 .env.local
+.env*.local
+*.env
 .DS_Store
 *.log
+
+admin/node_modules
+admin/.next/
+admin/.env*
 
 whatsapp-gateway/node_modules/
 whatsapp-gateway/.wwebjs_auth/

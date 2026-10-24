@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getDb, initDb } from '@/lib/mongodb';
+import { createShiprocketOrder } from '@/lib/shiprocket';
 
 export async function POST(request) {
   try {
@@ -118,10 +119,50 @@ export async function POST(request) {
 
     console.log(`[MongoDB] Successfully saved Order ${orderId} into database.`);
 
+    // 3. Automatically push order to Shiprocket
+    let shiprocketResult = null;
+    try {
+      shiprocketResult = await createShiprocketOrder(orderDoc);
+      console.log(
+        `[Shiprocket] Successfully pushed Order ${orderId} to Shiprocket. Shipment ID: ${shiprocketResult.shipment_id}`
+      );
+
+      await db.collection('orders').updateOne(
+        { orderId },
+        {
+          $set: {
+            shiprocket: {
+              orderId: shiprocketResult.order_id,
+              shipmentId: shiprocketResult.shipment_id,
+              status: shiprocketResult.status || 'NEW',
+              awbCode: shiprocketResult.awb_code || null,
+              courierName: shiprocketResult.courier_name || null,
+              createdAt: new Date(),
+            },
+          },
+        }
+      );
+    } catch (srError) {
+      console.error(`[Shiprocket] Error pushing Order ${orderId} to Shiprocket:`, srError.message);
+      await db.collection('orders').updateOne(
+        { orderId },
+        {
+          $set: {
+            shiprocket: {
+              status: 'FAILED',
+              error: srError.message,
+              failedAt: new Date(),
+            },
+          },
+        }
+      );
+    }
+
     return NextResponse.json({
       success: true,
       orderId,
-      message: 'Order saved in MongoDB successfully',
+      shiprocket: shiprocketResult,
+      message: 'Order saved in MongoDB and pushed to Shiprocket successfully',
     });
   } catch (error) {
     console.error('[MongoDB] Error saving order:', error);

@@ -10,7 +10,10 @@ export async function POST(request) {
       firstName,
       lastName,
       name,
-      address = {},
+      preference,
+      dob,
+      isEmailVerified,
+      address,
     } = body;
 
     if (!email && !mobile) {
@@ -22,32 +25,43 @@ export async function POST(request) {
 
     const db = await initDb();
 
-    const fullName =
-      name ||
-      `${firstName || ''} ${lastName || ''}`.trim() ||
-      'Customer';
+    // Match existing user by either email or mobile number
+    const userFilter =
+      email && mobile
+        ? { $or: [{ email: email.toLowerCase().trim() }, { mobile: mobile.trim() }] }
+        : email
+        ? { email: email.toLowerCase().trim() }
+        : { mobile: mobile.trim() };
 
-    const userFilter = email
-      ? { email: email.toLowerCase().trim() }
-      : { mobile: mobile.trim() };
+    const setFields = {
+      updatedAt: new Date(),
+    };
+
+    if (name) setFields.name = name;
+    if (firstName) setFields.firstName = firstName;
+    if (lastName) setFields.lastName = lastName;
+    if (!name && (firstName || lastName)) {
+      setFields.name = `${firstName || ''} ${lastName || ''}`.trim();
+    }
+    if (email) setFields.email = email.toLowerCase().trim();
+    if (mobile) setFields.mobile = mobile.trim();
+    if (preference) setFields.preference = preference;
+    if (dob) setFields.dob = dob;
+    if (typeof isEmailVerified === 'boolean') setFields.isEmailVerified = isEmailVerified;
+
+    if (address && (address.houseNo || address.street || address.roadArea || address.pincode)) {
+      setFields.primaryAddress = {
+        houseNo: address.houseNo || '',
+        street: address.street || address.roadArea || '',
+        landmark: address.landmark || '',
+        city: address.city || '',
+        state: address.state || '',
+        pincode: address.pincode || '',
+      };
+    }
 
     const updateDoc = {
-      $set: {
-        name: fullName,
-        firstName: firstName || '',
-        lastName: lastName || '',
-        ...(email ? { email: email.toLowerCase().trim() } : {}),
-        ...(mobile ? { mobile: mobile.trim() } : {}),
-        primaryAddress: {
-          houseNo: address.houseNo || '',
-          street: address.street || address.roadArea || '',
-          landmark: address.landmark || '',
-          city: address.city || '',
-          state: address.state || '',
-          pincode: address.pincode || '',
-        },
-        updatedAt: new Date(),
-      },
+      $set: setFields,
       $setOnInsert: {
         createdAt: new Date(),
         orders: [],

@@ -66,6 +66,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
   const [isBagModalVisible, setIsBagModalVisible] = useState(false);
   const [isBagBackdropVisible, setIsBagBackdropVisible] = useState(false);
   const [bagModalMode, setBagModalMode] = useState('added-to-bag'); // 'added-to-bag' | 'select-size'
+  const [tempDrawerSize, setTempDrawerSize] = useState(null);
   const bagTimerRef = useRef(null);
 
   // Size Guide Modal state
@@ -294,6 +295,9 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
   const openBagModal = (mode = 'added-to-bag') => {
     if (bagTimerRef.current) clearTimeout(bagTimerRef.current);
     setBagModalMode(mode);
+    if (mode === 'select-size') {
+      setTempDrawerSize(selectedSize || null);
+    }
     setIsBagModalMounted(true);
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -438,6 +442,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
       price: product.price || `₹${(product.priceNumber || 13995).toLocaleString('en-IN')}`,
       priceNumber: product.priceNumber || 13995,
       size: selectedSize,
+      availableSizes: availableSizesList,
       color: Array.isArray(product.colorways) ? product.colorways[0] : (product.color || 'Signature Tone'),
       image: productImages[0] || product.image || product.mainImage,
     });
@@ -455,6 +460,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
       price: product.price || `₹${(product.priceNumber || 13995).toLocaleString('en-IN')}`,
       priceNumber: product.priceNumber || 13995,
       size: sz,
+      availableSizes: availableSizesList,
       color: Array.isArray(product.colorways) ? product.colorways[0] : (product.color || 'Signature Tone'),
       image: productImages[0] || product.image || product.mainImage,
     });
@@ -843,7 +849,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
                       <RotateCcw className="w-4 h-4 text-[#111111] stroke-[2]" />
                     </div>
                     <span className="text-[14px] text-[#111111] font-normal group-hover:text-black">
-                      14-day return and size exchange
+                      7-day return and size exchange
                     </span>
                   </div>
                   <button
@@ -962,7 +968,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
               >
                 <div className="overflow-hidden text-[13.5px] leading-[22px] text-[rgba(0,19,37,0.92)]">
                   <p>
-                    This product is eligible for hassle-free returns or size exchanges within 14 days of delivery. Kindly ensure the footwear is unworn outdoors, with original packaging, shoe box, and tags intact.
+                    This product is eligible for hassle-free returns or size exchanges within 7 days of delivery. Kindly ensure the footwear is unworn outdoors, with original packaging, shoe box, and tags intact.
                   </p>
                 </div>
               </div>
@@ -1290,7 +1296,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
             {knowMoreType === 'return' ? (
               <div className="py-4 space-y-4 text-[14px] text-[rgba(0,19,37,0.92)] leading-relaxed">
                 <p>
-                  At SONU, we want every pair to fit like a second skin. If your shoes don&apos;t fit perfectly, you can request a return or size exchange within 14 days of delivery.
+                  At SONU, we want every pair to fit like a second skin. If your shoes don&apos;t fit perfectly, you can request a return or size exchange within 7 days of delivery.
                 </p>
                 <ol className="list-decimal list-inside space-y-2 text-[#707072]">
                   <li>Footwear must be unworn outdoors with all original packaging, shoe tags, and shoe box intact.</li>
@@ -1461,68 +1467,90 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
             onClick={(e) => e.stopPropagation()}
           >
             {bagModalMode === 'select-size' ? (
-              /* Mode 1: Select Size Drawer */
+              /* Mode 1: Select Size Drawer (Strict match to user screenshot) */
               <div>
-                <div className="flex items-center justify-between">
-                  <h2 className="text-[22px] sm:text-[24px] font-medium text-[#111111] tracking-tight">
-                    Select Size
-                  </h2>
-                  <button
-                    type="button"
-                    onClick={closeBagModal}
-                    className="w-9 h-9 rounded-full bg-[#f5f5f5] hover:bg-[#e8e8e8] flex items-center justify-center text-[#111111] transition-colors cursor-pointer"
-                    aria-label="Close"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-
-                <div className="mt-4 flex items-center gap-3.5 pb-4 border-b border-neutral-100">
-                  <div className="w-[64px] h-[64px] bg-[#f5f5f5] rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
-                    <img
-                      src={activeImage}
-                      alt={product.name}
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
+                {/* Header: Title, Category, Price on Left; Raw X on Right */}
+                <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="text-[16px] font-medium text-[#111111] leading-tight">
+                    <h2 className="text-[18px] sm:text-[19px] font-bold text-[#111111] leading-tight font-['Helvetica_Now_Text_Medium',sans-serif]">
                       {product.name}
-                    </h3>
-                    <p className="text-[14px] text-[#707072] mt-0.5">
+                    </h2>
+                    <p className="text-[15px] sm:text-[16px] text-[#111111] font-normal mt-1 leading-tight">
+                      {product.category || "Women's Training Shoes"}
+                    </p>
+                    <p className="text-[16px] sm:text-[17px] font-bold text-[#111111] mt-1.5 leading-tight">
                       {formattedPrice}
                     </p>
                   </div>
+
+                  {/* Close Button: Clean raw X matching screenshot */}
+                  <button
+                    type="button"
+                    onClick={closeBagModal}
+                    className="p-1 -mr-1 -mt-1 text-[#111111] hover:opacity-60 transition-opacity cursor-pointer"
+                    aria-label="Close"
+                  >
+                    <X className="w-6 h-6 stroke-[1.8]" />
+                  </button>
                 </div>
 
-                <div className="mt-5">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-[14px] text-[#707072]">
-                      Choose your footwear size
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        closeBagModal();
-                        setTimeout(() => openSizeGuide(), 320);
-                      }}
-                      className="text-[13px] font-medium text-[#111111] underline hover:text-[#707072] cursor-pointer"
-                    >
-                      Size Guide
-                    </button>
+                {/* Size Grid: 4 columns, light grey border rounded boxes */}
+                <div className="mt-7">
+                  <div className="grid grid-cols-4 gap-2.5 sm:gap-3">
+                    {availableSizesList.map((sz) => {
+                      const isSelected = sz === tempDrawerSize;
+                      const isOutOfStock =
+                        sz === 'UK 9' &&
+                        (product.category?.toLowerCase().includes('women') ||
+                          product.name?.toLowerCase().includes('women') ||
+                          product.name?.toLowerCase().includes('hybrid rn'));
+
+                      if (isOutOfStock) {
+                        return (
+                          <div
+                            key={sz}
+                            className="h-[50px] sm:h-[52px] rounded-[8px] border border-[#e5e5e5] bg-[#fafafa] flex items-center justify-center text-[15px] sm:text-[16px] font-medium text-[#d1d5db] line-through cursor-not-allowed select-none"
+                          >
+                            {sz}
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <button
+                          key={sz}
+                          type="button"
+                          onClick={() => setTempDrawerSize(sz)}
+                          className={`h-[50px] sm:h-[52px] rounded-[8px] border text-[15px] sm:text-[16px] font-medium flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
+                            isSelected
+                              ? 'border-[#111111] bg-[#111111] text-white font-semibold'
+                              : 'border-[#d1d5db] bg-white text-[#111111] hover:border-[#111111]'
+                          }`}
+                        >
+                          {sz}
+                        </button>
+                      );
+                    })}
                   </div>
-                  <div className="grid grid-cols-4 gap-2.5">
-                    {availableSizesList.map((sz) => (
-                      <button
-                        key={sz}
-                        type="button"
-                        onClick={() => handleSelectSizeInDrawer(sz)}
-                        className="py-3 rounded-[8px] text-[15px] font-medium border border-neutral-300 hover:border-[#111111] hover:bg-neutral-50 bg-white text-[#111111] transition-all cursor-pointer active:scale-95"
-                      >
-                        {sz}
-                      </button>
-                    ))}
-                  </div>
+                </div>
+
+                {/* Bottom Button: Full-width pill matching screenshot strictly */}
+                <div className="mt-8">
+                  <button
+                    type="button"
+                    disabled={!tempDrawerSize}
+                    onClick={() => {
+                      if (!tempDrawerSize) return;
+                      handleSelectSizeInDrawer(tempDrawerSize);
+                    }}
+                    className={`w-full py-4 rounded-full text-[16px] font-medium transition-all ${
+                      tempDrawerSize
+                        ? 'bg-[#111111] text-white hover:bg-black active:scale-[0.99] cursor-pointer'
+                        : 'bg-[#e5e5e5] text-[#8e8e93] cursor-not-allowed'
+                    }`}
+                  >
+                    Add to bag
+                  </button>
                 </div>
               </div>
             ) : (

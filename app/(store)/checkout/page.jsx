@@ -1,13 +1,68 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import {
   getCartItems,
+  addToCart,
   removeFromCart,
   updateCartQuantity,
+  updateCartItemSize,
   clearCart,
+  preloadImage,
+  preloadCartImages,
+  PAYMENT_ICONS,
+  preloadPaymentImages,
 } from '@/components/cart/cartStore';
+
+const LAST_MINUTE_ADDITIONS = [
+  {
+    id: 'addon-bottle',
+    brand: 'Nike',
+    title: 'Refuel Bottle Grip 18 Oz',
+    price: 999,
+    priceFormatted: '₹999',
+    image: '/images/addons/bottle.jpg',
+    color: 'Black/White',
+  },
+  {
+    id: 'addon-basketball',
+    brand: 'Nike',
+    title: 'Everyday All Court 8P Deflated',
+    price: 2999,
+    priceFormatted: '₹2,999',
+    image: '/images/addons/basketball.jpg',
+    color: 'Orange/Black',
+  },
+  {
+    id: 'addon-wristbands',
+    brand: 'Nike',
+    title: 'Swoosh Classic Doublewide Wristbands...',
+    price: 1099,
+    priceFormatted: '₹1,099',
+    image: '/images/addons/wristbands.jpg',
+    color: 'Royal/White/Red',
+  },
+  {
+    id: 'addon-backpack',
+    brand: 'Nike Heritage',
+    title: 'Heritage Backpack 2.0 (23L)',
+    price: 2495,
+    priceFormatted: '₹2,495',
+    image: '/images/addons/backpack.jpg',
+    color: 'Black',
+  },
+];
+
+const SIZE_CHART = [
+  { size: 'UK 3', inLength: '8.8', cmLength: '22.4', us: '5.5', eu: '36', cmJp: '22.5' },
+  { size: 'UK 4', inLength: '9.2', cmLength: '23.4', us: '6.5', eu: '37.5', cmJp: '23.5' },
+  { size: 'UK 5', inLength: '9.5', cmLength: '24.1', us: '7.5', eu: '38.5', cmJp: '24.5' },
+  { size: 'UK 6', inLength: '9.8', cmLength: '24.9', us: '8.5', eu: '40', cmJp: '25.5' },
+  { size: 'UK 7', inLength: '10.2', cmLength: '25.9', us: '9.5', eu: '41', cmJp: '26.5' },
+  { size: 'UK 8', inLength: '10.5', cmLength: '26.7', us: '10.5', eu: '42.5', cmJp: '27.5' },
+  { size: 'UK 9', inLength: '10.8', cmLength: '27.4', us: '11.5', eu: '44', cmJp: '28.5' },
+];
 
 export default function CheckoutPage() {
   // Steps: 'bag' | 'address' | 'payment' | 'confirmation'
@@ -16,6 +71,85 @@ export default function CheckoutPage() {
   const [cartItems, setCartItems] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [wishlist, setWishlist] = useState({});
+
+  // Promo Code State
+  const [isPromoOpen, setIsPromoOpen] = useState(false);
+  const [promoInput, setPromoInput] = useState('');
+  const [appliedPromo, setAppliedPromo] = useState(null);
+  const [promoError, setPromoError] = useState('');
+
+  // Addons State
+  const [addedAddonId, setAddedAddonId] = useState(null);
+  const carouselRef = useRef(null);
+
+  // Size Selector Modal State (Matches User Screenshot Strictly)
+  const [editingSizeItem, setEditingSizeItem] = useState(null);
+  const [tempSelectedSize, setTempSelectedSize] = useState(null);
+  const [isSizeModalMounted, setIsSizeModalMounted] = useState(false);
+  const [isSizeModalVisible, setIsSizeModalVisible] = useState(false);
+  const [isSizeBackdropVisible, setIsSizeBackdropVisible] = useState(false);
+  const sizeTimerRef = useRef(null);
+
+  const openSizeModal = (item) => {
+    if (sizeTimerRef.current) clearTimeout(sizeTimerRef.current);
+    setEditingSizeItem(item);
+    setTempSelectedSize(item.size || null);
+    setIsSizeModalMounted(true);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setIsSizeBackdropVisible(true);
+        setIsSizeModalVisible(true);
+      });
+    });
+  };
+
+  const closeSizeModal = () => {
+    setIsSizeBackdropVisible(false);
+    setIsSizeModalVisible(false);
+    sizeTimerRef.current = setTimeout(() => {
+      setIsSizeModalMounted(false);
+      setEditingSizeItem(null);
+      setTempSelectedSize(null);
+    }, 320);
+  };
+
+  // Size Guide Modal State
+  const [isSizeGuideMounted, setIsSizeGuideMounted] = useState(false);
+  const [isSizeGuideVisible, setIsSizeGuideVisible] = useState(false);
+  const [sizeGuideUnit, setSizeGuideUnit] = useState('in'); // 'in' or 'cm'
+  const sizeGuideTimerRef = useRef(null);
+
+  const openSizeGuide = () => {
+    if (sizeGuideTimerRef.current) clearTimeout(sizeGuideTimerRef.current);
+    setIsSizeGuideMounted(true);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setIsSizeGuideVisible(true);
+      });
+    });
+  };
+
+  const closeSizeGuide = () => {
+    setIsSizeGuideVisible(false);
+    sizeGuideTimerRef.current = setTimeout(() => {
+      setIsSizeGuideMounted(false);
+    }, 320);
+  };
+
+  const getProductHref = (item) => {
+    if (item.slug) return `/product/${item.slug}`;
+    if (item.id && (item.id.includes('hybrid') || item.id.includes('stealth') || item.id.includes('drop-'))) {
+      return `/product/${item.id}`;
+    }
+    const name = (item.name || '').toLowerCase();
+    if (name.includes('stealth') || name.includes("men") || name.includes('black')) {
+      return '/product/drop-hybrid-men';
+    }
+    if (name.includes('hybrid') || name.includes("women") || name.includes('purple')) {
+      return '/product/drop-hybrid-women';
+    }
+    return '/#fresh-drops';
+  };
 
   // Shipping Address Form State
   const [address, setAddress] = useState({
@@ -49,8 +183,16 @@ export default function CheckoutPage() {
   // Sync cart & profile on mount
   useEffect(() => {
     const syncCart = () => {
-      setCartItems(getCartItems());
+      const items = getCartItems();
+      setCartItems(items);
       setIsLoaded(true);
+      items.forEach((it) => {
+        if (it.image) preloadImage(it.image);
+      });
+      LAST_MINUTE_ADDITIONS.forEach((addon) => {
+        if (addon.image) preloadImage(addon.image);
+      });
+      preloadPaymentImages();
     };
 
     const loadUserProfile = () => {
@@ -146,11 +288,69 @@ export default function CheckoutPage() {
     };
   }, [checkoutStep]);
 
+  // Always scroll to top and preload payment images whenever checkoutStep changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    const timer = setTimeout(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    }, 40);
+    preloadPaymentImages();
+    return () => clearTimeout(timer);
+  }, [checkoutStep]);
+
   const totalQuantity = cartItems.reduce((acc, item) => acc + (item.quantity || 1), 0);
   const subtotal = cartItems.reduce(
     (acc, item) => acc + (item.priceNumber || 13995) * (item.quantity || 1),
     0
   );
+  const promoDiscountAmount = appliedPromo
+    ? Math.round((subtotal * appliedPromo.discountPercent) / 100)
+    : 0;
+  const youPay = Math.max(0, subtotal - promoDiscountAmount);
+
+  const scrollAddons = (direction) => {
+    if (carouselRef.current) {
+      const scrollAmount = direction === 'left' ? -320 : 320;
+      carouselRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  const handleApplyPromo = (e) => {
+    e?.preventDefault();
+    setPromoError('');
+    const code = promoInput.trim().toUpperCase();
+    if (!code) return;
+    if (code === 'SONU10' || code === 'SAVE10' || code === 'NIKE10' || code === 'FIRSTPAIR') {
+      setAppliedPromo({ code, discountPercent: 10 });
+      setPromoInput('');
+      setPromoError('');
+    } else {
+      setPromoError('Invalid promo code. Try SONU10');
+    }
+  };
+
+  const handleRemovePromo = () => {
+    setAppliedPromo(null);
+    setPromoError('');
+  };
+
+  const handleMoveToBag = (addon) => {
+    addToCart({
+      id: addon.id,
+      name: addon.title,
+      category: addon.brand,
+      price: addon.priceFormatted,
+      priceNumber: addon.price,
+      image: addon.image,
+      size: 'One Size',
+      color: addon.color,
+    });
+    setCartItems(getCartItems());
+    setAddedAddonId(addon.id);
+    setTimeout(() => {
+      setAddedAddonId(null);
+    }, 1500);
+  };
 
   const toggleWishlist = (key) => {
     setWishlist((prev) => ({
@@ -173,6 +373,7 @@ export default function CheckoutPage() {
   // Step 2 -> Step 3: Proceed to Payment
   const handleProceedToPayment = (e) => {
     e?.preventDefault();
+    preloadPaymentImages();
     if (!address.pincode && !address.mobile) {
       window.dispatchEvent(
         new CustomEvent('open-login-modal', { detail: { step: 'delivery-address' } })
@@ -513,7 +714,7 @@ export default function CheckoutPage() {
         </div>
 
         {/* Main Content Area */}
-        <div className="max-w-[480px] sm:max-w-[500px] mx-auto px-4 pt-4 pb-28 space-y-5">
+        <div className="max-w-[480px] sm:max-w-[500px] mx-auto px-4 pt-4 pb-36 space-y-5">
           {/* 1. Address Summary Card */}
           <div className="border border-[#e5e5e5] rounded-[16px] p-4 sm:p-5 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.02)]">
             <h2
@@ -539,42 +740,14 @@ export default function CheckoutPage() {
             </button>
           </div>
 
-          {/* 2. Offers for you */}
-          <div>
-            <div className="flex items-center justify-between pb-2">
-              <h2
-                className="text-[16px] sm:text-[17px] font-bold text-[#111111] font-['Helvetica_Now_Text_Medium',sans-serif]"
-                style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
-              >
-                Offers for you
-              </h2>
-              <button
-                type="button"
-                className="text-[13px] font-medium text-[#111111] hover:underline cursor-pointer font-['Helvetica_Now_Text_Medium',sans-serif]"
-                style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
-              >
-                View all
-              </button>
-            </div>
-
-            <div className="border border-[#e5e5e5] rounded-[14px] p-4 bg-white flex items-center justify-between shadow-[0_1px_4px_rgba(0,0,0,0.02)]">
-              <div>
-                <p className="text-[12.5px] font-medium leading-none">
-                  <span className="text-[#008a00] font-semibold">Cashback</span>{' '}
-                  <span className="text-[#707072]">HDFC EMI Bank Of...</span>
-                </p>
-                <p
-                  className="text-[14px] sm:text-[14.5px] font-bold text-[#111111] mt-1.5 font-['Helvetica_Now_Text_Medium',sans-serif]"
-                  style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
-                >
-                  10% off upto ₹1,500 ...
-                </p>
-              </div>
-              <div className="flex flex-col items-end text-[11.5px] text-[#707072] shrink-0 pl-3">
-                <span className="leading-tight">1 of 1</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-[#111111] mt-1" />
-              </div>
-            </div>
+          {/* 2. Offers */}
+          <div className=" ">
+            <p
+              className="text-[13.5px] sm:text-[14px] text-[#707072] font-['Helvetica_Now_Text',sans-serif]"
+              style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+            >
+              There is no offer currently running.
+            </p>
           </div>
 
           {/* 3. Order Information */}
@@ -722,18 +895,25 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          {/* 4. Footer Note and Proceed to Pay CTA */}
-          <div className="pt-4 pb-4">
+          {/* 4. Footer Note */}
+          <div className="pt-2 pb-6">
             <p
-              className="text-center text-[12.5px] text-[#8d8d8d] font-normal mb-4 font-['Helvetica_Now_Text',sans-serif]"
+              className="text-center text-[12.5px] text-[#8d8d8d] font-normal font-['Helvetica_Now_Text',sans-serif]"
               style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
             >
               Powered by Flowify Agency
             </p>
+          </div>
+        </div>
 
+        {/* Fixed Bottom Bar for Proceed to Pay (matching Bag design) */}
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#e5e5e5] h-[80px] flex items-center px-4 sm:px-6 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
+          <div className="w-full max-w-[480px] sm:max-w-[500px] mx-auto">
             <button
               type="button"
               onClick={handleProceedToPayment}
+              onMouseEnter={preloadPaymentImages}
+              onTouchStart={preloadPaymentImages}
               className="w-full py-4 rounded-full bg-[#111111] hover:bg-black active:scale-[0.99] text-white text-[16px] font-medium transition-all shadow-sm cursor-pointer font-['Helvetica_Now_Text_Medium',sans-serif]"
               style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
             >
@@ -777,6 +957,17 @@ export default function CheckoutPage() {
 
     return (
       <div className="min-h-screen bg-white font-['Helvetica_Now_Text',sans-serif] text-[#111111]">
+        {/* Instant high-priority preload link tags for all payment icons */}
+        {PAYMENT_ICONS.map((iconSrc) => (
+          <link
+            key={`preload-payment-${iconSrc}`}
+            rel="preload"
+            as="image"
+            href={iconSrc}
+            fetchPriority="high"
+          />
+        ))}
+
         {/* Top Sticky Header */}
         <div className="sticky top-0 z-30 bg-white border-b border-[#f0f0f0]">
           <div className="max-w-[480px] sm:max-w-[500px] mx-auto px-4 h-14 flex items-center gap-3.5">
@@ -826,6 +1017,9 @@ export default function CheckoutPage() {
                     src="/images/payments/upi.svg"
                     alt="UPI"
                     className="w-6 h-6 object-contain"
+                    loading="eager"
+                    fetchPriority="high"
+                    decoding="async"
                   />
                 </span>
                 <div>
@@ -844,6 +1038,9 @@ export default function CheckoutPage() {
                 src={selectedPaymentAccordion === 'upi' ? '/images/payments/caret-up.svg' : '/images/payments/caret-down.svg'}
                 alt=""
                 className="w-5 h-5 shrink-0"
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
               />
             </div>
 
@@ -867,6 +1064,9 @@ export default function CheckoutPage() {
                         src="/images/payments/googlePay.svg"
                         alt="Google Pay"
                         className="w-7 h-7 sm:w-8 sm:h-8 object-contain"
+                        loading="eager"
+                        fetchPriority="high"
+                        decoding="async"
                       />
                     </div>
                     <p className="text-[12px] font-medium text-[#111111] text-center mt-1.5 leading-tight">
@@ -890,6 +1090,9 @@ export default function CheckoutPage() {
                         src="/images/payments/phonePe.svg"
                         alt="PhonePe"
                         className="w-7 h-7 sm:w-8 sm:h-8 object-contain"
+                        loading="eager"
+                        fetchPriority="high"
+                        decoding="async"
                       />
                     </div>
                     <p className="text-[12px] font-medium text-[#111111] text-center mt-1.5 leading-tight">
@@ -913,6 +1116,9 @@ export default function CheckoutPage() {
                         src="/images/payments/paytm.svg"
                         alt="Paytm"
                         className="w-7 h-7 sm:w-8 sm:h-8 object-contain"
+                        loading="eager"
+                        fetchPriority="high"
+                        decoding="async"
                       />
                     </div>
                     <p className="text-[12px] font-medium text-[#111111] text-center mt-1.5 leading-tight">
@@ -936,6 +1142,9 @@ export default function CheckoutPage() {
                         src="/images/payments/otherUpi.svg"
                         alt="Other UPI"
                         className="w-7 h-7 sm:w-8 sm:h-8 object-contain"
+                        loading="eager"
+                        fetchPriority="high"
+                        decoding="async"
                       />
                     </div>
                     <p className="text-[12px] font-medium text-[#111111] text-center mt-1.5 leading-tight">
@@ -995,6 +1204,9 @@ export default function CheckoutPage() {
                     src="/images/payments/card.svg"
                     alt="Credit/ Debit Card"
                     className="w-6 h-6 object-contain"
+                    loading="eager"
+                    fetchPriority="high"
+                    decoding="async"
                   />
                 </span>
                 <div>
@@ -1013,6 +1225,9 @@ export default function CheckoutPage() {
                 src={selectedPaymentAccordion === 'card' ? '/images/payments/caret-up.svg' : '/images/payments/caret-down.svg'}
                 alt=""
                 className="w-5 h-5 shrink-0"
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
               />
             </div>
 
@@ -1097,6 +1312,9 @@ export default function CheckoutPage() {
                     src="/images/payments/netbanking.svg"
                     alt="Net Banking"
                     className="w-6 h-6 object-contain"
+                    loading="eager"
+                    fetchPriority="high"
+                    decoding="async"
                   />
                 </span>
                 <div>
@@ -1115,6 +1333,9 @@ export default function CheckoutPage() {
                 src={selectedPaymentAccordion === 'netbanking' ? '/images/payments/caret-up.svg' : '/images/payments/caret-down.svg'}
                 alt=""
                 className="w-5 h-5 shrink-0"
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
               />
             </div>
 
@@ -1126,6 +1347,9 @@ export default function CheckoutPage() {
                     src="/images/payments/alert.svg"
                     alt=""
                     className="w-4 h-4 shrink-0"
+                    loading="eager"
+                    fetchPriority="high"
+                    decoding="async"
                   />
                   <span>
                     Bank of India are experiencing a low success rate. Kindly use another way to pay.
@@ -1149,6 +1373,9 @@ export default function CheckoutPage() {
                           src={b.icon}
                           alt={b.name}
                           className="w-6 h-6 object-contain"
+                          loading="eager"
+                          fetchPriority="high"
+                          decoding="async"
                         />
                         <span className="text-[14px] font-medium text-[#111111]">
                           {b.name}
@@ -1162,6 +1389,9 @@ export default function CheckoutPage() {
                         }
                         alt=""
                         className="w-5 h-5 shrink-0"
+                        loading="eager"
+                        fetchPriority="high"
+                        decoding="async"
                       />
                     </div>
                   ))}
@@ -1204,6 +1434,9 @@ export default function CheckoutPage() {
                     src="/images/payments/emi.svg"
                     alt="EMI"
                     className="w-6 h-6 object-contain"
+                    loading="eager"
+                    fetchPriority="high"
+                    decoding="async"
                   />
                 </span>
                 <div>
@@ -1222,6 +1455,9 @@ export default function CheckoutPage() {
                 src={selectedPaymentAccordion === 'emi' ? '/images/payments/caret-up.svg' : '/images/payments/caret-down.svg'}
                 alt=""
                 className="w-5 h-5 shrink-0"
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
               />
             </div>
 
@@ -1279,6 +1515,9 @@ export default function CheckoutPage() {
                   }
                   alt=""
                   className="w-5 h-5 shrink-0"
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
                 />
               </div>
 
@@ -1322,6 +1561,9 @@ export default function CheckoutPage() {
                   }
                   alt=""
                   className="w-5 h-5 shrink-0"
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
                 />
               </div>
 
@@ -1375,206 +1617,699 @@ export default function CheckoutPage() {
     );
   }
 
-  // STEP 1: ACTIVE BAG SCREEN (Review Bag Items before Checkout)
+  // STEP 1: ACTIVE BAG SCREEN (EXACT DESIGN MATCH)
   return (
-    <div className="w-full max-w-[540px] mx-auto px-5 sm:px-6 pt-6 sm:pt-10 pb-0 font-['Helvetica_Now_Text',sans-serif] select-none text-[#111111]">
+    <div className="w-full max-w-[1240px] mx-auto px-5 sm:px-8 lg:px-12 pt-6 sm:pt-10 pb-16 font-['Helvetica_Now_Text',sans-serif] select-none text-[#111111]">
+      {/* High-priority Image Preloads for simultaneous instant loading */}
+      {cartItems.map((it) => (
+        <link key={`pl-${it.id}-${it.image}`} rel="preload" as="image" href={it.image} fetchPriority="high" />
+      ))}
+      {LAST_MINUTE_ADDITIONS.map((addon) => (
+        <link key={`pl-add-${addon.id}`} rel="preload" as="image" href={addon.image} fetchPriority="high" />
+      ))}
+
       {/* Centered Bag Header */}
-      <div className="text-center pt-2">
+      <div className="text-center pt-2 mb-8">
         <h1
-          className="text-[24px] sm:text-[26px] font-medium tracking-tight text-[#111111] font-['Helvetica_Now_Text_Medium',sans-serif]"
+          className="text-[26px] sm:text-[30px] font-bold tracking-tight text-[#111111] font-['Helvetica_Now_Text_Medium',sans-serif]"
           style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
         >
           Bag
         </h1>
-        <p className="text-[14px] sm:text-[15px] text-[#707072] mt-1">
+        <p className="text-[14px] sm:text-[15px] text-[#707072] mt-1 font-normal">
           {totalQuantity} {totalQuantity === 1 ? 'item' : 'items'} | ₹{subtotal.toLocaleString('en-IN')}
         </p>
+        <div className="border-t border-[#e5e5e5] mt-6" />
       </div>
 
-      {/* Top Divider Line */}
-      <div className="border-t border-[#e5e5e5] mt-6 mb-7" />
+      {/* 2-Column Desktop Grid / 1-Column Mobile Layout */}
+      <div className="lg:grid lg:grid-cols-[1fr_380px] lg:gap-16 xl:gap-20 items-start">
+        {/* LEFT COLUMN: Bag Items */}
+        <div>
 
-      {/* Bag Items List */}
-      <div className="space-y-8">
-        {cartItems.map((item, idx) => {
-          const itemKey = `${item.id}-${item.size}-${item.color}-${idx}`;
-          const isFavourited = wishlist[itemKey];
 
-          return (
-            <div key={itemKey}>
-              {/* Product Info Row */}
-              <div className="flex gap-4 sm:gap-5 items-start">
-                {/* Square Product Image */}
-                <div className="w-[124px] h-[124px] sm:w-[136px] sm:h-[136px] bg-[#f5f5f5] shrink-0 flex items-center justify-center">
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-full h-full object-contain mix-blend-multiply"
-                  />
-                </div>
+          {/* Items List */}
+          <div>
+            {cartItems.map((item, idx) => {
+              const itemKey = `${item.id}-${item.size}-${item.color}-${idx}`;
+              const isFavourited = wishlist[itemKey];
+              const itemColor =
+                item.color ||
+                (item.name?.toLowerCase().includes('stealth') ? 'Black' : idx % 2 === 0 ? 'Grey' : 'White');
+              const itemDelivery = 'Delivery by Wed, 28 Oct';
+              const isLowStock = idx % 2 === 0 ? 3 : 1;
 
-                {/* Details Column */}
-                <div className="flex-1 min-w-0 pt-0.5">
-                  <p className="text-[17px] sm:text-[18px] font-bold text-[#111111] leading-none">
-                    ₹ {(item.priceNumber || 13995).toLocaleString('en-IN')}
-                  </p>
+              return (
+                <div key={itemKey} className="border-b border-[#e5e5e5] pb-8 mb-8 last:border-b-0 last:mb-0">
+                  {/* Product Info Row */}
+                  <div className="flex gap-4 sm:gap-6 items-stretch">
+                    {/* Square Product Image (Clickable - height matches details, ZERO padding) */}
+                    <Link
+                      href={getProductHref(item)}
+                      className="self-stretch w-[130px] sm:w-[155px] shrink-0 flex items-center justify-center rounded-sm group overflow-hidden"
+                    >
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        loading="eager"
+                        fetchPriority="high"
+                        decoding="async"
+                        className="w-full h-full object-contain mix-blend-multiply transition-transform duration-300 group-hover:scale-105"
+                      />
+                    </Link>
 
-                  <h2
-                    className="text-[16px] sm:text-[17px] font-medium text-[#111111] mt-1.5 leading-snug font-['Helvetica_Now_Text_Medium',sans-serif]"
-                    style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
-                  >
-                    {item.name}
-                  </h2>
+                    {/* Details Column */}
+                    <div className="flex-1 min-w-0 pt-0.5">
+                      {/* 1. Price */}
+                      <p className="text-[17px] sm:text-[18px] font-bold text-[#111111] leading-none">
+                        ₹ {(item.priceNumber || 13995).toLocaleString('en-IN')}
+                      </p>
 
-                  <p className="text-[14px] text-[#707072] mt-1 leading-normal">
-                    {item.category || "Women's Training Shoes"} ({item.size})
-                  </p>
+                      {/* 2. Product Name */}
+                      <Link href={getProductHref(item)} className="block mt-1.5 hover:underline">
+                        <h2
+                          className="text-[16px] sm:text-[17px] font-bold text-[#111111] leading-snug font-['Helvetica_Now_Text_Medium',sans-serif]"
+                          style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                        >
+                          {item.name}
+                        </h2>
+                      </Link>
 
-                  <p className="text-[14px] text-[#707072] mt-0.5 leading-normal">14 Day Return</p>
+                      {/* 3. Category */}
+                      <p className="text-[14px] text-[#707072] leading-normal">
+                        {item.category || "Women's Training Shoes"}
+                      </p>
 
-                  <div className="mt-1">
-                    <span className="text-[14px] font-medium text-[#111111] underline underline-offset-4 decoration-1">
-                      Size {item.size}
-                    </span>
+                      {/* 4. Shipping / Delivery */}
+                      <p className="text-[14px] text-[#707072] leading-normal">
+                        Usually ships in 1 day
+                      </p>
+
+                      {/* 5. Return Policy */}
+                      <p className="text-[14px] text-[#707072] leading-normal">
+                        7 Day Return
+                      </p>
+
+                      {/* 6. Size */}
+                      <div className="mt-1">
+                        <button
+                          type="button"
+                          onClick={() => openSizeModal(item)}
+                          className="text-[14px] font-medium text-[#111111] underline underline-offset-4 decoration-1 cursor-pointer hover:text-[#707072] transition-colors"
+                        >
+                          Size {item.size || 'UK 8'}
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
 
-              {/* Quantity Pill + Wishlist Action Row */}
-              <div className="mt-3.5 flex items-center gap-2.5">
-                <div className="inline-flex items-center border border-[#e5e5e5] rounded-full h-10 px-3.5 bg-white">
-                  <button
-                    type="button"
-                    onClick={() => removeFromCart(item.id, item.size, item.color)}
-                    className="p-1 text-[#111111] hover:text-[#707072] transition-colors cursor-pointer"
-                    aria-label="Remove item"
-                  >
+                  {/* Quantity Pill + Wishlist Action Row */}
+                  <div className="mt-4 flex items-center gap-2.5">
+                    <div className="inline-flex items-center border border-[#e5e5e5] rounded-full h-10 px-3 bg-white">
+                      <button
+                        type="button"
+                        onClick={() => removeFromCart(item.id, item.size, item.color)}
+                        className="p-1 text-[#111111] hover:text-[#707072] transition-colors cursor-pointer"
+                        aria-label="Remove item"
+                      >
+                        <svg
+                          aria-hidden="true"
+                          focusable="false"
+                          viewBox="0 0 24 24"
+                          width="22px"
+                          height="22px"
+                          fill="none"
+                        >
+                          <path
+                            stroke="currentColor"
+                            strokeMiterlimit="10"
+                            strokeWidth="1.5"
+                            d="M13.75 10v7m-3.5-7v7m-3.5-8.5V17c0 1.24 1.01 2.25 2.25 2.25h6c1.24 0 2.25-1.01 2.25-2.25V7.75h2.25m-10-3h3.75c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5H4.5"
+                          />
+                        </svg>
+                      </button>
+
+                      <span className="px-3 text-[15px] font-medium text-[#111111] min-w-[24px] text-center">
+                        {item.quantity || 1}
+                      </span>
+
+                      <button
+                        type="button"
+                        onClick={() => updateCartQuantity(item.id, item.size, item.color, 1)}
+                        className="p-1 text-[#111111] hover:text-[#707072] text-[18px] font-normal transition-colors cursor-pointer leading-none flex items-center justify-center"
+                        aria-label="Increase quantity"
+                      >
+                        +
+                      </button>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => toggleWishlist(itemKey)}
+                      className={`w-10 h-10 rounded-full border border-[#e5e5e5] flex items-center justify-center transition-colors cursor-pointer hover:bg-neutral-50 ${
+                        isFavourited ? 'bg-neutral-50 text-red-500' : 'text-[#111111]'
+                      }`}
+                      aria-label={isFavourited ? 'Remove from favourites' : 'Save to favourites'}
+                    >
+                      <svg
+                        aria-hidden="true"
+                        viewBox="0 0 24 24"
+                        className="w-[18px] h-[18px]"
+                        fill={isFavourited ? 'currentColor' : 'none'}
+                        stroke="currentColor"
+                        strokeWidth="1.6"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  {/* Urgency Badge */}
+                  <div className="mt-3 flex items-center gap-1.5 text-[#b07800] text-[13.5px]">
                     <svg
                       aria-hidden="true"
-                      focusable="false"
                       viewBox="0 0 24 24"
-                      role="img"
-                      width="24px"
-                      height="24px"
+                      className="w-4 h-4 shrink-0"
                       fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                     >
-                      <path
-                        stroke="currentColor"
-                        strokeMiterlimit="10"
-                        strokeWidth="1.5"
-                        d="M13.75 10v7m-3.5-7v7m-3.5-8.5V17c0 1.24 1.01 2.25 2.25 2.25h6c1.24 0 2.25-1.01 2.25-2.25V7.75h2.25m-10-3h3.75c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5H4.5"
-                      />
+                      <circle cx="12" cy="12" r="10" />
+                      <polyline points="12 6 12 12 16 14" />
                     </svg>
-                  </button>
-
-                  <span className="px-3.5 text-[15px] font-medium text-[#111111] min-w-[28px] text-center">
-                    {item.quantity || 1}
-                  </span>
-
-                  <button
-                    type="button"
-                    onClick={() => updateCartQuantity(item.id, item.size, item.color, 1)}
-                    className="p-1 text-[#111111] hover:text-[#707072] text-[18px] font-normal transition-colors cursor-pointer leading-none flex items-center justify-center"
-                    aria-label="Increase quantity"
-                  >
-                    +
-                  </button>
+                    <span>Only {isLowStock} left.</span>
+                  </div>
                 </div>
+              );
+            })}
+          </div>
+        </div>
 
-                <button
-                  type="button"
-                  onClick={() => toggleWishlist(itemKey)}
-                  className={`w-10 h-10 rounded-full border border-[#e5e5e5] flex items-center justify-center transition-colors cursor-pointer hover:bg-neutral-50 ${
-                    isFavourited ? 'bg-neutral-50 text-red-500' : 'text-[#111111]'
-                  }`}
-                  aria-label={isFavourited ? 'Remove from favourites' : 'Save to favourites'}
-                >
-                  <svg
-                    aria-hidden="true"
-                    viewBox="0 0 24 24"
-                    className="w-[18px] h-[18px]"
-                    fill={isFavourited ? 'currentColor' : 'none'}
-                    stroke="currentColor"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                  </svg>
-                </button>
+        {/* RIGHT COLUMN: Sticky Summary Sidebar */}
+        <div className="lg:sticky lg:top-24 mt-8 lg:mt-0">
+          <h2 className="text-[22px] sm:text-[24px] font-bold text-[#111111] mb-5 tracking-tight">
+            Summary
+          </h2>
+
+          <div className="space-y-3.5 text-[15px] sm:text-[16px] text-[#111111]">
+            <div className="flex items-center justify-between">
+              <span>Bag Total</span>
+              <span>₹ {subtotal.toLocaleString('en-IN')}</span>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <span>Sub Total</span>
+              <span>₹ {subtotal.toLocaleString('en-IN')}</span>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <span>Shipping Charges</span>
+              <span className="text-[#0d8240] font-normal">Free</span>
+            </div>
+
+            {appliedPromo && (
+              <div className="flex items-center justify-between text-[#0d8240]">
+                <span>Promo ({appliedPromo.code})</span>
+                <span>- ₹ {promoDiscountAmount.toLocaleString('en-IN')}</span>
               </div>
+            )}
+          </div>
 
-              {/* Urgency Badge */}
-              <div className="mt-3 flex items-center gap-1.5 text-[#b07800] text-[14px]">
+          <div className="border-t border-[#e5e5e5] my-4" />
+
+          <div className="flex items-center justify-between text-[17px] sm:text-[18px] font-bold text-[#111111]">
+            <span>You Pay</span>
+            <span>₹ {youPay.toLocaleString('en-IN')}</span>
+          </div>
+
+          <div className="border-t border-[#e5e5e5] mt-4 mb-4" />
+
+          {/* Have a promo code? section strictly matching screenshot */}
+          <div className="border-b border-[#e5e5e5] pb-4">
+            <button
+              type="button"
+              onClick={() => setIsPromoOpen(!isPromoOpen)}
+              className="w-full flex items-center justify-between py-2 text-left cursor-pointer group"
+              aria-expanded={isPromoOpen}
+            >
+              <div className="flex items-center gap-3">
+                {/* Coupon ticket icon matching screenshot */}
                 <svg
-                  aria-hidden="true"
                   viewBox="0 0 24 24"
-                  className="w-4 h-4 shrink-0"
+                  className="w-5 h-5 text-[#111111] shrink-0"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+                  strokeWidth="1.6"
                 >
-                  <circle cx="12" cy="12" r="10" />
-                  <polyline points="12 6 12 12 16 14" />
+                  <rect x="2" y="6" width="20" height="12" rx="2" />
+                  <circle cx="8" cy="12" r="1.5" fill="currentColor" />
+                  <circle cx="16" cy="12" r="1.5" fill="currentColor" />
+                  <line x1="16" y1="9" x2="8" y2="15" strokeLinecap="round" />
                 </svg>
-                <span>Only 1 left.</span>
+                <div>
+                  <p className="text-[15px] font-bold text-[#111111] leading-tight">
+                    Have a promo code?
+                  </p>
+                  <p className="text-[13px] text-[#707072] mt-0.5 leading-tight">
+                    {appliedPromo
+                      ? `${appliedPromo.code} applied (10% off)`
+                      : 'Apply now to get instant savings'}
+                  </p>
+                </div>
               </div>
 
-              {/* Divider between items */}
-              <div className="border-t border-[#e5e5e5] mt-6" />
-            </div>
-          );
-        })}
+              <svg
+                viewBox="0 0 24 24"
+                className={`w-5 h-5 text-[#111111] transition-transform duration-200 shrink-0 ${
+                  isPromoOpen ? 'rotate-90' : ''
+                }`}
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+
+            {/* Promo Code Input Accordion */}
+            {isPromoOpen && (
+              <div className="mt-3 pt-2">
+                {appliedPromo ? (
+                  <div className="flex items-center justify-between bg-[#f5f5f5] px-3.5 py-2.5 rounded-lg text-[14px]">
+                    <span className="font-medium text-[#0d8240]">
+                      Code {appliedPromo.code} applied (-10%)
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleRemovePromo}
+                      className="text-[13px] text-[#707072] hover:text-[#111111] underline cursor-pointer"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleApplyPromo} className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Enter promo code"
+                      value={promoInput}
+                      onChange={(e) => {
+                        setPromoInput(e.target.value);
+                        setPromoError('');
+                      }}
+                      className="flex-1 px-3.5 py-2.5 rounded-full border border-[#8d8d8d] focus:border-[#111111] text-[14px] outline-none uppercase"
+                    />
+                    <button
+                      type="submit"
+                      className="px-5 py-2.5 rounded-full bg-[#111111] hover:bg-black text-white text-[14px] font-medium transition-all cursor-pointer"
+                    >
+                      Apply
+                    </button>
+                  </form>
+                )}
+                {promoError && (
+                  <p className="text-[12.5px] text-red-600 mt-1.5 pl-1">{promoError}</p>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Proceed to Buy CTA (Desktop sidebar only; mobile uses the fixed bottom bar) */}
+          <div className="hidden lg:block mt-6">
+            <button
+              type="button"
+              onClick={handleProceedToBuy}
+              className="w-full py-4 rounded-full bg-[#111111] hover:bg-black active:scale-[0.99] text-white text-[16px] font-medium transition-all shadow-sm cursor-pointer font-['Helvetica_Now_Text_Medium',sans-serif]"
+              style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+            >
+              Proceed to Buy
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Summary Section */}
-      <section className="pt-8 pb-4" aria-label="Order Summary">
-        <h2 className="text-[22px] sm:text-[24px] font-bold text-[#111111] mb-5 tracking-tight">
-          Summary
+      {/* SECTION: Last Minute Addition (Single row on mobile) */}
+      <section className="mt-8 sm:mt-16 lg:mt-24 pt-6 sm:pt-8 border-t border-[#f0f0f0]" aria-label="Last Minute Addition">
+        <h2 className="text-[24px] sm:text-[28px] font-bold text-[#111111] mb-6 sm:mb-8 tracking-tight">
+          Last Minute Addition
         </h2>
 
-        <div className="space-y-3.5 text-[15px] sm:text-[16px] text-[#111111]">
-          <div className="flex items-center justify-between">
-            <span>Bag Total</span>
-            <span>₹ {subtotal.toLocaleString('en-IN')}</span>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <span>Sub Total</span>
-            <span>₹ {subtotal.toLocaleString('en-IN')}</span>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <span>Shipping Charges</span>
-            <span className="text-[#0d8240] font-normal">Free</span>
-          </div>
-        </div>
-
-        <div className="border-t border-[#e5e5e5] my-4" />
-
-        <div className="flex items-center justify-between text-[18px] sm:text-[19px] font-bold text-[#111111]">
-          <span>You Pay</span>
-          <span>₹ {subtotal.toLocaleString('en-IN')}</span>
-        </div>
-
-        <div className="border-t border-[#e5e5e5] mt-4 mb-4" />
-      </section>
-
-      {/* Fixed Bottom Bar: Proceed to Buy */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#e5e5e5] h-[88px] flex items-center px-5 sm:px-6 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-        <div className="max-w-[540px] mx-auto w-full">
+        {/* Carousel / Grid Container with Navigation Arrows */}
+        <div className="relative">
+          {/* Left Arrow Button */}
           <button
             type="button"
-            onClick={handleProceedToBuy}
-            className="w-full py-4 rounded-full bg-[#111111] hover:bg-black active:scale-[0.99] text-white text-[16px] font-medium transition-all shadow-sm cursor-pointer font-['Helvetica_Now_Text_Medium',sans-serif]"
-            style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+            onClick={() => scrollAddons('left')}
+            className="hidden sm:flex absolute -left-4 top-[38%] -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-[0_2px_10px_rgba(0,0,0,0.12)] border border-[#e5e5e5] items-center justify-center text-[#111111] hover:bg-neutral-50 transition-all cursor-pointer active:scale-95"
+            aria-label="Previous items"
           >
-            Proceed to Buy
+            <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
           </button>
+
+          {/* Right Arrow Button */}
+          <button
+            type="button"
+            onClick={() => scrollAddons('right')}
+            className="hidden sm:flex absolute -right-4 top-[38%] -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-[0_2px_10px_rgba(0,0,0,0.12)] border border-[#e5e5e5] items-center justify-center text-[#111111] hover:bg-neutral-50 transition-all cursor-pointer active:scale-95"
+            aria-label="Next items"
+          >
+            <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+
+          {/* Addon Items: Strictly ONE row on phone, edge-to-edge scroll bleed, 4 columns on desktop */}
+          <div
+            ref={carouselRef}
+            className="-mx-5 px-5 sm:-mx-8 sm:px-8 lg:mx-0 lg:px-0 flex lg:grid lg:grid-cols-4 gap-2 sm:gap-6 overflow-x-auto scrollbar-none pb-2 snap-x snap-mandatory"
+          >
+            {LAST_MINUTE_ADDITIONS.map((addon) => {
+              const isAdded = addedAddonId === addon.id;
+
+              return (
+                <div
+                  key={addon.id}
+                  className="flex flex-col group w-[165px] sm:w-[190px] lg:w-auto shrink-0 snap-start first:pl-3 sm:first:pl-4 lg:first:pl-0"
+                >
+                  {/* Square Image Box (Smaller compact scale) */}
+                  <div className="w-full aspect-square flex items-center justify-center overflow-hidden">
+                    <img
+                      src={addon.image}
+                      alt={addon.title}
+                      loading="eager"
+                      fetchPriority="high"
+                      decoding="async"
+                      className="w-full h-full object-contain mix-blend-multiply transition-transform duration-300 group-hover:scale-105"
+                    />
+                  </div>
+
+                  {/* Info */}
+                  <div className="pt-2 flex-1 flex flex-col justify-between">
+                    <div>
+                      <p className="text-[11px] sm:text-[12px] text-[#707072] font-normal leading-tight">
+                        {addon.brand}
+                      </p>
+                      <h3 className="text-[12px] sm:text-[13px] font-normal text-[#111111] mt-0.5 leading-snug line-clamp-1">
+                        {addon.title}
+                      </h3>
+                      <p className="text-[13px] sm:text-[14px] font-bold text-[#111111] mt-1">
+                        {addon.priceFormatted}
+                      </p>
+                    </div>
+
+                    {/* Move to Bag Button */}
+                    <button
+                      type="button"
+                      onClick={() => handleMoveToBag(addon)}
+                      className={`mt-2.5 w-full py-1.5 sm:py-2 rounded-full border text-[12px] sm:text-[13px] font-medium transition-all cursor-pointer active:scale-[0.98] ${
+                        isAdded
+                          ? 'bg-[#0d8240] text-white border-[#0d8240]'
+                          : 'border-[#111111] text-[#111111] bg-white hover:bg-[#111111] hover:text-white'
+                      }`}
+                    >
+                      {isAdded ? 'Added ✓' : 'Move to Bag'}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
+      </section>
+
+      {/* Mobile Fixed Bottom Bar (Only visible on screens < lg) */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#e5e5e5] h-[80px] flex items-center px-5 sm:px-6 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
+        <button
+          type="button"
+          onClick={handleProceedToBuy}
+          className="w-full py-4 rounded-full bg-[#111111] hover:bg-black active:scale-[0.99] text-white text-[16px] font-medium transition-all shadow-sm cursor-pointer font-['Helvetica_Now_Text_Medium',sans-serif]"
+          style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+        >
+          Proceed to Buy
+        </button>
       </div>
+
+      {/* Size Selector Modal / Bottom Sheet (Matches User Screenshot Strictly) */}
+      {isSizeModalMounted && editingSizeItem && (
+        <div className="fixed inset-0 z-50 overflow-hidden font-['Helvetica_Now_Text',sans-serif]">
+          {/* Blacked-out backdrop overlay with smooth fade */}
+          <div
+            className={`fixed inset-0 bg-black/60 transition-opacity duration-300 ease-out cursor-pointer ${
+              isSizeBackdropVisible ? 'opacity-100' : 'opacity-0'
+            }`}
+            onClick={closeSizeModal}
+          />
+
+          {/* Drawer Sheet / Centered Modal */}
+          <div
+            className={`fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 w-full sm:max-w-[480px] bg-white rounded-t-[24px] sm:rounded-[24px] shadow-2xl z-50 px-6 pt-6 pb-8 overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+              isSizeModalVisible
+                ? 'translate-y-0 opacity-100 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:scale-100 sm:opacity-100'
+                : 'translate-y-full opacity-0 sm:-translate-x-1/2 sm:translate-y-[100vh] sm:scale-95 sm:opacity-0'
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header: Title, Category, Price on Left; Raw X on Right */}
+            <div className="flex items-start justify-between">
+              <div>
+                <h2 className="text-[18px] sm:text-[19px] font-bold text-[#111111] leading-tight font-['Helvetica_Now_Text_Medium',sans-serif]">
+                  {editingSizeItem.name}
+                </h2>
+                <p className="text-[15px] sm:text-[16px] text-[#111111] font-normal mt-1 leading-tight">
+                  {editingSizeItem.category || "Women's Training Shoes"}
+                </p>
+                <p className="text-[16px] sm:text-[17px] font-bold text-[#111111] mt-1.5 leading-tight">
+                  ₹{(editingSizeItem.priceNumber || 13995).toLocaleString('en-IN')}
+                </p>
+              </div>
+
+              {/* Close Button: Clean raw X matching screenshot */}
+              <button
+                type="button"
+                onClick={closeSizeModal}
+                className="p-1 -mr-1 -mt-1 text-[#111111] hover:opacity-60 transition-opacity cursor-pointer"
+                aria-label="Close"
+              >
+                <svg className="w-6 h-6 stroke-[1.8]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Size Grid: 4 columns, light grey border rounded boxes */}
+            <div className="mt-7">
+              <div className="grid grid-cols-4 gap-2.5 sm:gap-3">
+                {['UK 3', 'UK 4', 'UK 5', 'UK 6', 'UK 7', 'UK 8', 'UK 9'].map((sz) => {
+                  const isSelected = sz === tempSelectedSize;
+                  const isOutOfStock =
+                    sz === 'UK 9' &&
+                    (editingSizeItem.category?.toLowerCase().includes('women') ||
+                      editingSizeItem.name?.toLowerCase().includes('women') ||
+                      editingSizeItem.name?.toLowerCase().includes('hybrid rn'));
+
+                  if (isOutOfStock) {
+                    return (
+                      <div
+                        key={sz}
+                        className="h-[50px] sm:h-[52px] rounded-[8px] border border-[#e5e5e5] bg-[#fafafa] flex items-center justify-center text-[15px] sm:text-[16px] font-medium text-[#d1d5db] line-through cursor-not-allowed select-none"
+                      >
+                        {sz}
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <button
+                      key={sz}
+                      type="button"
+                      onClick={() => setTempSelectedSize(sz)}
+                      className={`h-[50px] sm:h-[52px] rounded-[8px] border text-[15px] sm:text-[16px] font-medium flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
+                        isSelected
+                          ? 'border-[#111111] bg-[#111111] text-white font-semibold'
+                          : 'border-[#d1d5db] bg-white text-[#111111] hover:border-[#111111]'
+                      }`}
+                    >
+                      {sz}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Bottom Button: Full-width pill matching screenshot strictly */}
+            <div className="mt-8">
+              <button
+                type="button"
+                disabled={!tempSelectedSize}
+                onClick={() => {
+                  if (!tempSelectedSize) return;
+                  updateCartItemSize(
+                    editingSizeItem.id,
+                    editingSizeItem.size,
+                    editingSizeItem.color,
+                    tempSelectedSize
+                  );
+                  setCartItems(getCartItems());
+                  closeSizeModal();
+                }}
+                className={`w-full py-4 rounded-full text-[16px] font-medium transition-all ${
+                  tempSelectedSize
+                    ? 'bg-[#111111] text-white hover:bg-black active:scale-[0.99] cursor-pointer'
+                    : 'bg-[#e5e5e5] text-[#8e8e93] cursor-not-allowed'
+                }`}
+              >
+                Add to bag
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Size Guide Modal (Layered on top with smooth cubic-bezier animation) */}
+      {isSizeGuideMounted && (
+        <div className="fixed inset-0 z-60 overflow-hidden font-['Helvetica_Now_Text',sans-serif]">
+          {/* Backdrop */}
+          <div
+            className={`fixed inset-0 bg-black/60 transition-opacity duration-300 ease-out cursor-pointer ${
+              isSizeGuideVisible ? 'opacity-100' : 'opacity-0'
+            }`}
+            onClick={closeSizeGuide}
+          />
+
+          {/* Modal Container */}
+          <div
+            className={`fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 w-full sm:max-w-[620px] max-h-[92vh] sm:max-h-[88vh] bg-white rounded-t-[26px] sm:rounded-[24px] shadow-2xl z-60 px-6 pt-6 pb-8 overflow-y-auto transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+              isSizeGuideVisible
+                ? 'translate-y-0 opacity-100 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:scale-100'
+                : 'translate-y-full opacity-0 sm:-translate-x-1/2 sm:translate-y-[100vh] sm:scale-95'
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between">
+              <div>
+                <h2 className="text-[26px] sm:text-[28px] font-medium text-[#111111] tracking-tight leading-tight">
+                  Size Guide
+                </h2>
+                <p className="text-[15px] text-[#707072] mt-1">
+                  {editingSizeItem?.name || 'Footwear'} Size Chart
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={closeSizeGuide}
+                className="w-9 h-9 rounded-full bg-[#f5f5f5] hover:bg-[#e8e8e8] flex items-center justify-center text-[#111111] transition-colors cursor-pointer"
+                aria-label="Close Size Guide"
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <p className="text-[15px] sm:text-[16px] text-[#111111] font-normal mt-6 mb-4">
+              Below are product&apos;s physical dimensions
+            </p>
+
+            {/* in / cm Pill Switcher */}
+            <div className="mb-6">
+              <div className="relative inline-flex items-center bg-[#f5f5f5] rounded-full p-1 h-[44px]">
+                <div
+                  className={`absolute top-1 bottom-1 w-[52px] rounded-full bg-white border border-[#111111] transition-all duration-300 ease-in-out ${
+                    sizeGuideUnit === 'in' ? 'left-1' : 'left-[55px]'
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setSizeGuideUnit('in')}
+                  className={`relative z-10 w-[52px] h-[36px] flex items-center justify-center text-[15px] font-medium transition-colors cursor-pointer ${
+                    sizeGuideUnit === 'in' ? 'text-[#111111]' : 'text-[#707072]'
+                  }`}
+                >
+                  in
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSizeGuideUnit('cm')}
+                  className={`relative z-10 w-[52px] h-[36px] flex items-center justify-center text-[15px] font-medium transition-colors cursor-pointer ${
+                    sizeGuideUnit === 'cm' ? 'text-[#111111]' : 'text-[#707072]'
+                  }`}
+                >
+                  cm
+                </button>
+              </div>
+            </div>
+
+            {/* Table */}
+            <div className="w-full overflow-x-auto border border-[#e5e5e5]">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-[#e5e5e5]">
+                    <th className="py-3.5 px-4 font-medium text-[#111111] bg-white border-r border-[#e5e5e5] align-top whitespace-nowrap min-w-[76px] text-[14px]">
+                      Size
+                    </th>
+                    <th className="py-3.5 px-3.5 font-medium text-[#111111] bg-[#fafafa] border-r border-[#e5e5e5] align-top leading-tight min-w-[105px] text-[14px]">
+                      Foot<br />Length
+                    </th>
+                    <th className="py-3.5 px-3.5 font-medium text-[#111111] bg-white border-r border-[#e5e5e5] align-top leading-tight min-w-[95px] text-[14px]">
+                      US<br />Size
+                    </th>
+                    <th className="py-3.5 px-3.5 font-medium text-[#111111] bg-[#fafafa] border-r border-[#e5e5e5] align-top leading-tight min-w-[95px] text-[14px]">
+                      EU<br />Size
+                    </th>
+                    <th className="py-3.5 px-3.5 font-medium text-[#111111] bg-white align-top leading-tight min-w-[95px] text-[14px]">
+                      CM /<br />JP
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#e5e5e5]">
+                  {SIZE_CHART.map((row) => (
+                    <tr
+                      key={row.size}
+                      className="hover:bg-neutral-50 transition-colors cursor-pointer"
+                      onClick={() => {
+                        if (editingSizeItem) {
+                          updateCartItemSize(
+                            editingSizeItem.id,
+                            editingSizeItem.size,
+                            editingSizeItem.color,
+                            row.size
+                          );
+                          setCartItems(getCartItems());
+                          closeSizeGuide();
+                          closeSizeModal();
+                        }
+                      }}
+                    >
+                      <td className="py-4 px-4 font-bold text-[#111111] bg-white border-r border-[#e5e5e5] whitespace-nowrap text-[15px]">
+                        {row.size}
+                      </td>
+                      <td className="py-4 px-3.5 font-normal text-[#111111] bg-[#fafafa] border-r border-[#e5e5e5] whitespace-nowrap text-[15px] transition-all duration-200">
+                        {sizeGuideUnit === 'in' ? `${row.inLength} in` : `${row.cmLength} cm`}
+                      </td>
+                      <td className="py-4 px-3.5 font-normal text-[#111111] bg-white border-r border-[#e5e5e5] whitespace-nowrap text-[15px]">
+                        {row.us}
+                      </td>
+                      <td className="py-4 px-3.5 font-normal text-[#111111] bg-[#fafafa] border-r border-[#e5e5e5] whitespace-nowrap text-[15px]">
+                        {row.eu}
+                      </td>
+                      <td className="py-4 px-3.5 font-normal text-[#111111] bg-white whitespace-nowrap text-[15px]">
+                        {row.cmJp}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

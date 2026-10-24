@@ -271,7 +271,7 @@ export default function PrivacyPage() {
               <ul className="list-disc pl-6 space-y-2 mb-4">
                 <li>
                   <strong className="text-[#111111]">Order Fulfillment:</strong> To prepare, dispatch,
-                  track, and deliver your footwear orders and process 14-day returns or exchanges.
+                  track, and deliver your footwear orders and process 7-day returns or exchanges.
                 </li>
                 <li>
                   <strong className="text-[#111111]">Customer Support:</strong> To resolve order

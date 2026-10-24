@@ -3,7 +3,7 @@ import Link from 'next/link';
 export const metadata = {
   title: 'Terms and Conditions of Sale – India | SONU Shoes',
   description:
-    'Read the official Terms and Conditions of Sale and Terms of Use for SONU Shoes in India. Understand our ordering, shipping, 14-day returns, and consumer policies.',
+    'Read the official Terms and Conditions of Sale and Terms of Use for SONU Shoes in India. Understand our ordering, shipping, 7-day returns, and consumer policies.',
   keywords: [
     'SONU terms and conditions',
     'terms of sale india',
@@ -399,16 +399,16 @@ export default function TermsPage() {
               </p>
             </section>
 
-            {/* 6. Returns & 14-Day Policy */}
+            {/* 6. Returns & 7-Day Policy */}
             <section className="pt-4 border-t border-[#f0f0f0]">
               <h2
                 className="text-[20px] sm:text-[22px] font-bold text-[#111111] mb-4 tracking-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
                 style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
               >
-                6. 14-DAY HASSLE-FREE RETURNS
+                6. 7-DAY HASSLE-FREE RETURNS
               </h2>
               <p className="mb-3">
-                6.1 We provide a 14-day return window from the date of delivery. You can initiate a
+                6.1 We provide a 7-day return window from the date of delivery. You can initiate a
                 return online through your account or by contacting{' '}
                 <a
                   href="mailto:support@sonu.shoes"
