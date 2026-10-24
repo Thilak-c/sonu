@@ -164,7 +164,7 @@ export default function CheckoutPage() {
     street: '',
     landmark: '',
     city: '',
-    state: 'Maharashtra',
+    state: 'Bihar',
   });
   const [addressErrors, setAddressErrors] = useState({});
   const [isDeliveryEstimateOpen, setIsDeliveryEstimateOpen] = useState(false);
@@ -227,7 +227,7 @@ export default function CheckoutPage() {
               houseNo: parsed.houseNo || '',
               street: parsed.street || parsed.roadArea || '',
               city: parsed.city || '',
-              state: parsed.state || prev.state || 'Maharashtra',
+              state: parsed.state || prev.state || 'Bihar',
               pincode: parsed.pincode || '',
               firstName: parsed.firstName || prev.firstName || '',
               lastName: parsed.lastName || prev.lastName || '',
@@ -266,7 +266,7 @@ export default function CheckoutPage() {
             houseNo: parsed.houseNo || '',
             street: parsed.street || parsed.roadArea || '',
             city: parsed.city || '',
-            state: parsed.state || prev.state || 'Maharashtra',
+            state: parsed.state || prev.state || 'Bihar',
             pincode: parsed.pincode || '',
             firstName: parsed.firstName || prev.firstName || '',
             lastName: parsed.lastName || prev.lastName || '',
@@ -1545,12 +1545,10 @@ export default function CheckoutPage() {
                     >
                       Partial Cash on Delivery
                     </p>
-                    <span className="px-2 py-0.5 rounded-full bg-neutral-100 text-[11px] font-bold text-[#111111]">
-                      ₹200 Advance
-                    </span>
+                   
                   </div>
                   <p className="text-[13px] text-[#707072] mt-0.5">
-                    Pay ₹200 advance now &bull; Balance ₹{Math.max(0, subtotal - 200).toLocaleString('en-IN')} on delivery
+                    Pay ₹200 now &bull; ₹{Math.max(0, subtotal - 200).toLocaleString('en-IN')} on delivery
                   </p>
                 </div>
               </div>
@@ -1570,13 +1568,13 @@ export default function CheckoutPage() {
 
             {selectedPaymentAccordion === 'partial_cod' && (
               <div className="mt-4 pt-3.5 border-t border-[#f0f0f0] space-y-4">
-                <div className="p-3.5 bg-neutral-50 rounded-[12px] border border-neutral-200/80 text-[13px] text-neutral-700 space-y-2">
+                <div className="text-[13px] text-neutral-700 space-y-2">
                   <div className="flex items-center justify-between font-medium">
                     <span>Advance Booking Deposit</span>
                     <span className="text-[#111111] font-bold">₹200</span>
                   </div>
                   <div className="flex items-center justify-between text-[#707072]">
-                    <span>Balance Due on Delivery</span>
+                    <span>Due on Delivery</span>
                     <span className="text-[#111111] font-semibold">
                       ₹{Math.max(0, subtotal - 200).toLocaleString('en-IN')}
                     </span>
@@ -1713,7 +1711,7 @@ export default function CheckoutPage() {
                         <span className="text-[#111111] font-medium">₹200</span>
                       </div>
                       <div className="flex items-center justify-between text-[14px] text-[#707072]">
-                        <span>Balance Due on Delivery</span>
+                        <span>Due on Delivery</span>
                         <span className="text-[#111111] font-medium">
                           ₹{Math.max(0, subtotal - 200).toLocaleString('en-IN')}
                         </span>

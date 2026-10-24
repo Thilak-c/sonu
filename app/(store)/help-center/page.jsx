@@ -68,7 +68,7 @@ export default function HelpCenterPage() {
         name: 'How can I contact customer support?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Reach out on WhatsApp at +91 8008439762 or email support@sonushoes.com.',
+          text: 'Reach out on WhatsApp at +91 8008439762 or email Support@sonushoe.in.',
         },
       },
     ],

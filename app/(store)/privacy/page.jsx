@@ -82,7 +82,7 @@ export default function PrivacyPage() {
           '@type': 'ContactPoint',
           telephone: '+91-1800-210-0202',
           contactType: 'Privacy & Customer Support',
-          email: 'support@sonu.shoes',
+          email: 'Support@sonushoe.in',
           areaServed: 'IN',
           availableLanguage: ['English', 'Hindi'],
         },
@@ -169,8 +169,8 @@ export default function PrivacyPage() {
               <p className="mb-3">
                 <strong className="text-[#111111]">Sonu Shoes Private Limited</strong> is an Indian
                 company incorporated under the provisions of the Companies Act, 2013, with its registered
-                office situated at 104, Vasan Udyog Bhavan, Senapati Bapat Marg, Sun Mill Compound,
-                Lower Parel, Mumbai, Maharashtra – 400013, India.
+                office situated at Second floor Patna One Plaza, New Dak Bunglow Rd, opp. Bharat Petrol Pump,
+                Bander Bagicha, Fraser Road Area, Patna, Bihar – 800001, India.
               </p>
               <p className="mb-3">
                 SONU designs, markets, and fulfills handcrafted luxury footwear, small-run runners,
@@ -375,10 +375,10 @@ export default function PrivacyPage() {
                 with personal data without parental consent, please contact our Grievance Officer immediately
                 at{' '}
                 <a
-                  href="mailto:grievance@sonu.shoes"
+                  href="mailto:Support@sonushoe.in"
                   className="text-[#111111] underline hover:text-[#707072]"
                 >
-                  grievance@sonu.shoes
+                  Support@sonushoe.in
                 </a>
                 , and we will delete the data from our records.
               </p>
@@ -503,16 +503,16 @@ export default function PrivacyPage() {
                   </li>
                   <li>
                     <strong className="text-[#111111]">Corporate Office:</strong> Sonu Shoes Private
-                    Limited, 104, Vasan Udyog Bhavan, Senapati Bapat Marg, Lower Parel, Mumbai,
-                    Maharashtra, PIN – 400013
+                    Limited, Second floor Patna One Plaza, New Dak Bunglow Rd, opp. Bharat Petrol Pump,
+                    Bander Bagicha, Fraser Road Area, Patna, Bihar, PIN – 800001
                   </li>
                   <li>
                     <strong className="text-[#111111]">Email:</strong>{' '}
                     <a
-                      href="mailto:grievance@sonu.shoes"
+                      href="mailto:Support@sonushoe.in"
                       className="text-[#111111] underline hover:text-[#707072]"
                     >
-                      grievance@sonu.shoes
+                      Support@sonushoe.in
                     </a>
                   </li>
                   <li>

@@ -1305,8 +1305,8 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
                 </ol>
                 <p className="pt-2 text-[13px] text-[#707072]">
                   Need support? Write to us anytime at{' '}
-                  <a href="mailto:support@sonu.shoes" className="underline font-medium text-[#111111]">
-                    support@sonu.shoes
+                  <a href="mailto:Support@sonushoe.in" className="underline font-medium text-[#111111]">
+                    Support@sonushoe.in
                   </a>
                   .
                 </p>

@@ -162,7 +162,7 @@ const TOPICS = [
       },
       {
         q: 'Do you offer bulk or corporate gifting orders?',
-        a: 'Yes, please reach out via WhatsApp (+91 8008439762) or email support@sonushoes.com for custom corporate footwear inquiries.',
+        a: 'Yes, please reach out via WhatsApp (+91 8008439762) or email Support@sonushoe.in for custom corporate footwear inquiries.',
       },
     ],
   },
@@ -524,7 +524,7 @@ export default function HelpCenterClient() {
               </a>
 
               <a
-                href="mailto:support@sonushoes.com?subject=Customer%20Support%20Inquiry"
+                href="mailto:Support@sonushoe.in?subject=Customer%20Support%20Inquiry"
                 className="w-full p-4 rounded-2xl border border-neutral-200 hover:border-black flex items-center justify-between transition-colors group cursor-pointer"
               >
                 <div className="flex items-center gap-3.5">
@@ -533,7 +533,7 @@ export default function HelpCenterClient() {
                   </span>
                   <div>
                     <p className="text-[14px] font-bold text-[#111111]">Email Support</p>
-                    <p className="text-[12px] text-[#707072]">support@sonushoes.com</p>
+                    <p className="text-[12px] text-[#707072]">Support@sonushoe.in</p>
                   </div>
                 </div>
                 <span className="text-neutral-400 group-hover:text-black transition-colors">↗</span>

@@ -83,7 +83,7 @@ export default function TermsPage() {
           '@type': 'ContactPoint',
           telephone: '+91-1800-210-0202',
           contactType: 'Customer Service',
-          email: 'support@sonu.shoes',
+          email: 'Support@sonushoe.in',
           areaServed: 'IN',
           availableLanguage: ['English', 'Hindi'],
         },
@@ -175,8 +175,8 @@ export default function TermsPage() {
               <p className="mb-3">
                 1.1 The Retailer is Sonu Shoes Private Limited, a company incorporated and registered
                 under the provisions of the Companies Act, 2013 and having its registered corporate
-                office at 104, Vasan Udyog Bhavan, Senapati Bapat Marg, Lower Parel, Mumbai,
-                Maharashtra, PIN – 400013, India. Retailer is inter-alia engaged in the business of
+                office at Second floor Patna One Plaza, New Dak Bunglow Rd, opp. Bharat Petrol Pump,
+                Bander Bagicha, Fraser Road Area, Patna, Bihar – 800001, India. Retailer is inter-alia engaged in the business of
                 designing, manufacturing, marketing, and retailing handcrafted ergonomic footwear and
                 lifestyle merchandise (“Business”) through the e-commerce platform owned and operated
                 by Retailer and its affiliates or physical brand showcases.
@@ -201,10 +201,10 @@ export default function TermsPage() {
                     <li>
                       Email:{' '}
                       <a
-                        href="mailto:support@sonu.shoes"
+                        href="mailto:Support@sonushoe.in"
                         className="text-[#111111] underline hover:text-[#707072]"
                       >
-                        support@sonu.shoes
+                        Support@sonushoe.in
                       </a>
                     </li>
                     <li>Toll-Free Helpline: 1800 210 0202</li>
@@ -224,16 +224,16 @@ export default function TermsPage() {
                     <li>Name: Mrs. Jennifer Irani</li>
                     <li>Designation: Nodal Grievance Officer – Customer Experience</li>
                     <li>
-                      Address: Sonu Shoes Private Limited, 104, Vasan Udyog Bhavan, Senapati Bapat
-                      Marg, Lower Parel, Mumbai, Maharashtra, PIN – 400013
+                      Address: Sonu Shoes Private Limited, Second floor Patna One Plaza, New Dak Bunglow
+                      Rd, opp. Bharat Petrol Pump, Bander Bagicha, Fraser Road Area, Patna, Bihar, PIN – 800001
                     </li>
                     <li>
                       Email:{' '}
                       <a
-                        href="mailto:grievance@sonu.shoes"
+                        href="mailto:Support@sonushoe.in"
                         className="text-[#111111] underline hover:text-[#707072]"
                       >
-                        grievance@sonu.shoes
+                        Support@sonushoe.in
                       </a>
                     </li>
                     <li>Dedicated Desk: 1800 266 3333 (Mon – Sat, 10:00 AM – 7:00 PM IST)</li>
@@ -411,10 +411,10 @@ export default function TermsPage() {
                 6.1 We provide a 7-day return window from the date of delivery. You can initiate a
                 return online through your account or by contacting{' '}
                 <a
-                  href="mailto:support@sonu.shoes"
+                  href="mailto:Support@sonushoe.in"
                   className="text-[#111111] underline hover:text-[#707072]"
                 >
-                  support@sonu.shoes
+                  Support@sonushoe.in
                 </a>
                 .
               </p>
@@ -542,7 +542,7 @@ export default function TermsPage() {
               <p className="mb-3">
                 These Terms and any Contract for the purchase of Products shall be governed by and
                 construed in accordance with the laws of the Republic of India. In the event of any
-                unresolved dispute, the competent courts at Mumbai, Maharashtra shall have exclusive
+                unresolved dispute, the competent courts at Patna, Bihar shall have exclusive
                 jurisdiction.
               </p>
             </section>

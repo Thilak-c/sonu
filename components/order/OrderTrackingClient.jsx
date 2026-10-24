@@ -194,17 +194,7 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
                 Thank you, {customer.name || 'Customer'}!
               </h1>
               <div className="flex flex-wrap items-center gap-2.5 mt-2">
-                {isPartialCod ? (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-neutral-100 text-[#111111] text-[12px] font-semibold tracking-tight border border-neutral-200">
-                    <span className="w-2 h-2 rounded-full bg-amber-500" />
-                    Partial COD (₹200 Paid)
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-neutral-100 text-[#111111] text-[12px] font-semibold tracking-tight border border-neutral-200">
-                    <span className="w-2 h-2 rounded-full bg-emerald-600" />
-                    Paid Online
-                  </span>
-                )}
+        
                 <span className="text-[13px] text-[#707072]">Order ID: {order.orderId}</span>
               </div>
             </div>
@@ -430,10 +420,8 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
           {isPartialCod ? (
             <div className="flex items-center justify-between text-[17px] sm:text-[18px] font-bold text-[#111111]">
               <span className="flex items-center gap-2">
-                <span>Balance Due on Delivery</span>
-                <span className="text-[12px] font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
-                  Cash on Delivery
-                </span>
+                <span>Due on Delivery</span>
+               
               </span>
               <span>₹ {balanceDue.toLocaleString('en-IN')}</span>
             </div>
