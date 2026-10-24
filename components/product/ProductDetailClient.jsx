@@ -568,7 +568,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
   })();
 
   return (
-    <div className="w-full bg-white select-none font-['Helvetica_Now_Text',sans-serif] text-[#111111] pb-20">
+    <div className="w-full bg-white select-none font-['Helvetica_Now_Text',sans-serif] text-[#111111] pb-20 overflow-x-hidden">
       {/* Main Container */}
       <div className="w-full px-5 sm:px-6 lg:px-8 pt-4 sm:pt-6">
         <div className="max-w-[1200px] xl:max-w-[1240px] mx-auto">
@@ -669,12 +669,17 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
             </div>
 
             {/* Mobile Scrollable Image Row (Mobile ONLY: 100vw edge-to-edge bleed, horizontal snap scroll) */}
-            <div className="block lg:hidden w-full">
+            <div className="block lg:hidden w-full overflow-hidden">
               <div
                 ref={mobileScrollRef}
                 onScroll={handleMobileScroll}
-                className="flex flex-row overflow-x-auto snap-x snap-mandatory scrollbar-none w-screen -mx-5 sm:-mx-6 touch-pan-x"
-                style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
+                className="flex flex-row overflow-x-auto snap-x snap-mandatory scrollbar-none no-scrollbar w-screen -mx-5 sm:-mx-6 touch-pan-x"
+                style={{
+                  scrollSnapType: 'x mandatory',
+                  WebkitOverflowScrolling: 'touch',
+                  scrollbarWidth: 'none',
+                  msOverflowStyle: 'none',
+                }}
               >
                 {productImages.map((img, idx) => (
                   <div
@@ -820,10 +825,10 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
                       key={size}
                       type="button"
                       onClick={() => setSelectedSize(size)}
-                      className={`h-[52px] sm:h-[54px] rounded-[8px] flex items-center justify-center text-[15px] sm:text-[16px] font-medium transition-all cursor-pointer ${
+                      className={`h-[42px] sm:h-[54px] rounded-[4px] flex items-center justify-center text-[15px] sm:text-[16px] font-medium transition-all cursor-pointer ${
                         isSelected
-                          ? 'border-2 border-[#111111] bg-white text-[#111111] '
-                          : 'border border-[#e5e5e5] bg-white text-[#111111] hover:border-[#111111]'
+                          ? 'border border-[#111111] bg-white text-[#111111] '
+                          : 'border border-[#c4c3c3] bg-white text-[#111111] hover:border-[#111111]'
                       }`}
                     >
                       {size}
