@@ -151,22 +151,50 @@ export default function OrdersHubClient() {
     }
   };
 
-  // Status headline: e.g. "Delivered on Oct 08"
+  // Calculate expected delivery date for undelivered products
+  const getDeliveryTargetDate = (order) => {
+    if (order.expectedDelivery) {
+      const d = new Date(order.expectedDelivery);
+      if (!isNaN(d.getTime())) return d;
+    }
+    if (order.shipment?.expectedDelivery) {
+      const d = new Date(order.shipment.expectedDelivery);
+      if (!isNaN(d.getTime())) return d;
+    }
+
+    const base = new Date(order.placedAt || order.createdAt || Date.now());
+    const target = new Date(base);
+    target.setDate(target.getDate() + 4);
+
+    // If target date is in the past, adjust to next upcoming delivery window
+    const now = new Date();
+    if (target < now) {
+      const upcoming = new Date(now);
+      upcoming.setDate(upcoming.getDate() + 2);
+      return upcoming;
+    }
+
+    return target;
+  };
+
+  // Status headline: "Delivered on Oct 08" or "Coming on [day]"
   const getStatusHeadline = (order) => {
-    const rawDate = order.deliveryDate || order.placedAt || order.createdAt || new Date();
-    const dateFormatted = formatDate(rawDate);
     const status = (order.shipment?.status || order.status || '').toUpperCase();
 
     if (status === 'DELIVERED') {
-      return `Delivered on ${dateFormatted}`;
+      const deliveredRaw = order.deliveryDate || order.deliveredAt || order.placedAt || order.createdAt || new Date();
+      return `Delivered on ${formatDate(deliveredRaw)}`;
     }
-    if (status === 'SHIPPED' || status === 'OUT_FOR_DELIVERY') {
-      return `Arriving by ${dateFormatted}`;
-    }
+
     if (status === 'CANCELLED') {
-      return `Cancelled on ${dateFormatted}`;
+      const cancelledRaw = order.cancelledAt || order.placedAt || order.createdAt || new Date();
+      return `Cancelled on ${formatDate(cancelledRaw)}`;
     }
-    return `Delivered on ${dateFormatted}`;
+
+    // If the product is not delivered, say "Coming on [day]"
+    const targetDate = getDeliveryTargetDate(order);
+    const dayName = targetDate.toLocaleDateString('en-US', { weekday: 'long' });
+    return `Coming on ${dayName}`;
   };
 
   // Subtitle: e.g. "Minutes Basket (1 item)"
@@ -194,9 +222,9 @@ export default function OrdersHubClient() {
           >
             Orders
           </h1>
-          <p className="text-[14px] sm:text-[15px] text-[#707072] mt-1 font-normal">
+          <p className="text-[14px] sm:text-[15px] text-[#707072] font-normal">
             {orders.length} {orders.length === 1 ? 'order' : 'orders'}
-            {userMobile ? ` | +91 ${userMobile}` : ''}
+            
           </p>
           <div className="border-t border-[#e5e5e5] mt-6" />
         </div>
