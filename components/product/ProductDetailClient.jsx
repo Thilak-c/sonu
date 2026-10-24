@@ -86,6 +86,30 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
     }
   };
 
+  // Mobile horizontal snap scroll ref and handler
+  const mobileScrollRef = useRef(null);
+
+  const handleMobileScroll = () => {
+    if (!mobileScrollRef.current) return;
+    const { scrollLeft, clientWidth } = mobileScrollRef.current;
+    if (clientWidth > 0) {
+      const newIndex = Math.round(scrollLeft / clientWidth);
+      if (newIndex >= 0 && newIndex < productImages.length && newIndex !== currentImageIndex) {
+        setCurrentImageIndex(newIndex);
+      }
+    }
+  };
+
+  const scrollToSlide = (index) => {
+    setCurrentImageIndex(index);
+    if (mobileScrollRef.current) {
+      mobileScrollRef.current.scrollTo({
+        left: index * mobileScrollRef.current.clientWidth,
+        behavior: 'smooth',
+      });
+    }
+  };
+
   // Update product if initialProduct prop changes
   useEffect(() => {
     if (initialProduct) {
@@ -606,8 +630,8 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
               </div>
             )}
 
-            {/* Main Hero Image Area */}
-            <div className="flex-1 w-full aspect-square relative overflow-hidden flex items-center justify-center p-0 m-0 group">
+            {/* Desktop Hero Image Area (Desktop ONLY - unchanged) */}
+            <div className="hidden lg:flex flex-1 w-full aspect-square relative overflow-hidden items-center justify-center p-0 m-0 group">
               <FallbackImage
                 src={activeImage}
                 alt={product.name}
@@ -625,7 +649,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
                         (prev) => (prev - 1 + productImages.length) % productImages.length
                       )
                     }
-                    className="w-9 h-9 rounded-full bg-white hover:bg-neutral-100 flex items-center justify-center  transition-all cursor-pointer"
+                    className="w-9 h-9 rounded-full bg-white hover:bg-neutral-100 flex items-center justify-center transition-all cursor-pointer shadow-sm"
                     aria-label="Previous image"
                   >
                     <ChevronLeft className="w-4 h-4 text-[#111111]" />
@@ -635,7 +659,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
                     onClick={() =>
                       setCurrentImageIndex((prev) => (prev + 1) % productImages.length)
                     }
-                    className="w-9 h-9 rounded-full bg-white hover:bg-neutral-100 flex items-center justify-center  transition-all cursor-pointer"
+                    className="w-9 h-9 rounded-full bg-white hover:bg-neutral-100 flex items-center justify-center transition-all cursor-pointer shadow-sm"
                     aria-label="Next image"
                   >
                     <ChevronRight className="w-4 h-4 text-[#111111]" />
@@ -644,24 +668,48 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
               )}
             </div>
 
-            {/* Mobile Carousel Pagination Dots */}
-            {productImages.length > 1 && (
-              <div className="flex lg:hidden items-center justify-center gap-2 py-2">
-                {productImages.map((_, idx) => (
-                  <button
-                    key={`mob-dot-${idx}`}
-                    type="button"
-                    onClick={() => setCurrentImageIndex(idx)}
-                    className={`transition-all rounded-full cursor-pointer ${
-                      currentImageIndex === idx
-                        ? 'w-5 h-2 bg-[#111111]'
-                        : 'w-2 h-2 bg-[#d2d2d2] hover:bg-[#8d8d8d]'
-                    }`}
-                    aria-label={`Slide ${idx + 1}`}
-                  />
+            {/* Mobile Scrollable Image Row (Mobile ONLY: 100vw edge-to-edge bleed, horizontal snap scroll) */}
+            <div className="block lg:hidden w-full">
+              <div
+                ref={mobileScrollRef}
+                onScroll={handleMobileScroll}
+                className="flex flex-row overflow-x-auto snap-x snap-mandatory scrollbar-none w-screen -mx-5 sm:-mx-6 touch-pan-x"
+                style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
+              >
+                {productImages.map((img, idx) => (
+                  <div
+                    key={`mob-slide-${idx}`}
+                    className="w-screen shrink-0 aspect-square snap-center flex items-center justify-center p-4 sm:p-6"
+                  >
+                    <FallbackImage
+                      src={img}
+                      alt={`${product.name} view ${idx + 1}`}
+                      className="w-full h-full object-contain"
+                      logoSize="w-8 h-8"
+                    />
+                  </div>
                 ))}
               </div>
-            )}
+
+              {/* Mobile Carousel Pagination Dots */}
+              {productImages.length > 1 && (
+                <div className="flex items-center justify-center gap-1.5 pt-3 pb-1">
+                  {productImages.map((_, idx) => (
+                    <button
+                      key={`mob-dot-${idx}`}
+                      type="button"
+                      onClick={() => scrollToSlide(idx)}
+                      className={`transition-all rounded-full cursor-pointer ${
+                        currentImageIndex === idx
+                          ? 'w-5 h-2 bg-[#111111]'
+                          : 'w-2 h-2 bg-[#d2d2d2] hover:bg-[#8d8d8d]'
+                      }`}
+                      aria-label={`Go to slide ${idx + 1}`}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
 
           </div>
 
