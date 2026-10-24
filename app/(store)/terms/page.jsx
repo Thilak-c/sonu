@@ -132,8 +132,8 @@ export default function TermsPage() {
             {/* Preamble */}
             <section className="space-y-4">
               <p>
-                This page provides you information about Sonu shoe Private Limited (“
-                <strong className="text-[#111111]">Sonu shoe</strong>”, “
+                This page provides you information about Sonu Shoe (“
+                <strong className="text-[#111111]">Sonu Shoe</strong>”, “
                 <strong className="text-[#111111]">Retailer</strong>”, “
                 <strong className="text-[#111111]">we</strong>”, “
                 <strong className="text-[#111111]">our</strong>” and/or “
@@ -173,8 +173,7 @@ export default function TermsPage() {
                 1. INFORMATION ABOUT US
               </h2>
               <p className="mb-3">
-                1.1 The Retailer is Sonu shoe Private Limited, a company incorporated and registered
-                under the provisions of the Companies Act, 2013 and having its registered corporate
+                1.1 The Retailer is Sonu Shoe, an enterprise having its registered corporate
                 office at Second floor Patna One Plaza, New Dak Bunglow Rd, opp. Bharat Petrol Pump,
                 Bander Bagicha, Fraser Road Area, Patna, Bihar – 800001, India. Retailer is inter-alia engaged in the business of
                 designing, manufacturing, marketing, and retailing handcrafted ergonomic footwear and
@@ -224,7 +223,7 @@ export default function TermsPage() {
                     <li>Name: Mrs. Jennifer Irani</li>
                     <li>Designation: Nodal Grievance Officer – Customer Experience</li>
                     <li>
-                      Address: Sonu shoe Private Limited, Second floor Patna One Plaza, New Dak Bunglow
+                      Address: Sonu Shoe, Second floor Patna One Plaza, New Dak Bunglow
                       Rd, opp. Bharat Petrol Pump, Bander Bagicha, Fraser Road Area, Patna, Bihar, PIN – 800001
                     </li>
                     <li>
@@ -264,7 +263,7 @@ export default function TermsPage() {
               </p>
               <p className="mb-3">
                 2.2 By submitting an order through our Site, you acknowledge that your transaction is
-                directly with Sonu shoe Private Limited. Upon verification of payment information
+                directly with Sonu Shoe. Upon verification of payment information
                 and order validity, we will fulfill your order at the pricing and terms agreed upon
                 submission.
               </p>
@@ -340,9 +339,8 @@ export default function TermsPage() {
               <p className="mb-3">
                 3.5 <strong className="text-[#111111]">Intellectual Property Rights:</strong> All
                 designs, trademarks, brand logos, typography, shoe models, photography, graphics,
-                software, and text on this Site are the exclusive intellectual property of Sonu shoe
-                Private Limited and protected by applicable copyright, trademark, and design laws in
-                India.
+                software, and text on this Site are the exclusive intellectual property of Sonu Shoe
+                and protected by applicable copyright, trademark, and design laws in India.
               </p>
             </section>
 
@@ -467,7 +465,7 @@ export default function TermsPage() {
               </p>
               <p className="mb-3 text-[14px] leading-relaxed text-[#444444]">
                 THE SITE AND ITS CONTENTS ARE PROVIDED ON AN “AS IS” AND “AS AVAILABLE” BASIS. TO THE
-                MAXIMUM EXTENT PERMITTED BY APPLICABLE INDIAN LAW, SONU SHOE PRIVATE LIMITED
+                MAXIMUM EXTENT PERMITTED BY APPLICABLE INDIAN LAW, SONU SHOE
                 DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WARRANTIES OF MERCHANTABILITY,
                 FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
               </p>

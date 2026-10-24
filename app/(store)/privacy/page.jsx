@@ -132,7 +132,7 @@ export default function PrivacyPage() {
             <section className="space-y-4">
               <p>
                 This <strong className="text-[#111111]">Privacy Policy</strong> outlines{' '}
-                <strong className="text-[#111111]">Sonu shoe Private Limited</strong>’s approach
+                <strong className="text-[#111111]">Sonu Shoe</strong>’s approach
                 to Data Protection and Privacy to fulfill its obligations under the{' '}
                 <strong className="text-[#111111]">applicable laws and regulations in India</strong>
                 , including, but not limited to, the Digital Personal Data Protection Act of 2023
@@ -152,8 +152,8 @@ export default function PrivacyPage() {
                 order products on our Platform.
               </p>
               <p>
-                Throughout this document, “we”, “us”, “our”, “ours”, “Sonu shoe” refer to{' '}
-                <strong className="text-[#111111]">Sonu shoe Private Limited</strong>. Wherever we
+                Throughout this document, “we”, “us”, “our”, “ours”, “Sonu Shoe” refer to{' '}
+                <strong className="text-[#111111]">Sonu Shoe</strong>. Wherever we
                 have said “you” or “your” or “Customer”, this refers to YOU as the Data Principal.
               </p>
             </section>
@@ -167,8 +167,7 @@ export default function PrivacyPage() {
                 WHO WE ARE
               </h2>
               <p className="mb-3">
-                <strong className="text-[#111111]">Sonu shoe Private Limited</strong> is an Indian
-                company incorporated under the provisions of the Companies Act, 2013, with its registered
+                <strong className="text-[#111111]">Sonu Shoe</strong> has its registered
                 office situated at Second floor Patna One Plaza, New Dak Bunglow Rd, opp. Bharat Petrol Pump,
                 Bander Bagicha, Fraser Road Area, Patna, Bihar – 800001, India.
               </p>
@@ -502,8 +501,8 @@ export default function PrivacyPage() {
                     Customer Service & Privacy
                   </li>
                   <li>
-                    <strong className="text-[#111111]">Corporate Office:</strong> Sonu shoe Private
-                    Limited, Second floor Patna One Plaza, New Dak Bunglow Rd, opp. Bharat Petrol Pump,
+                    <strong className="text-[#111111]">Corporate Office:</strong> Sonu Shoe,
+                    Second floor Patna One Plaza, New Dak Bunglow Rd, opp. Bharat Petrol Pump,
                     Bander Bagicha, Fraser Road Area, Patna, Bihar, PIN – 800001
                   </li>
                   <li>
