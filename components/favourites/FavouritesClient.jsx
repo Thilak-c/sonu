@@ -17,6 +17,10 @@ export default function FavouritesClient() {
   const [selectedSize, setSelectedSize] = useState('UK 8');
   const [isModalVisible, setIsModalVisible] = useState(false);
 
+  // Size Guide modal state
+  const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
+  const [sizeGuideUnit, setSizeGuideUnit] = useState('cm');
+
   // Toast confirmation
   const [toastMessage, setToastMessage] = useState('');
 
@@ -172,7 +176,7 @@ export default function FavouritesClient() {
                   <div className="relative aspect-square bg-[#f6f6f6] overflow-hidden flex items-center justify-center group">
                     <Link
                       href={`/product/${product.slug || product.id}`}
-                      className="w-full h-full flex items-center justify-center p-3 sm:p-5 cursor-pointer"
+                      className="w-full h-full flex items-center justify-center cursor-pointer"
                     >
                       <img
                         src={product.image}
@@ -328,7 +332,13 @@ export default function FavouritesClient() {
             <div className="py-5">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-[14px] font-bold text-[#111111]">Select Size</span>
-                <span className="text-[12px] text-[#707072]">UK Sizing</span>
+                <button
+                  type="button"
+                  onClick={() => setIsSizeGuideOpen(true)}
+                  className="text-[12px] sm:text-[13px] text-[#707072] underline hover:text-[#111111] transition-colors cursor-pointer"
+                >
+                  Size Guide
+                </button>
               </div>
               <div className="grid grid-cols-4 sm:grid-cols-4 gap-2">
                 {CATALOG_SIZES.map((size) => {
@@ -360,6 +370,122 @@ export default function FavouritesClient() {
                 style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
               >
                 Move to Bag • {selectedSize}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SIZE GUIDE MODAL */}
+      {isSizeGuideOpen && (
+        <div className="fixed inset-0 z-50 overflow-hidden font-['Helvetica_Now_Text',sans-serif]">
+          <div
+            className="fixed inset-0 bg-black/60 transition-opacity duration-300 ease-out cursor-pointer"
+            onClick={() => setIsSizeGuideOpen(false)}
+          />
+
+          <div
+            className="fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 w-full sm:max-w-[540px] max-h-[90vh] bg-white rounded-t-[24px] sm:rounded-[24px] shadow-2xl z-50 p-6 sm:p-7 overflow-y-auto sm:-translate-x-1/2 sm:-translate-y-1/2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between pb-3 border-b border-[#f0f0f0]">
+              <div>
+                <h2 className="text-[20px] sm:text-[22px] font-bold text-[#111111] tracking-tight">
+                  Size Guide
+                </h2>
+                <p className="text-[13px] text-[#707072] mt-0.5">
+                  Footwear Size Conversion & Measurements
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsSizeGuideOpen(false)}
+                className="w-8 h-8 rounded-full bg-[#f5f5f5] hover:bg-[#e8e8e8] flex items-center justify-center text-[#111111] transition-colors cursor-pointer"
+                aria-label="Close Size Guide"
+              >
+                <svg viewBox="0 0 24 24" width="16px" height="16px" stroke="currentColor" fill="none" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+
+            {/* in / cm Switcher */}
+            <div className="my-4 flex items-center justify-between">
+              <span className="text-[13px] text-[#707072]">Foot Length Unit:</span>
+              <div className="inline-flex items-center bg-[#f5f5f5] rounded-full p-1 h-[36px]">
+                <button
+                  type="button"
+                  onClick={() => setSizeGuideUnit('cm')}
+                  className={`px-3 py-1 text-[13px] rounded-full font-medium transition-all cursor-pointer ${
+                    sizeGuideUnit === 'cm'
+                      ? 'bg-white text-[#111111] shadow-xs'
+                      : 'text-[#707072] hover:text-[#111111]'
+                  }`}
+                >
+                  cm
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSizeGuideUnit('in')}
+                  className={`px-3 py-1 text-[13px] rounded-full font-medium transition-all cursor-pointer ${
+                    sizeGuideUnit === 'in'
+                      ? 'bg-white text-[#111111] shadow-xs'
+                      : 'text-[#707072] hover:text-[#111111]'
+                  }`}
+                >
+                  in
+                </button>
+              </div>
+            </div>
+
+            {/* Conversion Table */}
+            <div className="overflow-x-auto border border-[#e5e5e5] rounded-xl">
+              <table className="w-full text-left border-collapse text-[13px]">
+                <thead>
+                  <tr className="bg-[#f9f9f9] border-b border-[#e5e5e5] text-[#111111] font-semibold">
+                    <th className="py-2.5 px-3 border-r border-[#e5e5e5]">UK</th>
+                    <th className="py-2.5 px-3 border-r border-[#e5e5e5]">US Men</th>
+                    <th className="py-2.5 px-3 border-r border-[#e5e5e5]">US Women</th>
+                    <th className="py-2.5 px-3 border-r border-[#e5e5e5]">EU</th>
+                    <th className="py-2.5 px-3">Length ({sizeGuideUnit})</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#f0f0f0] text-[#333333]">
+                  {[
+                    { uk: 'UK 3', usM: '3.5', usW: '5', eu: '35.5', cm: '22.0', in: '8.7' },
+                    { uk: 'UK 4', usM: '4.5', usW: '6', eu: '37', cm: '23.0', in: '9.1' },
+                    { uk: 'UK 5', usM: '5.5', usW: '7', eu: '38', cm: '24.0', in: '9.4' },
+                    { uk: 'UK 6', usM: '6.5', usW: '8', eu: '39', cm: '24.8', in: '9.8' },
+                    { uk: 'UK 7', usM: '7.5', usW: '9', eu: '40.5', cm: '25.5', in: '10.0' },
+                    { uk: 'UK 8', usM: '8.5', usW: '10', eu: '42', cm: '26.5', in: '10.4' },
+                    { uk: 'UK 9', usM: '9.5', usW: '11', eu: '43', cm: '27.5', in: '10.8' },
+                  ].map((row) => (
+                    <tr
+                      key={row.uk}
+                      className={`hover:bg-[#f9f9f9] transition-colors ${
+                        selectedSize === row.uk ? 'bg-neutral-50 font-semibold text-[#111111]' : ''
+                      }`}
+                    >
+                      <td className="py-2 px-3 border-r border-[#e5e5e5]">{row.uk}</td>
+                      <td className="py-2 px-3 border-r border-[#e5e5e5]">{row.usM}</td>
+                      <td className="py-2 px-3 border-r border-[#e5e5e5]">{row.usW}</td>
+                      <td className="py-2 px-3 border-r border-[#e5e5e5]">{row.eu}</td>
+                      <td className="py-2 px-3">{sizeGuideUnit === 'cm' ? row.cm : row.in}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="mt-5 pt-3 border-t border-[#f0f0f0]">
+              <button
+                type="button"
+                onClick={() => setIsSizeGuideOpen(false)}
+                className="w-full py-3 rounded-full bg-[#111111] hover:bg-black text-white text-[14px] font-medium transition-colors cursor-pointer"
+              >
+                Done
               </button>
             </div>
           </div>
