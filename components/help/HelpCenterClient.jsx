@@ -5,30 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 const TOPICS = [
-  {
-    id: 'account',
-    title: 'Account Settings and Shopping',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8 text-[#111111]">
-        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-        <circle cx="12" cy="7" r="4" />
-      </svg>
-    ),
-    faqs: [
-      {
-        q: 'How do I create or manage my SONU account?',
-        a: 'Your account is automatically created using your verified 10-digit mobile number during your first checkout. We auto-save your shipping address for fast, 1-click orders.',
-      },
-      {
-        q: 'Can I change my saved delivery address?',
-        a: 'Yes, when placing an order in the checkout drawer, you can edit your existing address or add a new shipping address before making payment.',
-      },
-      {
-        q: 'How do I choose the right shoe size?',
-        a: 'We use standard UK shoe sizing. Refer to our size guide on each product page or select your usual Nike / running shoe UK size for an ergonomic, true-to-fit feel.',
-      },
-    ],
-  },
+
   {
     id: 'checkout',
     title: 'Checkout and Payment',
