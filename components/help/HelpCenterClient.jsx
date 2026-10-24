@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -166,8 +166,18 @@ const TOPICS = [
 
 export default function HelpCenterClient() {
   const router = useRouter();
+
+  // Topic Modal Animation States
   const [selectedTopic, setSelectedTopic] = useState(null);
-  const [isContactOpen, setIsContactOpen] = useState(false);
+  const [isTopicMounted, setIsTopicMounted] = useState(false);
+  const [isTopicVisible, setIsTopicVisible] = useState(false);
+  const topicTimerRef = useRef(null);
+
+  // Contact Modal Animation States
+  const [isContactMounted, setIsContactMounted] = useState(false);
+  const [isContactVisible, setIsContactVisible] = useState(false);
+  const contactTimerRef = useRef(null);
+
   const [trackingInput, setTrackingInput] = useState('');
 
   const handleBack = () => {
@@ -178,6 +188,49 @@ export default function HelpCenterClient() {
     }
   };
 
+  const openTopicModal = (topic) => {
+    if (topicTimerRef.current) clearTimeout(topicTimerRef.current);
+    setSelectedTopic(topic);
+    setIsTopicMounted(true);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setIsTopicVisible(true);
+      });
+    });
+  };
+
+  const closeTopicModal = () => {
+    setIsTopicVisible(false);
+    topicTimerRef.current = setTimeout(() => {
+      setIsTopicMounted(false);
+      setSelectedTopic(null);
+    }, 320);
+  };
+
+  const openContactModal = () => {
+    if (contactTimerRef.current) clearTimeout(contactTimerRef.current);
+    setIsContactMounted(true);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setIsContactVisible(true);
+      });
+    });
+  };
+
+  const closeContactModal = () => {
+    setIsContactVisible(false);
+    contactTimerRef.current = setTimeout(() => {
+      setIsContactMounted(false);
+    }, 320);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (topicTimerRef.current) clearTimeout(topicTimerRef.current);
+      if (contactTimerRef.current) clearTimeout(contactTimerRef.current);
+    };
+  }, []);
+
   const handleTrackSubmit = (e) => {
     e.preventDefault();
     if (!trackingInput.trim()) return;
@@ -185,7 +238,7 @@ export default function HelpCenterClient() {
   };
 
   return (
-    <div className="min-h-screen bg-white font-['Helvetica_Now_Text',sans-serif] text-[#111111] pb-24 pt-3 sm:pt-6">
+    <div className="min-h-screen bg-white font-['Helvetica_Now_Text',sans-serif] text-[#111111] pb-24 pt-4 sm:pt-8">
       <div className="max-w-[480px] sm:max-w-[540px] mx-auto px-4 sm:px-6">
         
         {/* Top Navigation Row: Back Button */}
@@ -254,7 +307,7 @@ export default function HelpCenterClient() {
               <button
                 key={topic.id}
                 type="button"
-                onClick={() => setSelectedTopic(topic)}
+                onClick={() => openTopicModal(topic)}
                 className="p-4 sm:p-5 border border-[#d1d5db] rounded-[14px] bg-white hover:border-black active:bg-neutral-50 flex flex-col items-center justify-center text-center transition-all cursor-pointer group min-h-[125px] sm:min-h-[135px]"
               >
                 <div className="transition-transform duration-200 group-hover:scale-110">
@@ -279,7 +332,7 @@ export default function HelpCenterClient() {
 
           <button
             type="button"
-            onClick={() => setIsContactOpen(true)}
+            onClick={openContactModal}
             className="w-full border border-[#d1d5db] rounded-[16px] p-4 flex items-center justify-between bg-white hover:border-black active:bg-neutral-50 transition-colors cursor-pointer group text-left"
           >
             <div className="flex items-center gap-3.5">
@@ -308,52 +361,72 @@ export default function HelpCenterClient() {
 
       </div>
 
-      {/* TOPIC DETAIL MODAL */}
-      {selectedTopic && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-xs transition-opacity">
-          <div className="w-full sm:max-w-[480px] bg-white rounded-t-[24px] sm:rounded-[24px] p-6 max-h-[85vh] overflow-y-auto shadow-2xl animate-in slide-in-from-bottom-4 duration-200">
-            <div className="flex items-center justify-between pb-4 border-b border-neutral-100">
+      {/* TOPIC DETAIL MODAL - animated identical to product detail popups */}
+      {isTopicMounted && selectedTopic && (
+        <div className="fixed inset-0 z-50 overflow-hidden font-['Helvetica_Now_Text',sans-serif]">
+          <div
+            className={`fixed inset-0 bg-black/60 transition-opacity duration-300 ease-out cursor-pointer ${
+              isTopicVisible ? 'opacity-100' : 'opacity-0'
+            }`}
+            onClick={closeTopicModal}
+          />
+          <div
+            className={`fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 w-full sm:max-w-[520px] bg-white rounded-t-[28px] sm:rounded-[24px] shadow-2xl z-50 p-6 sm:p-7 overflow-y-auto max-h-[85vh] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+              isTopicVisible
+                ? 'translate-y-0 opacity-100 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:scale-100'
+                : 'translate-y-full opacity-0 sm:-translate-x-1/2 sm:-translate-y-[45%] sm:scale-95'
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-3.5 border-b border-[#f0f0f0]">
               <div className="flex items-center gap-3">
                 <div className="shrink-0">{selectedTopic.icon}</div>
-                <h3 className="text-[17px] font-bold text-[#111111]">
+                <h2
+                  className="text-[19px] sm:text-[20px] font-bold text-[#111111] font-['Helvetica_Now_Text_Medium',sans-serif]"
+                  style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                >
                   {selectedTopic.title}
-                </h3>
+                </h2>
               </div>
               <button
                 type="button"
-                onClick={() => setSelectedTopic(null)}
-                className="w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-neutral-600 transition-colors cursor-pointer text-lg"
+                onClick={closeTopicModal}
+                className="w-9 h-9 rounded-full bg-[#f5f5f5] hover:bg-[#e8e8e8] flex items-center justify-center text-[#111111] transition-colors cursor-pointer"
+                aria-label="Close"
               >
-                ✕
+                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2" fill="none">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
               </button>
             </div>
 
-            <div className="divide-y divide-neutral-100 py-4 space-y-4">
+            <div className="divide-y divide-[#f0f0f0] py-4 space-y-4">
               {selectedTopic.faqs.map((faq, idx) => (
                 <div key={idx} className="pt-3 first:pt-0">
-                  <p className="text-[14px] font-bold text-[#111111] mb-1">
+                  <p className="text-[14.5px] font-bold text-[#111111] mb-1">
                     {faq.q}
                   </p>
-                  <p className="text-[13px] text-neutral-600 leading-relaxed">
+                  <p className="text-[13.5px] text-[#707072] leading-relaxed">
                     {faq.a}
                   </p>
                 </div>
               ))}
             </div>
 
-            <div className="pt-4 border-t border-neutral-100 flex flex-col gap-2.5">
+            <div className="pt-4 border-t border-[#f0f0f0] flex flex-col gap-2.5">
               <a
                 href={`https://wa.me/918008439762?text=Hi%20SONU,%20I%20have%20a%20question%20regarding%20${encodeURIComponent(selectedTopic.title)}`}
                 target="_blank"
                 rel="noreferrer"
-                className="w-full py-3 rounded-full bg-[#111111] hover:bg-black text-white text-[13.5px] font-medium text-center transition-colors flex items-center justify-center gap-2"
+                className="w-full py-3.5 rounded-full bg-[#111111] hover:bg-black text-white text-[14px] font-medium text-center transition-colors flex items-center justify-center gap-2 shadow-sm"
               >
                 <span>Ask on WhatsApp</span>
                 <span>↗</span>
               </a>
               <button
                 type="button"
-                onClick={() => setSelectedTopic(null)}
+                onClick={closeTopicModal}
                 className="w-full py-2.5 rounded-full border border-neutral-200 text-neutral-600 text-[13px] font-medium hover:bg-neutral-50 transition-colors cursor-pointer"
               >
                 Close
@@ -363,31 +436,51 @@ export default function HelpCenterClient() {
         </div>
       )}
 
-      {/* GET IN TOUCH MODAL */}
-      {isContactOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-xs transition-opacity">
-          <div className="w-full sm:max-w-[480px] bg-white rounded-t-[24px] sm:rounded-[24px] p-6 shadow-2xl animate-in slide-in-from-bottom-4 duration-200">
-            <div className="flex items-center justify-between pb-4 border-b border-neutral-100">
+      {/* GET IN TOUCH MODAL - animated identical to product detail popups */}
+      {isContactMounted && (
+        <div className="fixed inset-0 z-50 overflow-hidden font-['Helvetica_Now_Text',sans-serif]">
+          <div
+            className={`fixed inset-0 bg-black/60 transition-opacity duration-300 ease-out cursor-pointer ${
+              isContactVisible ? 'opacity-100' : 'opacity-0'
+            }`}
+            onClick={closeContactModal}
+          />
+          <div
+            className={`fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 w-full sm:max-w-[520px] bg-white rounded-t-[28px] sm:rounded-[24px] shadow-2xl z-50 p-6 sm:p-7 overflow-y-auto max-h-[85vh] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+              isContactVisible
+                ? 'translate-y-0 opacity-100 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:scale-100'
+                : 'translate-y-full opacity-0 sm:-translate-x-1/2 sm:-translate-y-[45%] sm:scale-95'
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-3.5 border-b border-[#f0f0f0]">
               <div>
-                <h3 className="text-[18px] font-bold text-[#111111]">
+                <h2
+                  className="text-[19px] sm:text-[20px] font-bold text-[#111111] font-['Helvetica_Now_Text_Medium',sans-serif]"
+                  style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                >
                   Contact SONU Support
-                </h3>
-                <p className="text-[12px] text-neutral-500 mt-0.5">
+                </h2>
+                <p className="text-[12px] text-[#707072] mt-0.5">
                   Available Monday – Saturday, 9:00 AM – 7:00 PM IST
                 </p>
               </div>
               <button
                 type="button"
-                onClick={() => setIsContactOpen(false)}
-                className="w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-neutral-600 transition-colors cursor-pointer text-lg"
+                onClick={closeContactModal}
+                className="w-9 h-9 rounded-full bg-[#f5f5f5] hover:bg-[#e8e8e8] flex items-center justify-center text-[#111111] transition-colors cursor-pointer"
+                aria-label="Close"
               >
-                ✕
+                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2" fill="none">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
               </button>
             </div>
 
             {/* Quick Track Order Input */}
             <form onSubmit={handleTrackSubmit} className="pt-4 pb-2">
-              <label className="block text-[12px] font-bold text-neutral-500 uppercase tracking-wider mb-1.5">
+              <label className="block text-[12px] font-bold text-[#707072] uppercase tracking-wider mb-1.5">
                 Have an Order ID?
               </label>
               <div className="flex gap-2">
@@ -420,7 +513,7 @@ export default function HelpCenterClient() {
                   </span>
                   <div>
                     <p className="text-[14px] font-bold text-[#111111]">WhatsApp Concierge</p>
-                    <p className="text-[12px] text-neutral-500">+91 8008439762 • Average reply in 5 mins</p>
+                    <p className="text-[12px] text-[#707072]">+91 8008439762 • Average reply in 5 mins</p>
                   </div>
                 </div>
                 <span className="text-neutral-400 group-hover:text-black transition-colors">↗</span>
@@ -436,17 +529,17 @@ export default function HelpCenterClient() {
                   </span>
                   <div>
                     <p className="text-[14px] font-bold text-[#111111]">Email Support</p>
-                    <p className="text-[12px] text-neutral-500">support@sonushoes.com</p>
+                    <p className="text-[12px] text-[#707072]">support@sonushoes.com</p>
                   </div>
                 </div>
                 <span className="text-neutral-400 group-hover:text-black transition-colors">↗</span>
               </a>
             </div>
 
-            <div className="mt-5 pt-3 border-t border-neutral-100">
+            <div className="mt-5 pt-3 border-t border-[#f0f0f0]">
               <button
                 type="button"
-                onClick={() => setIsContactOpen(false)}
+                onClick={closeContactModal}
                 className="w-full py-2.5 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-[13px] font-medium transition-colors cursor-pointer"
               >
                 Done
