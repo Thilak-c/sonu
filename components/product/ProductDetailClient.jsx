@@ -61,11 +61,11 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
   const [knowMoreType, setKnowMoreType] = useState('return'); // 'return' | 'delivery'
   const knowMoreTimerRef = useRef(null);
 
-  // Added to Bag / Select Size Drawer state
+  // Added to Bag / Added to Favourites / Select Size Drawer state
   const [isBagModalMounted, setIsBagModalMounted] = useState(false);
   const [isBagModalVisible, setIsBagModalVisible] = useState(false);
   const [isBagBackdropVisible, setIsBagBackdropVisible] = useState(false);
-  const [bagModalMode, setBagModalMode] = useState('added-to-bag'); // 'added-to-bag' | 'select-size'
+  const [bagModalMode, setBagModalMode] = useState('added-to-bag'); // 'added-to-bag' | 'added-to-fav' | 'select-size'
   const [tempDrawerSize, setTempDrawerSize] = useState(null);
   const bagTimerRef = useRef(null);
 
@@ -236,6 +236,10 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
     return () => clearTimeout(timer);
   }, [product]);
 
+  const favouritesCount = useMemo(() => {
+    return Object.values(wishlistMap).filter(Boolean).length;
+  }, [wishlistMap]);
+
   // Wishlist toggle helper
   const toggleProductWishlist = () => {
     if (!product) return;
@@ -246,11 +250,17 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
       const next = { ...prev, [pid]: nextState };
       try {
         localStorage.setItem('sonu_wishlist', JSON.stringify(next));
+        window.dispatchEvent(new Event('wishlist-updated'));
       } catch {
         // ignore
       }
       return next;
     });
+
+    // If item was added to favourites, show identical confirmation drawer
+    if (nextState) {
+      openBagModal('added-to-fav');
+    }
   };
 
   const toggleCardWishlist = (itemId) => {
@@ -285,9 +295,19 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
     syncCount();
     window.addEventListener('cart-updated', syncCount);
     window.addEventListener('storage', syncCount);
+
+    const syncWishlist = () => {
+      try {
+        const raw = localStorage.getItem('sonu_wishlist');
+        if (raw) setWishlistMap(JSON.parse(raw));
+      } catch {}
+    };
+    window.addEventListener('wishlist-updated', syncWishlist);
+
     return () => {
       window.removeEventListener('cart-updated', syncCount);
       window.removeEventListener('storage', syncCount);
+      window.removeEventListener('wishlist-updated', syncWishlist);
     };
   }, []);
 
@@ -1553,8 +1573,83 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
                   </button>
                 </div>
               </div>
+            ) : bagModalMode === 'added-to-fav' ? (
+              /* Mode 2: Added to Favourites confirmation (Identical to Added to Bag) */
+              <div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-6 h-6 rounded-full bg-[#008a00] flex items-center justify-center shrink-0">
+                      <svg
+                        className="w-3.5 h-3.5 text-white"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={3}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    </div>
+                    <h2 className="text-[22px] sm:text-[24px] font-medium text-[#111111] tracking-tight leading-none font-['Helvetica_Now_Text_Medium',sans-serif]">
+                      Added to Favourites
+                    </h2>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={closeBagModal}
+                    className="w-9 h-9 rounded-full bg-[#f5f5f5] hover:bg-[#e8e8e8] flex items-center justify-center text-[#111111] transition-colors cursor-pointer"
+                    aria-label="Close"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <div className="mt-6 flex items-start gap-4">
+                  <div className="w-[104px] h-[104px] sm:w-[112px] sm:h-[112px] bg-[#f5f5f5] rounded-xl flex items-center justify-center shrink-0 overflow-hidden">
+                    <img
+                      src={activeImage}
+                      alt={product.name}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+
+                  <div className="flex flex-col text-left">
+                    <h3
+                      className="text-[17px] sm:text-[18px] font-medium text-[#111111] leading-snug font-['Helvetica_Now_Text_Medium',sans-serif]"
+                      style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                    >
+                      {product.name}
+                    </h3>
+                    <p className="text-[15px] text-[#707072] mt-0.5 leading-tight">
+                      {product.category || 'Footwear'}
+                    </p>
+                    <p
+                      className="text-[17px] font-medium text-[#111111] mt-2 font-['Helvetica_Now_Text_Medium',sans-serif]"
+                      style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                    >
+                      {formattedPrice}
+                    </p>
+                    <p className="text-[13px] text-[#707072] mt-0.5">
+                      Inclusive of all taxes
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-6">
+                  <Link
+                    href="/favourites"
+                    onClick={closeBagModal}
+                    className="w-full py-4 rounded-full bg-[#111111] hover:bg-black text-white text-[16px] font-medium text-center transition-all block shadow-md active:scale-[0.99] cursor-pointer font-['Helvetica_Now_Text_Medium',sans-serif]"
+                    style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                  >
+                    View Favourites ({favouritesCount})
+                  </Link>
+                </div>
+              </div>
             ) : (
-              /* Mode 2: Added to Bag confirmation */
+              /* Mode 3: Added to Bag confirmation */
               <div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
