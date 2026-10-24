@@ -1,15 +1,15 @@
 import '@/app/globals.css';
 
 export const metadata = {
-  metadataBase: new URL('https://sonu.shoes'),
+  metadataBase: new URL('https://sonushoe.in'),
   title: {
-    default: 'SONU — Premium Footwear | For the Long Way Home',
-    template: '%s | SONU Shoes',
+    default: 'Sonu shoe — Premium Footwear | For the Long Way Home',
+    template: '%s | Sonu shoe',
   },
   description:
-    'Sonu Shoes crafts small-run, precision-engineered footwear designed for all-day comfort and timeless minimalism. Discover handcrafted sneakers built for the long way home.',
+    'Sonu shoe crafts small-run, precision-engineered footwear designed for all-day comfort and timeless minimalism. Discover handcrafted sneakers built for the long way home.',
   keywords: [
-    'SONU shoes',
+    'Sonu shoe',
     'premium footwear',
     'small-run sneakers',
     'handcrafted shoes',
@@ -18,34 +18,34 @@ export const metadata = {
     'everyday walking shoes',
     'designer footwear',
   ],
-  authors: [{ name: 'SONU Shoes' }],
-  creator: 'SONU',
-  publisher: 'SONU',
+  authors: [{ name: 'Sonu shoe' }],
+  creator: 'Sonu shoe',
+  publisher: 'Sonu shoe',
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
   openGraph: {
-    title: 'SONU — Premium Footwear | For the Long Way Home',
+    title: 'Sonu shoe — Premium Footwear | For the Long Way Home',
     description:
       'Small-run, precision-engineered footwear built for timeless street style and ergonomic comfort.',
-    url: 'https://sonu.shoes',
-    siteName: 'SONU Shoes',
+    url: 'https://sonushoe.in',
+    siteName: 'Sonu shoe',
     images: [
       {
         url: '/Logo/Logo_Full.png',
         width: 1200,
         height: 630,
-        alt: 'SONU Shoes Brand Logo',
+        alt: 'Sonu shoe Brand Logo',
       },
     ],
-    locale: 'en_US',
+    locale: 'en_IN',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'SONU — Premium Footwear | For the Long Way Home',
+    title: 'Sonu shoe — Premium Footwear | For the Long Way Home',
     description:
       'Small-run, precision-engineered footwear built for timeless street style and ergonomic comfort.',
     images: ['/Logo/Logo_Full.png'],

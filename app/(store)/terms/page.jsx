@@ -1,11 +1,11 @@
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Terms and Conditions of Sale – India | SONU Shoes',
+  title: 'Terms and Conditions of Sale – India | Sonu shoe',
   description:
-    'Read the official Terms and Conditions of Sale and Terms of Use for SONU Shoes in India. Understand our ordering, shipping, 7-day returns, and consumer policies.',
+    'Read the official Terms and Conditions of Sale and Terms of Use for Sonu shoe in India. Understand our ordering, shipping, 7-day returns, and consumer policies.',
   keywords: [
-    'SONU terms and conditions',
+    'Sonu shoe terms and conditions',
     'terms of sale india',
     'handcrafted footwear',
     'small-run sneakers',
@@ -15,23 +15,23 @@ export const metadata = {
     'for the long way home',
   ],
   alternates: {
-    canonical: 'https://sonu.shoes/terms',
+    canonical: 'https://sonushoe.in/terms',
   },
   openGraph: {
-    title: 'Terms and Conditions of Sale – India | SONU Shoes',
+    title: 'Terms and Conditions of Sale – India | Sonu shoe',
     description:
-      'Official Terms and Conditions of Sale and Website Terms of Use for SONU Shoes in India.',
-    url: 'https://sonu.shoes/terms',
-    siteName: 'SONU Shoes',
+      'Official Terms and Conditions of Sale and Website Terms of Use for Sonu shoe in India.',
+    url: 'https://sonushoe.in/terms',
+    siteName: 'Sonu shoe',
     images: ['/Logo/Logo_Full.png'],
     locale: 'en_IN',
     type: 'website',
   },
   twitter: {
     card: 'summary',
-    title: 'Terms and Conditions — SONU Shoes India',
+    title: 'Terms and Conditions — Sonu shoe India',
     description:
-      'Official Terms and Conditions of Sale and Website Terms of Use for SONU Shoes in India.',
+      'Official Terms and Conditions of Sale and Website Terms of Use for Sonu shoe in India.',
     images: ['/Logo/Logo_Full.png'],
   },
   robots: {
@@ -46,39 +46,39 @@ export default function TermsPage() {
     '@graph': [
       {
         '@type': 'WebPage',
-        '@id': 'https://sonu.shoes/terms#webpage',
-        url: 'https://sonu.shoes/terms',
-        name: 'Terms and Conditions of Sale – India | SONU Shoes',
+        '@id': 'https://sonushoe.in/terms#webpage',
+        url: 'https://sonushoe.in/terms',
+        name: 'Terms and Conditions of Sale – India | Sonu shoe',
         description:
-          'Official Terms and Conditions of Sale and Website Terms of Use for SONU Shoes in India.',
+          'Official Terms and Conditions of Sale and Website Terms of Use for Sonu shoe in India.',
         publisher: {
-          '@id': 'https://sonu.shoes/#organization',
+          '@id': 'https://sonushoe.in/#organization',
         },
       },
       {
         '@type': 'BreadcrumbList',
-        '@id': 'https://sonu.shoes/terms#breadcrumb',
+        '@id': 'https://sonushoe.in/terms#breadcrumb',
         itemListElement: [
           {
             '@type': 'ListItem',
             position: 1,
             name: 'Home',
-            item: 'https://sonu.shoes',
+            item: 'https://sonushoe.in',
           },
           {
             '@type': 'ListItem',
             position: 2,
             name: 'Terms and Conditions',
-            item: 'https://sonu.shoes/terms',
+            item: 'https://sonushoe.in/terms',
           },
         ],
       },
       {
         '@type': 'Organization',
-        '@id': 'https://sonu.shoes/#organization',
-        name: 'SONU Shoes',
-        url: 'https://sonu.shoes',
-        logo: 'https://sonu.shoes/Logo/Logo_Full.png',
+        '@id': 'https://sonushoe.in/#organization',
+        name: 'Sonu shoe',
+        url: 'https://sonushoe.in',
+        logo: 'https://sonushoe.in/Logo/Logo_Full.png',
         contactPoint: {
           '@type': 'ContactPoint',
           telephone: '+91-1800-210-0202',
@@ -132,8 +132,8 @@ export default function TermsPage() {
             {/* Preamble */}
             <section className="space-y-4">
               <p>
-                This page provides you information about Sonu Shoes Private Limited (“
-                <strong className="text-[#111111]">SONU</strong>”, “
+                This page provides you information about Sonu shoe Private Limited (“
+                <strong className="text-[#111111]">Sonu shoe</strong>”, “
                 <strong className="text-[#111111]">Retailer</strong>”, “
                 <strong className="text-[#111111]">we</strong>”, “
                 <strong className="text-[#111111]">our</strong>” and/or “
@@ -143,7 +143,7 @@ export default function TermsPage() {
                 related products in accordance with section 2.1 below (“
                 <strong className="text-[#111111]">Products</strong>”) through the website{' '}
                 <Link href="/" className="text-[#111111] underline hover:text-[#707072] transition-colors">
-                  www.sonu.shoes
+                  sonushoe.in
                 </Link>{' '}
                 (“<strong className="text-[#111111]">our site</strong>”/“
                 <strong className="text-[#111111]">Site</strong>”) to you. These Terms will apply
@@ -173,7 +173,7 @@ export default function TermsPage() {
                 1. INFORMATION ABOUT US
               </h2>
               <p className="mb-3">
-                1.1 The Retailer is Sonu Shoes Private Limited, a company incorporated and registered
+                1.1 The Retailer is Sonu shoe Private Limited, a company incorporated and registered
                 under the provisions of the Companies Act, 2013 and having its registered corporate
                 office at Second floor Patna One Plaza, New Dak Bunglow Rd, opp. Bharat Petrol Pump,
                 Bander Bagicha, Fraser Road Area, Patna, Bihar – 800001, India. Retailer is inter-alia engaged in the business of
@@ -182,7 +182,7 @@ export default function TermsPage() {
                 by Retailer and its affiliates or physical brand showcases.
               </p>
               <p className="mb-3">
-                1.2 SONU operates this Site and sells Products on the Site directly to consumers with
+                1.2 Sonu shoe operates this Site and sells Products on the Site directly to consumers with
                 a verified delivery address in India.
               </p>
               <p className="font-semibold text-[#111111] mt-4 mb-2">1.3 Contacting Us</p>
@@ -224,7 +224,7 @@ export default function TermsPage() {
                     <li>Name: Mrs. Jennifer Irani</li>
                     <li>Designation: Nodal Grievance Officer – Customer Experience</li>
                     <li>
-                      Address: Sonu Shoes Private Limited, Second floor Patna One Plaza, New Dak Bunglow
+                      Address: Sonu shoe Private Limited, Second floor Patna One Plaza, New Dak Bunglow
                       Rd, opp. Bharat Petrol Pump, Bander Bagicha, Fraser Road Area, Patna, Bihar, PIN – 800001
                     </li>
                     <li>
@@ -264,7 +264,7 @@ export default function TermsPage() {
               </p>
               <p className="mb-3">
                 2.2 By submitting an order through our Site, you acknowledge that your transaction is
-                directly with Sonu Shoes Private Limited. Upon verification of payment information
+                directly with Sonu shoe Private Limited. Upon verification of payment information
                 and order validity, we will fulfill your order at the pricing and terms agreed upon
                 submission.
               </p>
@@ -340,7 +340,7 @@ export default function TermsPage() {
               <p className="mb-3">
                 3.5 <strong className="text-[#111111]">Intellectual Property Rights:</strong> All
                 designs, trademarks, brand logos, typography, shoe models, photography, graphics,
-                software, and text on this Site are the exclusive intellectual property of Sonu Shoes
+                software, and text on this Site are the exclusive intellectual property of Sonu shoe
                 Private Limited and protected by applicable copyright, trademark, and design laws in
                 India.
               </p>
@@ -443,7 +443,7 @@ export default function TermsPage() {
                 7. FAULTY MERCHANDISE
               </h2>
               <p className="mb-3">
-                7.1 Every pair of SONU shoes is handcrafted and inspected before dispatch. If you
+                7.1 Every pair of Sonu shoe is handcrafted and inspected before dispatch. If you
                 receive footwear with a manufacturing defect or non-conformance, notify us within 14
                 days of delivery with photos of the issue.
               </p>
@@ -467,12 +467,12 @@ export default function TermsPage() {
               </p>
               <p className="mb-3 text-[14px] leading-relaxed text-[#444444]">
                 THE SITE AND ITS CONTENTS ARE PROVIDED ON AN “AS IS” AND “AS AVAILABLE” BASIS. TO THE
-                MAXIMUM EXTENT PERMITTED BY APPLICABLE INDIAN LAW, SONU SHOES PRIVATE LIMITED
+                MAXIMUM EXTENT PERMITTED BY APPLICABLE INDIAN LAW, SONU SHOE PRIVATE LIMITED
                 DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WARRANTIES OF MERCHANTABILITY,
                 FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
               </p>
               <p className="mb-3 text-[14px] leading-relaxed text-[#444444]">
-                IN NO EVENT SHALL SONU, ITS DIRECTORS, OFFICERS, EMPLOYEES, OR AGENTS BE LIABLE FOR
+                IN NO EVENT SHALL SONU SHOE, ITS DIRECTORS, OFFICERS, EMPLOYEES, OR AGENTS BE LIABLE FOR
                 ANY INDIRECT, INCIDENTAL, CONSEQUENTIAL, SPECIAL, OR PUNITIVE DAMAGES ARISING FROM
                 YOUR USE OF THE SITE OR PURCHASED MERCHANDISE. OUR TOTAL AGGREGATE LIABILITY ARISING
                 FROM ANY ORDER OR CONTRACT SHALL NOT EXCEED THE ACTUAL AMOUNT PAID BY YOU FOR THE

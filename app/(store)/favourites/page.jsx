@@ -2,30 +2,30 @@ import React from 'react';
 import FavouritesClient from '@/components/favourites/FavouritesClient';
 
 export const metadata = {
-  title: 'Favourites & Wishlist | SONU Shoes',
+  title: 'Favourites & Wishlist | Sonu shoe',
   description:
-    'Review and manage your saved SONU handcrafted luxury running shoes, court sneakers, and ergonomic sole trainers. Move your saved pairs to bag with one click.',
+    'Review and manage your saved Sonu shoe handcrafted luxury running shoes, court sneakers, and ergonomic sole trainers. Move your saved pairs to bag with one click.',
   keywords: [
-    'SONU favourites',
+    'Sonu shoe favourites',
     'shoes wishlist',
     'handcrafted sneakers saved',
     'luxury footwear wishlist',
     'ergonomic running shoes wishlist',
   ],
   alternates: {
-    canonical: 'https://sonu.shoes/favourites',
+    canonical: 'https://sonushoe.in/favourites',
   },
   openGraph: {
-    title: 'Favourites & Wishlist | SONU Shoes',
+    title: 'Favourites & Wishlist | Sonu shoe',
     description: 'Review and manage your saved handcrafted sneakers and luxury footwear pairs.',
-    url: 'https://sonu.shoes/favourites',
-    siteName: 'SONU Shoes',
+    url: 'https://sonushoe.in/favourites',
+    siteName: 'Sonu shoe',
     locale: 'en_IN',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Favourites & Wishlist | SONU Shoes',
+    title: 'Favourites & Wishlist | Sonu shoe',
     description: 'Review and manage your saved handcrafted footwear pairs.',
   },
   robots: {
@@ -38,13 +38,13 @@ export default function FavouritesPage() {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
-    name: 'Favourites | SONU Shoes',
-    url: 'https://sonu.shoes/favourites',
+    name: 'Favourites | Sonu shoe',
+    url: 'https://sonushoe.in/favourites',
     description: 'Saved shoes and wishlist pairs.',
     isPartOf: {
       '@type': 'WebSite',
-      name: 'SONU Shoes',
-      url: 'https://sonu.shoes',
+      name: 'Sonu shoe',
+      url: 'https://sonushoe.in',
     },
   };
 

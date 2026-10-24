@@ -151,7 +151,7 @@ export default function Header() {
             <Link href="/" className="inline-block transition-opacity hover:opacity-85" aria-label="Home">
               <img
                 src="/Logo/Logo_Full.png"
-                alt="SONU Logo"
+                alt="Sonu shoe"
                 className="h-7 sm:h-9 w-auto object-contain"
                 loading="eager"
                 fetchPriority="high"

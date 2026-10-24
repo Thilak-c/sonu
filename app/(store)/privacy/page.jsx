@@ -1,11 +1,11 @@
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Privacy Policy | SONU Shoes India',
+  title: 'Privacy Policy | Sonu shoe India',
   description:
-    'Read the official Privacy Policy for SONU Shoes in India. Learn how we collect, protect, and process your personal information under the Digital Personal Data Protection Act (DPDPA).',
+    'Read the official Privacy Policy for Sonu shoe in India. Learn how we collect, protect, and process your personal information under the Digital Personal Data Protection Act (DPDPA).',
   keywords: [
-    'SONU privacy policy',
+    'Sonu shoe privacy policy',
     'footwear privacy policy india',
     'DPDP Act 2023 compliance',
     'customer data protection',
@@ -14,23 +14,23 @@ export const metadata = {
     'for the long way home',
   ],
   alternates: {
-    canonical: 'https://sonu.shoes/privacy',
+    canonical: 'https://sonushoe.in/privacy',
   },
   openGraph: {
-    title: 'Privacy Policy | SONU Shoes India',
+    title: 'Privacy Policy | Sonu shoe India',
     description:
-      'Official Data Protection, Privacy, and Customer Grievance Redressal Policy for SONU Shoes.',
-    url: 'https://sonu.shoes/privacy',
-    siteName: 'SONU Shoes',
+      'Official Data Protection, Privacy, and Customer Grievance Redressal Policy for Sonu shoe.',
+    url: 'https://sonushoe.in/privacy',
+    siteName: 'Sonu shoe',
     images: ['/Logo/Logo_Full.png'],
     locale: 'en_IN',
     type: 'website',
   },
   twitter: {
     card: 'summary',
-    title: 'Privacy Policy — SONU Shoes',
+    title: 'Privacy Policy — Sonu shoe',
     description:
-      'Official Data Protection and Privacy Policy for SONU Shoes in India.',
+      'Official Data Protection and Privacy Policy for Sonu shoe in India.',
     images: ['/Logo/Logo_Full.png'],
   },
   robots: {
@@ -45,39 +45,39 @@ export default function PrivacyPage() {
     '@graph': [
       {
         '@type': 'WebPage',
-        '@id': 'https://sonu.shoes/privacy#webpage',
-        url: 'https://sonu.shoes/privacy',
-        name: 'Privacy Policy | SONU Shoes India',
+        '@id': 'https://sonushoe.in/privacy#webpage',
+        url: 'https://sonushoe.in/privacy',
+        name: 'Privacy Policy | Sonu shoe India',
         description:
-          'Official Privacy and Data Protection Policy for SONU Shoes in India under the Digital Personal Data Protection Act of 2023.',
+          'Official Privacy and Data Protection Policy for Sonu shoe in India under the Digital Personal Data Protection Act of 2023.',
         publisher: {
-          '@id': 'https://sonu.shoes/#organization',
+          '@id': 'https://sonushoe.in/#organization',
         },
       },
       {
         '@type': 'BreadcrumbList',
-        '@id': 'https://sonu.shoes/privacy#breadcrumb',
+        '@id': 'https://sonushoe.in/privacy#breadcrumb',
         itemListElement: [
           {
             '@type': 'ListItem',
             position: 1,
             name: 'Home',
-            item: 'https://sonu.shoes',
+            item: 'https://sonushoe.in',
           },
           {
             '@type': 'ListItem',
             position: 2,
             name: 'Privacy Policy',
-            item: 'https://sonu.shoes/privacy',
+            item: 'https://sonushoe.in/privacy',
           },
         ],
       },
       {
         '@type': 'Organization',
-        '@id': 'https://sonu.shoes/#organization',
-        name: 'SONU Shoes',
-        url: 'https://sonu.shoes',
-        logo: 'https://sonu.shoes/Logo/Logo_Full.png',
+        '@id': 'https://sonushoe.in/#organization',
+        name: 'Sonu shoe',
+        url: 'https://sonushoe.in',
+        logo: 'https://sonushoe.in/Logo/Logo_Full.png',
         contactPoint: {
           '@type': 'ContactPoint',
           telephone: '+91-1800-210-0202',
@@ -120,7 +120,7 @@ export default function PrivacyPage() {
               className="text-[28px] sm:text-[38px] font-bold text-[#111111] tracking-tight leading-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
               style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
             >
-              SONU.SHOES PRIVACY POLICY
+              SONUSHOE.IN PRIVACY POLICY
             </h1>
             <p className="text-[14px] text-[#707072] mt-2">
               Updated October 2026 • In compliance with the Digital Personal Data Protection Act of 2023
@@ -132,14 +132,14 @@ export default function PrivacyPage() {
             <section className="space-y-4">
               <p>
                 This <strong className="text-[#111111]">Privacy Policy</strong> outlines{' '}
-                <strong className="text-[#111111]">Sonu Shoes Private Limited</strong>’s approach
+                <strong className="text-[#111111]">Sonu shoe Private Limited</strong>’s approach
                 to Data Protection and Privacy to fulfill its obligations under the{' '}
                 <strong className="text-[#111111]">applicable laws and regulations in India</strong>
                 , including, but not limited to, the Digital Personal Data Protection Act of 2023
                 (DPDPA), the Information Technology Act of 2000, and related rules. This Privacy Policy
                 describes the personal data collected, stored, and processed when you interact through{' '}
                 <Link href="/" className="text-[#111111] underline hover:text-[#707072] transition-colors">
-                  sonu.shoes
+                  sonushoe.in
                 </Link>{' '}
                 or mobile touchpoints (collectively defined as the “
                 <strong className="text-[#111111]">Platform</strong>”).
@@ -152,8 +152,8 @@ export default function PrivacyPage() {
                 order products on our Platform.
               </p>
               <p>
-                Throughout this document, “we”, “us”, “our”, “ours”, “SONU” refer to{' '}
-                <strong className="text-[#111111]">Sonu Shoes Private Limited</strong>. Wherever we
+                Throughout this document, “we”, “us”, “our”, “ours”, “Sonu shoe” refer to{' '}
+                <strong className="text-[#111111]">Sonu shoe Private Limited</strong>. Wherever we
                 have said “you” or “your” or “Customer”, this refers to YOU as the Data Principal.
               </p>
             </section>
@@ -167,13 +167,13 @@ export default function PrivacyPage() {
                 WHO WE ARE
               </h2>
               <p className="mb-3">
-                <strong className="text-[#111111]">Sonu Shoes Private Limited</strong> is an Indian
+                <strong className="text-[#111111]">Sonu shoe Private Limited</strong> is an Indian
                 company incorporated under the provisions of the Companies Act, 2013, with its registered
                 office situated at Second floor Patna One Plaza, New Dak Bunglow Rd, opp. Bharat Petrol Pump,
                 Bander Bagicha, Fraser Road Area, Patna, Bihar – 800001, India.
               </p>
               <p className="mb-3">
-                SONU designs, markets, and fulfills handcrafted luxury footwear, small-run runners,
+                Sonu shoe designs, markets, and fulfills handcrafted luxury footwear, small-run runners,
                 and ergonomic sole sneakers directly to consumers with delivery addresses within India.
               </p>
             </section>
@@ -456,7 +456,7 @@ export default function PrivacyPage() {
                 CUSTOMER GRIEVANCE REDRESSAL POLICY
               </h2>
               <p className="mb-3">
-                Customer satisfaction is integral to SONU’s founding principles. We believe that
+                Customer satisfaction is integral to Sonu shoe’s founding principles. We believe that
                 transparent, prompt grievance resolution is vital to our relationship with you:
               </p>
               <ul className="list-disc pl-6 space-y-1.5 mb-4">
@@ -476,7 +476,7 @@ export default function PrivacyPage() {
                   Important Security Notice – Beware of Fraud:
                 </p>
                 <p>
-                  SONU representatives will <strong className="text-[#553c00]">NEVER</strong> ask for your
+                  Sonu shoe representatives will <strong className="text-[#553c00]">NEVER</strong> ask for your
                   OTP, CVV, Card Number, ATM PIN, or NetBanking password over phone, SMS, WhatsApp, or
                   email. We never call asking you to download remote desktop apps or transfer money for
                   lottery prizes.
@@ -502,7 +502,7 @@ export default function PrivacyPage() {
                     Customer Service & Privacy
                   </li>
                   <li>
-                    <strong className="text-[#111111]">Corporate Office:</strong> Sonu Shoes Private
+                    <strong className="text-[#111111]">Corporate Office:</strong> Sonu shoe Private
                     Limited, Second floor Patna One Plaza, New Dak Bunglow Rd, opp. Bharat Petrol Pump,
                     Bander Bagicha, Fraser Road Area, Patna, Bihar, PIN – 800001
                   </li>

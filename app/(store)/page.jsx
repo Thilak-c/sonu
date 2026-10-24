@@ -16,14 +16,14 @@ export const metadata = {
     'premium soles',
     'minimalist luxury shoe',
     'for the long way home',
-    'SONU shoes',
+    'Sonu shoe',
     'city walking footwear',
   ],
   openGraph: {
-    title: 'SONU — For the Long Way Home',
+    title: 'Sonu shoe — For the Long Way Home',
     description:
       'Discover handcrafted footwear engineered in limited runs for maximum walking comfort and timeless street minimalism.',
-    url: 'https://sonu.shoes',
+    url: 'https://sonushoe.in',
     images: ['/Logo/Logo_Full.png'],
   },
 };
@@ -34,21 +34,21 @@ export default function HomePage() {
     '@graph': [
       {
         '@type': 'Organization',
-        '@id': 'https://sonu.shoes/#organization',
-        name: 'SONU Shoes',
-        url: 'https://sonu.shoes',
-        logo: 'https://sonu.shoes/Logo/Logo_Full.png',
+        '@id': 'https://sonushoe.in/#organization',
+        name: 'Sonu shoe',
+        url: 'https://sonushoe.in',
+        logo: 'https://sonushoe.in/Logo/Logo_Full.png',
         slogan: 'For the long way home',
         description:
           'Small-run handcrafted luxury footwear engineered with ergonomic comfort and timeless minimalism.',
       },
       {
         '@type': 'WebSite',
-        '@id': 'https://sonu.shoes/#website',
-        url: 'https://sonu.shoes',
-        name: 'SONU Shoes',
+        '@id': 'https://sonushoe.in/#website',
+        url: 'https://sonushoe.in',
+        name: 'Sonu shoe',
         publisher: {
-          '@id': 'https://sonu.shoes/#organization',
+          '@id': 'https://sonushoe.in/#organization',
         },
       },
     ],

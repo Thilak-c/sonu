@@ -94,7 +94,7 @@ const TOPICS = [
     faqs: [
       {
         q: 'What is covered under the footwear warranty?',
-        a: 'Every pair of SONU shoes is protected by a 3-month manufacturing warranty covering sole bonding, stitching defects, and upper material faults.',
+        a: 'Every pair of Sonu shoe is protected by a 3-month manufacturing warranty covering sole bonding, stitching defects, and upper material faults.',
       },
       {
         q: 'What is not covered?',
@@ -157,7 +157,7 @@ const TOPICS = [
     ),
     faqs: [
       {
-        q: 'How do I care for and clean my SONU footwear?',
+        q: 'How do I care for and clean my Sonu shoe footwear?',
         a: 'Wipe with a soft damp microfiber cloth using mild soapy water. Air dry naturally away from direct scorching sunlight. Avoid washing machines.',
       },
       {
@@ -420,7 +420,7 @@ export default function HelpCenterClient() {
 
             <div className="pt-4 border-t border-[#f0f0f0] flex flex-col gap-2.5">
               <a
-                href={`https://wa.me/918008439762?text=Hi%20SONU,%20I%20have%20a%20question%20regarding%20${encodeURIComponent(selectedTopic.title)}`}
+                href={`https://wa.me/918008439762?text=Hi%20Sonu%20shoe,%20I%20have%20a%20question%20regarding%20${encodeURIComponent(selectedTopic.title)}`}
                 target="_blank"
                 rel="noreferrer"
                 className="w-full py-3.5 rounded-full bg-[#111111] hover:bg-black text-white text-[14px] font-medium text-center transition-colors flex items-center justify-center gap-2 shadow-sm"
@@ -463,7 +463,7 @@ export default function HelpCenterClient() {
                   className="text-[19px] sm:text-[20px] font-bold text-[#111111] font-['Helvetica_Now_Text_Medium',sans-serif]"
                   style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
                 >
-                  Contact SONU Support
+                  Contact Sonu shoe Support
                 </h2>
                 <p className="text-[12px] text-[#707072] mt-0.5">
                   Available Monday – Saturday, 9:00 AM – 7:00 PM IST
@@ -506,7 +506,7 @@ export default function HelpCenterClient() {
 
             <div className="space-y-3 pt-3">
               <a
-                href="https://wa.me/918008439762?text=Hi%20SONU,%20I%20need%20help%20with%20my%20order"
+                href="https://wa.me/918008439762?text=Hi%20Sonu%20shoe,%20I%20need%20help%20with%20my%20order"
                 target="_blank"
                 rel="noreferrer"
                 className="w-full p-4 rounded-2xl border border-neutral-200 hover:border-black flex items-center justify-between transition-colors group cursor-pointer"

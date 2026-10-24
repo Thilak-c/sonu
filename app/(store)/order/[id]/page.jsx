@@ -8,8 +8,8 @@ export async function generateMetadata({ params }) {
   const decodedId = decodeURIComponent(id || '');
 
   return {
-    title: `Track Order #${decodedId} | SONU Footwear`,
-    description: `Track your handcrafted footwear delivery in real-time. Live Shiprocket courier status, expected delivery date, and order breakdown for SONU shoes.`,
+    title: `Track Order #${decodedId} | Sonu shoe`,
+    description: `Track your handcrafted footwear delivery in real-time. Live Shiprocket courier status, expected delivery date, and order breakdown for Sonu shoe.`,
     alternates: {
       canonical: `/order/${encodeURIComponent(decodedId)}`,
     },
@@ -18,16 +18,16 @@ export async function generateMetadata({ params }) {
       follow: true,
     },
     openGraph: {
-      title: `Track Order #${decodedId} | SONU Footwear`,
+      title: `Track Order #${decodedId} | Sonu shoe`,
       description: `Track your handcrafted footwear delivery in real-time. Live Shiprocket courier tracking and delivery address.`,
       url: `/order/${encodeURIComponent(decodedId)}`,
-      siteName: 'SONU Footwear',
+      siteName: 'Sonu shoe',
       locale: 'en_IN',
       type: 'website',
     },
     twitter: {
       card: 'summary_large_image',
-      title: `Track Order #${decodedId} | SONU Footwear`,
+      title: `Track Order #${decodedId} | Sonu shoe`,
       description: `Track your handcrafted footwear delivery in real-time. Live Shiprocket courier tracking and delivery address.`,
     },
   };
@@ -69,8 +69,8 @@ export default async function OrderTrackingPage({ params }) {
     orderStatus: order?.status ? `https://schema.org/Order${order.status}` : 'https://schema.org/OrderProcessing',
     broker: {
       '@type': 'Organization',
-      name: 'SONU Footwear',
-      url: 'https://sonushoes.com',
+      name: 'Sonu shoe',
+      url: 'https://sonushoe.in',
     },
     customer: {
       '@type': 'Person',

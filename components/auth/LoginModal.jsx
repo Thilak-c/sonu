@@ -694,7 +694,7 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
     }
   };
 
-  // Transition from "Welcome to Sonu Shoes." or Details -> Slide up Delivery Address
+  // Transition from "Welcome to Sonu shoe." or Details -> Slide up Delivery Address
   const handleTransitionToDeliveryAddress = (delay = 450) => {
     clearTimeout(closeTimerRef.current);
     // 1. Smoothly fade out the welcome message
@@ -765,7 +765,7 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
     setStep('success');
     setIsWelcomeFadingOut(false);
 
-    // Smoothly fade out "Welcome to Sonu Shoes." after 2s and slide up Delivery Address
+    // Smoothly fade out "Welcome to Sonu shoe." after 2s and slide up Delivery Address
     closeTimerRef.current = setTimeout(() => {
       handleTransitionToDeliveryAddress();
     }, 2000);
@@ -1670,7 +1670,7 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
               </div>
             )}
 
-            {/* STEP 5: SUCCESS STATE ("Welcome to Sonu Shoes.") */}
+            {/* STEP 5: SUCCESS STATE ("Welcome to Sonu shoe.") */}
             {step === 'success' && (
               <div
                 className={`transition-opacity duration-500 ease-out ${
@@ -1681,7 +1681,7 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
                 <div className="flex justify-center pt-1 pb-1">
                   <img
                     src="/Logo/Logo_Full.png"
-                    alt="SONU Logo"
+                    alt="Sonu shoe Logo"
                     className="h-7 sm:h-8 w-auto object-contain"
                     loading="eager"
                     fetchPriority="high"
@@ -1690,12 +1690,12 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
                   />
                 </div>
 
-                {/* Header: Welcome to Sonu Shoes. */}
+                {/* Header: Welcome to Sonu shoe. */}
                 <h2
                   className="text-[22px] sm:text-[24px] font-bold text-[#111111] text-center mt-3 tracking-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
                   style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
                 >
-                  Welcome to Sonu Shoes.
+                  Welcome to Sonu shoe.
                 </h2>
 
                 {/* Subtitle */}

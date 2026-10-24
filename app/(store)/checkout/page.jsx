@@ -481,7 +481,7 @@ export default function CheckoutPage() {
         key: orderData.keyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_ToeynJ0XXfrtyp',
         amount: orderData.amount,
         currency: orderData.currency || 'INR',
-        name: 'SONU',
+        name: 'Sonu shoe',
         description: isPartialCod
           ? 'Partial COD Advance Deposit (₹200)'
           : `Order Payment (${totalQuantity} ${totalQuantity === 1 ? 'item' : 'items'})`,

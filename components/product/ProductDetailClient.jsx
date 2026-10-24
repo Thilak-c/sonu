@@ -920,7 +920,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
                 <div className="overflow-hidden space-y-2.5 text-[13.5px]">
                   <div>
                     <p className="text-[12px] text-[rgba(0,19,37,0.64)] leading-tight">Sold By</p>
-                    <p className="text-[14px] font-normal text-[rgba(0,19,37,0.92)] mt-0.5">Sonu Shoes.</p>
+                    <p className="text-[14px] font-normal text-[rgba(0,19,37,0.92)] mt-0.5">Sonu shoe</p>
                   </div>
                   <div>
                     <p className="text-[12px] text-[rgba(0,19,37,0.64)] leading-tight">Country Of Origin</p>
@@ -928,12 +928,12 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
                   </div>
                   <div>
                     <p className="text-[12px] text-[rgba(0,19,37,0.64)] leading-tight">Name Of Manufacturer/ Packer/ Importer</p>
-                    <p className="text-[14px] font-normal text-[rgba(0,19,37,0.92)] mt-0.5">Sonu Shoes</p>
+                    <p className="text-[14px] font-normal text-[rgba(0,19,37,0.92)] mt-0.5">Sonu shoe</p>
                   </div>
                   <div>
                     <p className="text-[12px] text-[rgba(0,19,37,0.64)] leading-tight">Address Of Manufacturer/ Packer/ Importer</p>
                     <p className="text-[14px] font-normal text-[rgba(0,19,37,0.92)] mt-0.5 leading-[20px]">
-                   -, Patna, Bihar 800013
+                      Second floor Patna One Plaza, New Dak Bunglow Rd, opp. Bharat Petrol Pump, Bander Bagicha, Fraser Road Area, Patna, Bihar – 800001
                     </p>
                   </div>
                 </div>
@@ -1296,7 +1296,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
             {knowMoreType === 'return' ? (
               <div className="py-4 space-y-4 text-[14px] text-[rgba(0,19,37,0.92)] leading-relaxed">
                 <p>
-                  At SONU, we want every pair to fit like a second skin. If your shoes don&apos;t fit perfectly, you can request a return or size exchange within 7 days of delivery.
+                  At Sonu shoe, we want every pair to fit like a second skin. If your shoes don&apos;t fit perfectly, you can request a return or size exchange within 7 days of delivery.
                 </p>
                 <ol className="list-decimal list-inside space-y-2 text-[#707072]">
                   <li>Footwear must be unworn outdoors with all original packaging, shoe tags, and shoe box intact.</li>

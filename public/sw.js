@@ -1,4 +1,4 @@
-// SONU Global Image Cache Service Worker
+// Sonu shoe Global Image Cache Service Worker
 const CACHE_NAME = 'sonu-global-image-cache-v1';
 
 // Static image extensions & directories to intercept

@@ -14,7 +14,7 @@ export async function generateMetadata({ params }) {
   const product = (await getProductById(slug)) || FRESH_DROPS.find((p) => p.id === slug) || FRESH_DROPS[0];
 
   return {
-    title: `${product.name} — ${product.category} | SONU Shoes`,
+    title: `${product.name} — ${product.category} | Sonu shoe`,
     description: `${product.description} Handcrafted in small runs with ergonomic comfort soles.`,
     keywords: [
       product.name,
@@ -27,9 +27,9 @@ export async function generateMetadata({ params }) {
       'for the long way home',
     ],
     openGraph: {
-      title: `${product.name} | ${product.category} — SONU`,
+      title: `${product.name} | ${product.category} — Sonu shoe`,
       description: product.description,
-      url: `https://sonu.shoes/product/${product.id || slug}`,
+      url: `https://sonushoe.in/product/${product.id || slug}`,
       images: [
         {
           url: product.image || product.mainImage,
@@ -39,7 +39,7 @@ export async function generateMetadata({ params }) {
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${product.name} — SONU Shoes`,
+      title: `${product.name} — Sonu shoe`,
       description: product.description,
       images: [product.image || product.mainImage],
     },
@@ -61,11 +61,11 @@ export default async function ProductDetailPage({ params }) {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.name,
-    image: `https://sonu.shoes${product.image || product.mainImage}`,
+    image: `https://sonushoe.in${product.image || product.mainImage}`,
     description: product.description,
     brand: {
       '@type': 'Brand',
-      name: 'SONU',
+      name: 'Sonu shoe',
     },
     category: product.category,
     offers: {
@@ -73,10 +73,10 @@ export default async function ProductDetailPage({ params }) {
       priceCurrency: 'INR',
       price: product.priceNumber || 13995,
       availability: 'https://schema.org/InStock',
-      url: `https://sonu.shoes/product/${product.id || slug}`,
+      url: `https://sonushoe.in/product/${product.id || slug}`,
       seller: {
         '@type': 'Organization',
-        name: 'SONU Shoes',
+        name: 'Sonu shoe',
       },
     },
   };
@@ -89,19 +89,19 @@ export default async function ProductDetailPage({ params }) {
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: 'https://sonu.shoes',
+        item: 'https://sonushoe.in',
       },
       {
         '@type': 'ListItem',
         position: 2,
         name: 'Fresh Drops',
-        item: 'https://sonu.shoes/#fresh-drops',
+        item: 'https://sonushoe.in/#fresh-drops',
       },
       {
         '@type': 'ListItem',
         position: 3,
         name: product.name,
-        item: `https://sonu.shoes/product/${product.id || slug}`,
+        item: `https://sonushoe.in/product/${product.id || slug}`,
       },
     ],
   };
