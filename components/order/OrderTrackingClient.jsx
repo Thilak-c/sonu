@@ -439,14 +439,12 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
           >
             Continue Shopping
           </Link>
-          <a
-            href="https://wa.me/918008439762?text=Hi%20SONU,%20I%20have%20a%20question%20about%20my%20order"
-            target="_blank"
-            rel="noreferrer"
+          <Link
+            href="/help-center"
             className="w-full sm:w-auto px-6 py-3.5 rounded-full border border-neutral-300 hover:border-black text-[14px] font-medium text-center transition-colors text-neutral-700 bg-white"
           >
             Need Help?
-          </a>
+          </Link>
         </div>
       </div>
     </div>
