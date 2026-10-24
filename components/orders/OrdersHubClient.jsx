@@ -139,19 +139,21 @@ export default function OrdersHubClient() {
     }
   };
 
-  // Format date helper: "Oct 08"
+  // Format date helper: e.g. "Oct 5"
   const formatDate = (dateStr) => {
     if (!dateStr) return '';
     try {
       const d = new Date(dateStr);
       if (isNaN(d.getTime())) return '';
-      return d.toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
+      const month = d.toLocaleDateString('en-US', { month: 'short' });
+      const day = d.getDate();
+      return `${month} ${day}`;
     } catch (e) {
       return '';
     }
   };
 
-  // Calculate expected delivery date and late status for undelivered products
+  // Calculate expected delivery date for undelivered products
   const getDeliveryInfo = (order) => {
     let expected = null;
     if (order.expectedDelivery) {
@@ -170,21 +172,17 @@ export default function OrdersHubClient() {
     }
 
     const now = new Date();
-    // Check if the delivery has passed its expected date (delayed / 2-3 days late)
-    const isLate = now.getTime() > expected.getTime();
-
-    let targetDate = expected;
-    if (isLate) {
-      // If late, estimated arrival is 2-3 days from now
+    // If original expected date has passed, estimate 2 days from now
+    if (now.getTime() > expected.getTime()) {
       const delayed = new Date(now);
       delayed.setDate(delayed.getDate() + 2);
-      targetDate = delayed;
+      return { targetDate: delayed };
     }
 
-    return { targetDate, isLate };
+    return { targetDate: expected };
   };
 
-  // Status headline: "Delivered on Oct 08", "Coming on [day]", or "Coming on Fri, 5/10" if late
+  // Status headline: "Delivered on Oct 8" or "Coming on Oct 5"
   const getStatusHeadline = (order) => {
     const status = (order.shipment?.status || order.status || '').toUpperCase();
 
@@ -198,19 +196,8 @@ export default function OrdersHubClient() {
       return `Cancelled on ${formatDate(cancelledRaw)}`;
     }
 
-    const { targetDate, isLate } = getDeliveryInfo(order);
-
-    // If delivery is 2-3 days late, say "Coming on Fri, 5/10"
-    if (isLate) {
-      const weekday = targetDate.toLocaleDateString('en-US', { weekday: 'short' });
-      const day = targetDate.getDate();
-      const month = targetDate.getMonth() + 1;
-      return `Coming on ${weekday}, ${day}/${month}`;
-    }
-
-    // Normal on-time delivery: "Coming on [day]" e.g. "Coming on Friday"
-    const dayName = targetDate.toLocaleDateString('en-US', { weekday: 'long' });
-    return `Coming on ${dayName}`;
+    const { targetDate } = getDeliveryInfo(order);
+    return `Coming on ${formatDate(targetDate)}`;
   };
 
   // Subtitle: e.g. "Minutes Basket (1 item)"
