@@ -151,33 +151,40 @@ export default function OrdersHubClient() {
     }
   };
 
-  // Calculate expected delivery date for undelivered products
-  const getDeliveryTargetDate = (order) => {
+  // Calculate expected delivery date and late status for undelivered products
+  const getDeliveryInfo = (order) => {
+    let expected = null;
     if (order.expectedDelivery) {
       const d = new Date(order.expectedDelivery);
-      if (!isNaN(d.getTime())) return d;
+      if (!isNaN(d.getTime())) expected = d;
     }
-    if (order.shipment?.expectedDelivery) {
+    if (!expected && order.shipment?.expectedDelivery) {
       const d = new Date(order.shipment.expectedDelivery);
-      if (!isNaN(d.getTime())) return d;
+      if (!isNaN(d.getTime())) expected = d;
     }
 
     const base = new Date(order.placedAt || order.createdAt || Date.now());
-    const target = new Date(base);
-    target.setDate(target.getDate() + 4);
-
-    // If target date is in the past, adjust to next upcoming delivery window
-    const now = new Date();
-    if (target < now) {
-      const upcoming = new Date(now);
-      upcoming.setDate(upcoming.getDate() + 2);
-      return upcoming;
+    if (!expected) {
+      expected = new Date(base);
+      expected.setDate(expected.getDate() + 4);
     }
 
-    return target;
+    const now = new Date();
+    // Check if the delivery has passed its expected date (delayed / 2-3 days late)
+    const isLate = now.getTime() > expected.getTime();
+
+    let targetDate = expected;
+    if (isLate) {
+      // If late, estimated arrival is 2-3 days from now
+      const delayed = new Date(now);
+      delayed.setDate(delayed.getDate() + 2);
+      targetDate = delayed;
+    }
+
+    return { targetDate, isLate };
   };
 
-  // Status headline: "Delivered on Oct 08" or "Coming on [day]"
+  // Status headline: "Delivered on Oct 08", "Coming on [day]", or "Coming on Fri, 5/10" if late
   const getStatusHeadline = (order) => {
     const status = (order.shipment?.status || order.status || '').toUpperCase();
 
@@ -191,8 +198,17 @@ export default function OrdersHubClient() {
       return `Cancelled on ${formatDate(cancelledRaw)}`;
     }
 
-    // If the product is not delivered, say "Coming on [day]"
-    const targetDate = getDeliveryTargetDate(order);
+    const { targetDate, isLate } = getDeliveryInfo(order);
+
+    // If delivery is 2-3 days late, say "Coming on Fri, 5/10"
+    if (isLate) {
+      const weekday = targetDate.toLocaleDateString('en-US', { weekday: 'short' });
+      const day = targetDate.getDate();
+      const month = targetDate.getMonth() + 1;
+      return `Coming on ${weekday}, ${day}/${month}`;
+    }
+
+    // Normal on-time delivery: "Coming on [day]" e.g. "Coming on Friday"
     const dayName = targetDate.toLocaleDateString('en-US', { weekday: 'long' });
     return `Coming on ${dayName}`;
   };
