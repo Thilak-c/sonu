@@ -673,24 +673,26 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
               <div
                 ref={mobileScrollRef}
                 onScroll={handleMobileScroll}
-                className="flex flex-row overflow-x-auto snap-x snap-mandatory scrollbar-none no-scrollbar w-screen -mx-5 sm:-mx-6 touch-pan-x"
+                className="flex flex-row overflow-x-auto snap-x snap-mandatory scrollbar-none no-scrollbar w-screen -mx-5 sm:-mx-6 touch-pan-y touch-pan-x overscroll-x-contain"
                 style={{
                   scrollSnapType: 'x mandatory',
                   WebkitOverflowScrolling: 'touch',
                   scrollbarWidth: 'none',
                   msOverflowStyle: 'none',
+                  touchAction: 'pan-x pan-y',
                 }}
               >
                 {productImages.map((img, idx) => (
                   <div
                     key={`mob-slide-${idx}`}
-                    className="w-screen shrink-0 aspect-square snap-center flex items-center justify-center p-4 sm:p-6"
+                    className="w-screen shrink-0 aspect-square snap-center flex items-center justify-center p-4 sm:p-6 select-none"
                   >
                     <FallbackImage
                       src={img}
                       alt={`${product.name} view ${idx + 1}`}
-                      className="w-full h-full object-contain"
+                      className="w-full h-full object-contain pointer-events-none select-none"
                       logoSize="w-8 h-8"
+                      draggable={false}
                     />
                   </div>
                 ))}
@@ -750,7 +752,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
             {/* Colorway Swatches */}
             {swatches.length > 1 && (
               <div className="mb-6">
-                <div className="flex items-center gap-2.5 overflow-x-auto pb-1 scrollbar-none">
+                <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-none">
                   {swatches.map((swatch, sIdx) => {
                     const isCurrent = (swatch.id || swatch.slug) === (product.id || product.slug);
                     return (
@@ -762,9 +764,9 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
                             router.push(`/product/${swatch.id || swatch.slug}`);
                           }
                         }}
-                        className={`w-[72px] h-[72px] sm:w-[76px] sm:h-[76px] aspect-square rounded-[4px] p-0 transition-all cursor-pointer overflow-hidden flex items-center justify-center shrink-0 ${
+                        className={`w-[90px] h-[90px] sm:w-[76px] sm:h-[76px] aspect-square rounded-[4px] p-0 transition-all cursor-pointer overflow-hidden flex items-center justify-center shrink-0 ${
                           isCurrent
-                            ? 'border-[1.5px] border-[#111111]'
+                            ? 'border-[1px] border-[#111111]'
                             : ''
                         }`}
                         title={swatch.name}
