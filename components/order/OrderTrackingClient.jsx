@@ -317,7 +317,7 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
             className="text-[20px] sm:text-[22px] font-bold tracking-tight text-[#111111] font-['Helvetica_Now_Text_Medium',sans-serif] mb-6"
             style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
           >
-            Bag ({items.length} {items.length === 1 ? 'item' : 'items'})
+             {items.length} {items.length === 1 ? 'item' : 'items'}
           </h2>
 
           <div>
@@ -327,38 +327,38 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
                 <div key={itemKey} className="border-b border-[#e5e5e5] pb-8 mb-8 last:border-b-0 last:mb-0">
                   {/* Product Info Row - exact same as Bag */}
                   <div className="flex gap-4 sm:gap-6 items-stretch">
-                    {/* Square Product Image */}
-                    <div className="self-stretch w-[130px] sm:w-[155px] shrink-0 flex items-center justify-center rounded-sm overflow-hidden bg-[#f7f7f7]">
+                    {/* Square Product Image - height exactly matches detail section */}
+                    <div className="self-stretch aspect-square shrink-0 rounded-[10px] bg-[#f5f5f5] relative overflow-hidden flex items-center justify-center">
                       <img
                         src={item.image || '/images/ad22b92Nike-HQ2593-502_1.avif'}
                         alt={item.name}
                         loading="eager"
                         fetchPriority="high"
                         decoding="async"
-                        className="w-full h-full object-contain mix-blend-multiply"
+                        className="absolute inset-0 w-full h-full object-contain p-2.5 mix-blend-multiply"
                       />
                     </div>
 
                     {/* Details Column - exact same as Bag */}
-                    <div className="flex-1 min-w-0 pt-0.5">
+                    <div className="flex-1 min-w-0 flex flex-col justify-between">
                       {/* 1. Price */}
                       <p className="text-[17px] sm:text-[18px] font-bold text-[#111111] leading-none">
                         ₹ {(item.priceNumber || 13995).toLocaleString('en-IN')}
                       </p>
 
                       {/* 2. Product Name */}
-                      <div className="block mt-1.5">
+                      <div className="block">
                         <h3
                           className="text-[16px] sm:text-[17px] font-bold text-[#111111] leading-snug font-['Helvetica_Now_Text_Medium',sans-serif]"
                           style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
                         >
-                          {item.name || 'SONU Hybrid RN'}
+                          {item.name}
                         </h3>
                       </div>
 
                       {/* 3. Category */}
                       <p className="text-[14px] text-[#707072] leading-normal">
-                        {item.category || "Women's Training Shoes"}
+                        {item.category || "Women's Road Running Shoes"}
                       </p>
 
                       {/* 4. Shipping / Delivery */}
@@ -372,16 +372,16 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
                       </p>
 
                       {/* 6. Size */}
-                      <div className="mt-1">
-                        <span className="text-[14px] font-medium text-[#111111]">
+                      <div>
+                        <span className="text-[14px] font-medium text-[#111111] underline underline-offset-4 decoration-1">
                           Size {item.size || 'UK 8'}
                         </span>
+                        {item.quantity > 1 && (
+                          <span className="text-[14px] text-[#707072] ml-2 font-normal">
+                            (Qty: {item.quantity})
+                          </span>
+                        )}
                       </div>
-
-                      {/* 7. Quantity */}
-                      <p className="text-[14px] text-[#707072] mt-0.5">
-                        Quantity {item.quantity || 1}
-                      </p>
                     </div>
                   </div>
                 </div>
