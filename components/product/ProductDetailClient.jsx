@@ -669,7 +669,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
             </div>
 
             {/* Mobile Scrollable Image Row (Mobile ONLY: 100vw edge-to-edge bleed, horizontal snap scroll) */}
-            <div className="block lg:hidden w-full overflow-hidden">
+            <div className="block lg:hidden w-full overflow-hidden relative">
               <div
                 ref={mobileScrollRef}
                 onScroll={handleMobileScroll}
@@ -696,22 +696,24 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
                 ))}
               </div>
 
-              {/* Mobile Carousel Pagination Dots */}
+              {/* Mobile Carousel Pagination Dots (Overlaid at bottom of product image) */}
               {productImages.length > 1 && (
-                <div className="flex items-center justify-center gap-1.5 pt-3 pb-1">
-                  {productImages.map((_, idx) => (
-                    <button
-                      key={`mob-dot-${idx}`}
-                      type="button"
-                      onClick={() => scrollToSlide(idx)}
-                      className={`transition-all rounded-full cursor-pointer ${
-                        currentImageIndex === idx
-                          ? 'w-5 h-2 bg-[#111111]'
-                          : 'w-2 h-2 bg-[#d2d2d2] hover:bg-[#8d8d8d]'
-                      }`}
-                      aria-label={`Go to slide ${idx + 1}`}
-                    />
-                  ))}
+                <div className="absolute bottom-3.5 left-0 right-0 flex items-center justify-center z-10 pointer-events-auto">
+                  <div className="flex items-center gap-1.5 bg-white/75 backdrop-blur-xs px-2.5 py-1 rounded-full shadow-xs">
+                    {productImages.map((_, idx) => (
+                      <button
+                        key={`mob-dot-${idx}`}
+                        type="button"
+                        onClick={() => scrollToSlide(idx)}
+                        className={`transition-all rounded-full cursor-pointer ${
+                          currentImageIndex === idx
+                            ? 'w-5 h-2 bg-[#111111]'
+                            : 'w-2 h-2 bg-[#111111]/30 hover:bg-[#111111]/60'
+                        }`}
+                        aria-label={`Go to slide ${idx + 1}`}
+                      />
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
