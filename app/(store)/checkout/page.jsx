@@ -415,31 +415,7 @@ export default function CheckoutPage() {
         return;
       }
 
-      // 1. Create order on backend via Razorpay Orders API & save draft in MongoDB
-      const res = await fetch('/api/razorpay/create-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount: subtotal,
-          items: cartItems,
-          notes: {
-            customerName:
-              address.name ||
-              `${address.firstName || ''} ${address.lastName || ''}`.trim() ||
-              'Customer',
-            customerEmail: address.email || '',
-            contact: displayContact,
-            address: `${address.houseNo || ''}, ${address.street || ''}, ${address.city || ''} - ${address.pincode || ''}`,
-            method: paymentMethod,
-          },
-        }),
-      });
-
-      const orderData = await res.json();
-      if (!res.ok || !orderData.orderId) {
-        throw new Error(orderData.error || 'Failed to create payment order');
-      }
-
+      // Prepare customer display info & verified mobile
       const displayName =
         address.name ||
         `${address.firstName || ''} ${address.lastName || ''}`.trim() ||
@@ -463,6 +439,28 @@ export default function CheckoutPage() {
         }
       }
       const displayContact = (phone || '9182390192').replace(/\D/g, '').slice(-10);
+
+      // 1. Create order on backend via Razorpay Orders API & save draft in MongoDB
+      const res = await fetch('/api/razorpay/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: subtotal,
+          items: cartItems,
+          notes: {
+            customerName: displayName,
+            customerEmail: address.email || '',
+            contact: displayContact,
+            address: `${address.houseNo || ''}, ${address.street || ''}, ${address.city || ''} - ${address.pincode || ''}`,
+            method: paymentMethod,
+          },
+        }),
+      });
+
+      const orderData = await res.json();
+      if (!res.ok || !orderData.orderId) {
+        throw new Error(orderData.error || 'Failed to create payment order');
+      }
 
       // Sequence blocks to always show full detailed payment options
       const sequenceMap = {
