@@ -462,6 +462,15 @@ export default function TestOrderPage() {
 
                   {/* Actions for this test order */}
                   <div className="space-y-2 pt-2">
+                    <Link
+                      href={`/order/${result.orderId}`}
+                      target="_blank"
+                      className="w-full py-2.5 rounded-full bg-black hover:bg-neutral-800 text-white text-[13px] font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <span>Open Customer Tracking Page (/order/{result.orderId})</span>
+                      <span>↗</span>
+                    </Link>
+
                     <a
                       href={`http://localhost:3001/orders?id=${result.orderId}`}
                       target="_blank"
@@ -568,14 +577,21 @@ export default function TestOrderPage() {
                           </span>
                         )}
                       </td>
-                      <td className="py-3.5 text-right space-x-2">
+                      <td className="py-3.5 text-right space-x-2.5">
+                        <Link
+                          href={`/order/${ord.orderId}`}
+                          target="_blank"
+                          className="text-[12px] text-black hover:underline font-bold"
+                        >
+                          Track ↗
+                        </Link>
                         <a
                           href={`http://localhost:3001/orders?id=${ord.orderId}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-[12px] text-blue-600 hover:underline font-medium"
+                          className="text-[12px] text-neutral-500 hover:text-black hover:underline font-medium"
                         >
-                          View ↗
+                          Admin ↗
                         </a>
                         {ord.shiprocket?.orderId && ord.shiprocket?.status !== 'CANCELLED' && (
                           <button

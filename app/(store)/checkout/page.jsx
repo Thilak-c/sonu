@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   getCartItems,
   addToCart,
@@ -65,6 +66,7 @@ const SIZE_CHART = [
 ];
 
 export default function CheckoutPage() {
+  const router = useRouter();
   // Steps: 'bag' | 'address' | 'payment' | 'confirmation'
   const [checkoutStep, setCheckoutStep] = useState('bag');
 
@@ -570,6 +572,8 @@ export default function CheckoutPage() {
           setIsPlacingOrder(false);
           setCheckoutStep('confirmation');
           window.scrollTo({ top: 0, behavior: 'smooth' });
+          // Seamless redirect directly to the live Order Tracking page
+          router.push(`/order/${placedOrderId}`);
         },
       };
 
@@ -598,7 +602,7 @@ export default function CheckoutPage() {
   // STEP 4: ORDER SUCCESS / CONFIRMATION
   if (checkoutStep === 'confirmation' && confirmedOrder) {
     return (
-      <div className="w-full max-w-[580px] mx-auto px-5 sm:px-6 pt-8 pb-16 font-['Helvetica_Now_Text',sans-serif] text-[#111111]">
+      <div className="w-full max-w-[580px] mx-auto px-5 sm:px-6 pt-10 pb-20 font-['Helvetica_Now_Text',sans-serif] text-[#111111]">
         {/* Success Icon */}
         <div className="text-center">
           <div className="w-16 h-16 rounded-full bg-[#008a00] flex items-center justify-center text-white mx-auto mb-4 shadow-sm">
@@ -620,9 +624,25 @@ export default function CheckoutPage() {
           >
             Thank you for your order!
           </h1>
+          <p className="text-[14px] text-neutral-500 mt-2">
+            Your order reference is <span className="font-mono font-bold text-[#111111]">{confirmedOrder.orderId}</span>
+          </p>
 
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link
+              href={`/order/${confirmedOrder.orderId}`}
+              className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#111111] hover:bg-black text-white text-[14px] font-medium transition-all shadow-sm"
+            >
+              Track Your Order & Courier ↗
+            </Link>
+            <Link
+              href="/"
+              className="w-full sm:w-auto px-6 py-3.5 rounded-full border border-neutral-300 hover:border-black text-[14px] font-medium transition-colors text-neutral-700 bg-white"
+            >
+              Back to Home
+            </Link>
+          </div>
         </div>
-
       </div>
     );
   }

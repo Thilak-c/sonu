@@ -183,7 +183,13 @@ export async function GET(request) {
     const db = await initDb();
 
     if (orderId) {
-      const order = await db.collection('orders').findOne({ orderId });
+      let order = await db.collection('orders').findOne({ orderId });
+      if (!order && orderId.length === 24) {
+        try {
+          const { ObjectId } = await import('mongodb');
+          order = await db.collection('orders').findOne({ _id: new ObjectId(orderId) });
+        } catch (e) {}
+      }
       if (!order) {
         return NextResponse.json({ error: 'Order not found' }, { status: 404 });
       }
