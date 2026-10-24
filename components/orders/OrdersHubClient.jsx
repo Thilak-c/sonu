@@ -287,17 +287,64 @@ export default function OrdersHubClient() {
                 >
                   {/* Left Side: Product Image & Details */}
                   <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
-                    {/* Left: Rounded Square Image Box */}
-                    <div className="w-[68px] h-[68px] sm:w-[76px] sm:h-[76px] bg-[#f4f4f4] rounded-[16px] sm:rounded-[18px] flex items-center justify-center p-2 shrink-0 overflow-hidden">
-                      <img
-                        src={firstItem.image || '/Logo/Logo_Full.png'}
-                        alt={firstItem.name || 'Sonu shoe'}
-                        className="w-full h-full object-contain"
-                        onError={(e) => {
-                          e.currentTarget.src = '/Logo/Logo_Full.png';
-                        }}
-                      />
-                    </div>
+                    {/* Left: Product Image Box (Stacked if > 1 item, single if 1 item) */}
+                    {order.items && order.items.length > 1 ? (
+                      <div className="relative w-[68px] h-[68px] sm:w-[76px] sm:h-[76px] shrink-0">
+                        {/* Stacked Back Photo 2 (if 3+ items) */}
+                        {order.items.length > 2 && (
+                          <div className="absolute top-0 right-0 w-[50px] h-[50px] sm:w-[56px] sm:h-[56px] bg-[#e9e9e9] rounded-[13px] sm:rounded-[15px] border border-white shadow-xs p-1.5 overflow-hidden flex items-center justify-center rotate-[7deg] translate-x-1.5 -translate-y-0.5">
+                            <img
+                              src={order.items[2]?.image || order.items[0]?.image || '/Logo/Logo_Full.png'}
+                              alt=""
+                              className="w-full h-full object-contain opacity-65"
+                              onError={(e) => {
+                                e.currentTarget.src = '/Logo/Logo_Full.png';
+                              }}
+                            />
+                          </div>
+                        )}
+
+                        {/* Stacked Back Photo 1 (2nd item) */}
+                        <div className="absolute top-0.5 right-0.5 w-[52px] h-[52px] sm:w-[58px] sm:h-[58px] bg-[#ededed] rounded-[14px] sm:rounded-[16px] border border-white shadow-xs p-1.5 overflow-hidden flex items-center justify-center rotate-[3.5deg] translate-x-0.5 -translate-y-0.5">
+                          <img
+                            src={order.items[1]?.image || order.items[0]?.image || '/Logo/Logo_Full.png'}
+                            alt=""
+                            className="w-full h-full object-contain opacity-80"
+                            onError={(e) => {
+                              e.currentTarget.src = '/Logo/Logo_Full.png';
+                            }}
+                          />
+                        </div>
+
+                        {/* Front Main Photo (1st item) */}
+                        <div className="absolute bottom-0 left-0 w-[54px] h-[54px] sm:w-[60px] sm:h-[60px] bg-[#f4f4f4] rounded-[14px] sm:rounded-[16px] border-2 border-white shadow-sm p-1.5 overflow-hidden flex items-center justify-center -rotate-[2deg]">
+                          <img
+                            src={firstItem.image || '/Logo/Logo_Full.png'}
+                            alt={firstItem.name || 'Sonu shoe'}
+                            className="w-full h-full object-contain"
+                            onError={(e) => {
+                              e.currentTarget.src = '/Logo/Logo_Full.png';
+                            }}
+                          />
+                        </div>
+
+                        {/* Badge for extra item count */}
+                        <span className="absolute -bottom-1 -right-1 bg-[#111111] text-white text-[9.5px] font-bold px-1.5 py-0.5 rounded-full shadow-xs border border-white z-10 leading-none">
+                          +{order.items.length - 1}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="w-[68px] h-[68px] sm:w-[76px] sm:h-[76px] bg-[#f4f4f4] rounded-[16px] sm:rounded-[18px] flex items-center justify-center p-2 shrink-0 overflow-hidden">
+                        <img
+                          src={firstItem.image || '/Logo/Logo_Full.png'}
+                          alt={firstItem.name || 'Sonu shoe'}
+                          className="w-full h-full object-contain"
+                          onError={(e) => {
+                            e.currentTarget.src = '/Logo/Logo_Full.png';
+                          }}
+                        />
+                      </div>
+                    )}
 
                     {/* Right of Image: Date / Status Headline + Product Name */}
                     <div className="min-w-0">
