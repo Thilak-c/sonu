@@ -373,7 +373,7 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
 
                       {/* 6. Size */}
                       <div>
-                        <span className="text-[14px] font-medium text-[#111111] underline underline-offset-4 decoration-1">
+                        <span className="text-[14px] font-medium text-[#111111]">
                           Size {item.size || 'UK 8'}
                         </span>
                         {item.quantity > 1 && (
@@ -393,14 +393,10 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
           <div className="border-t border-[#e5e5e5] pt-6 mt-6 space-y-3.5 text-[15px] sm:text-[16px] text-[#111111]">
             <div className="flex items-center justify-between">
               <span>Bag Total</span>
-              <span>₹ {(order.totalAmount || 13995).toLocaleString('en-IN')}</span>
+              <span>₹ {(order.totalAmount).toLocaleString('en-IN')}</span>
             </div>
 
-            <div className="flex items-center justify-between">
-              <span>Sub Total</span>
-              <span>₹ {(order.totalAmount || 13995).toLocaleString('en-IN')}</span>
-            </div>
-
+          
             <div className="flex items-center justify-between">
               <span>Shipping Charges</span>
               <span className="text-[#0d8240] font-normal">Free</span>
@@ -416,11 +412,11 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
         </div>
 
         {/* Delivery Address & Customer Details */}
-        <div className="bg-white border border-[#e5e5e5] rounded-[24px] p-6 sm:p-7 shadow-sm">
+        <div className=" rounded-[24px]">
           <h2 className="text-[16px] font-bold text-[#111111] mb-3">
             Delivery Address
           </h2>
-          <div className="p-4 rounded-[18px] bg-neutral-50 border border-neutral-200/70 text-[13.5px] text-neutral-700 space-y-1.5 leading-relaxed">
+          <div className="text-[13.5px] text-neutral-700 space-y-1.5 leading-relaxed">
             <p className="text-[15px] font-bold text-[#111111]">
               {customer.name || 'Customer'}
             </p>
@@ -449,7 +445,7 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
             rel="noreferrer"
             className="w-full sm:w-auto px-6 py-3.5 rounded-full border border-neutral-300 hover:border-black text-[14px] font-medium text-center transition-colors text-neutral-700 bg-white"
           >
-            Need Help? Chat Support ↗
+            Need Help?
           </a>
         </div>
       </div>
