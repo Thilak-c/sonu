@@ -184,7 +184,7 @@ export default function Header() {
 
             {/* Favourites Heart Button */}
             <Link
-              href="/#fresh-drops"
+              href="/favourites"
               className="w-10 h-10 rounded-full hover:bg-neutral-100 flex items-center justify-center text-[#111111] transition-colors cursor-pointer"
               aria-label="Favourites"
             >
@@ -436,7 +436,7 @@ export default function Header() {
 
             {/* Favourites */}
             <Link
-              href="/#collection"
+              href="/favourites"
               onClick={() => setMenuOpen(false)}
               className="flex items-center gap-3.5 py-1.5 text-[15px] font-medium text-[#111111] hover:text-[#707072] transition-colors"
               aria-label="Wishlist"
@@ -449,14 +449,14 @@ export default function Header() {
 
             {/* Orders */}
             <Link
-              href="/checkout"
+              href="/orders"
               onClick={() => setMenuOpen(false)}
               className="flex items-center gap-3.5 py-1.5 text-[15px] font-medium text-[#111111] hover:text-[#707072] transition-colors"
             >
               <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" role="img" width="24px" height="24px" fill="none">
                 <path stroke="#111111" strokeMiterlimit="10" strokeWidth="1.5" d="M12 13.5v-7c0-1.74 1.01-2.75 2.25-2.75h4.39l1.61 6m0 0H3.75m16.5 0v10.5H3.75V9.75m0 0l1.61-6h5.14" />
               </svg>
-              <p>Orders</p>
+              <p>Orders & Tracking</p>
             </Link>
 
             {/* Saved Payments */}
