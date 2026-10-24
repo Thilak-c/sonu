@@ -31,6 +31,10 @@ export async function POST(request) {
       `${address.firstName || ''} ${address.lastName || ''}`.trim() ||
       'Customer';
 
+    const isPartialCod = paymentMethod === 'partial_cod' || paymentMethod === 'cod';
+    const advancePaid = isPartialCod ? Number(body.advancePaid || 200) : (razorpayPaymentId ? Number(totalAmount) : 0);
+    const balanceDue = isPartialCod ? Math.max(0, Number(totalAmount) - advancePaid) : 0;
+
     const orderDoc = {
       orderId,
       items: items.map((item) => ({
@@ -61,8 +65,10 @@ export async function POST(request) {
         },
       },
       payment: {
-        method: paymentMethod,
-        status: razorpayPaymentId ? 'PAID' : 'PENDING',
+        method: isPartialCod ? 'partial_cod' : paymentMethod,
+        status: isPartialCod ? (razorpayPaymentId ? 'PARTIALLY_PAID' : 'PENDING') : (razorpayPaymentId ? 'PAID' : 'PENDING'),
+        advancePaid,
+        balanceDue,
         razorpayPaymentId: razorpayPaymentId || null,
         razorpayOrderId: razorpayOrderId || null,
         razorpaySignature: razorpaySignature || null,

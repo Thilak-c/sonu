@@ -19,11 +19,15 @@ const TOPICS = [
     faqs: [
       {
         q: 'Which payment methods are accepted?',
-        a: 'We accept all major UPI apps (Google Pay, PhonePe, Paytm, CRED), Credit/Debit cards (Visa, MasterCard, RuPay), Net Banking across 50+ banks, and Cash on Delivery (COD).',
+        a: 'We accept full prepaid payments via UPI (Google Pay, PhonePe, Paytm, CRED), Credit/Debit Cards, Net Banking across 50+ Indian banks, EMI, and Partial Cash on Delivery (COD).',
+      },
+      {
+        q: 'How does Partial Cash on Delivery work?',
+        a: 'To guarantee verified delivery reservations, Partial COD requires a flat ₹200 advance deposit paid online at checkout. The remaining balance of your order is collected by the delivery courier upon arrival at your doorstep in cash or via UPI.',
       },
       {
         q: 'Is my payment transaction secure?',
-        a: 'Yes, 100%. All payments are processed through Razorpay using bank-grade 256-bit encryption with PCI-DSS Level 1 compliance.',
+        a: 'Yes, 100%. All online payments and advance deposits are processed securely through Razorpay using bank-grade 256-bit encryption with PCI-DSS Level 1 compliance.',
       },
       {
         q: 'What if amount is debited but order failed?',

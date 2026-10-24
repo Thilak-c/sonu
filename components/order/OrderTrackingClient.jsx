@@ -178,6 +178,11 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
   const isShipped = isDelivered || currentFulfillment === 'shipped' || currentFulfillment === 'in_transit';
   const isProcessing = isShipped || currentFulfillment === 'processing' || currentFulfillment === 'confirmed';
 
+  // Payment Breakdown
+  const isPartialCod = order.payment?.method === 'partial_cod' || order.payment?.method === 'cod';
+  const advancePaid = isPartialCod ? Number(order.payment?.advancePaid ?? 200) : Number(order.totalAmount || 13995);
+  const balanceDue = isPartialCod ? Number(order.payment?.balanceDue ?? Math.max(0, Number(order.totalAmount || 13995) - advancePaid)) : 0;
+
   return (
     <div className="min-h-screen font-['Helvetica_Now_Text',sans-serif] text-[#111111] pb-24 pt-6 sm:pt-10">
       <div className="max-w-[760px] mx-auto px-4 sm:px-6 space-y-6">
@@ -185,13 +190,24 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
         <div className="bg-white">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-
               <h1 className="text-[24px] sm:text-[28px] font-bold text-[#111111] tracking-tight font-['Helvetica_Now_Text_Medium',sans-serif]">
                 Thank you, {customer.name || 'Customer'}!
               </h1>
-             
+              <div className="flex flex-wrap items-center gap-2.5 mt-2">
+                {isPartialCod ? (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-neutral-100 text-[#111111] text-[12px] font-semibold tracking-tight border border-neutral-200">
+                    <span className="w-2 h-2 rounded-full bg-amber-500" />
+                    Partial COD (₹200 Paid)
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-neutral-100 text-[#111111] text-[12px] font-semibold tracking-tight border border-neutral-200">
+                    <span className="w-2 h-2 rounded-full bg-emerald-600" />
+                    Paid Online
+                  </span>
+                )}
+                <span className="text-[13px] text-[#707072]">Order ID: {order.orderId}</span>
+              </div>
             </div>
-
           </div>
 
           {/* Expected Delivery Date Highlight */}
@@ -393,22 +409,40 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
           <div className="border-t border-[#e5e5e5] pt-6 mt-6 space-y-3.5 text-[15px] sm:text-[16px] text-[#111111]">
             <div className="flex items-center justify-between">
               <span>Bag Total</span>
-              <span>₹ {(order.totalAmount).toLocaleString('en-IN')}</span>
+              <span>₹ {(order.totalAmount || 13995).toLocaleString('en-IN')}</span>
             </div>
 
-          
             <div className="flex items-center justify-between">
               <span>Shipping Charges</span>
               <span className="text-[#0d8240] font-normal">Free</span>
             </div>
+
+            {isPartialCod && (
+              <div className="flex items-center justify-between text-[#707072]">
+                <span>Advance Paid Online</span>
+                <span className="text-[#111111] font-medium">₹ {advancePaid.toLocaleString('en-IN')}</span>
+              </div>
+            )}
           </div>
 
           <div className="border-t border-[#e5e5e5] my-4" />
 
-          <div className="flex items-center justify-between text-[17px] sm:text-[18px] font-bold text-[#111111]">
-            <span>You Paid</span>
-            <span>₹ {(order.totalAmount || 13995).toLocaleString('en-IN')}</span>
-          </div>
+          {isPartialCod ? (
+            <div className="flex items-center justify-between text-[17px] sm:text-[18px] font-bold text-[#111111]">
+              <span className="flex items-center gap-2">
+                <span>Balance Due on Delivery</span>
+                <span className="text-[12px] font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
+                  Cash on Delivery
+                </span>
+              </span>
+              <span>₹ {balanceDue.toLocaleString('en-IN')}</span>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between text-[17px] sm:text-[18px] font-bold text-[#111111]">
+              <span>You Paid</span>
+              <span>₹ {(order.totalAmount || 13995).toLocaleString('en-IN')}</span>
+            </div>
+          )}
         </div>
 
         {/* Delivery Address & Customer Details */}

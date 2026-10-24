@@ -92,7 +92,9 @@ export default function TestOrderPage() {
         pincode: formData.pincode,
       },
       paymentMethod: formData.paymentMethod,
-      razorpayPaymentId: formData.paymentMethod === 'upi' ? `pay_mock_${Date.now()}` : null,
+      advancePaid: formData.paymentMethod === 'partial_cod' ? 200 : (Number(formData.price) * Number(formData.quantity)),
+      balanceDue: formData.paymentMethod === 'partial_cod' ? Math.max(0, (Number(formData.price) * Number(formData.quantity)) - 200) : 0,
+      razorpayPaymentId: `pay_mock_${Date.now()}`,
       placedAt: new Date().toISOString(),
     };
 
@@ -368,8 +370,8 @@ export default function TestOrderPage() {
                     onChange={handleInputChange}
                     className="w-full h-11 px-3.5 rounded-[12px] border border-neutral-300 focus:border-black outline-none font-medium bg-white"
                   >
-                    <option value="upi">Prepaid (UPI / Cards)</option>
-                    <option value="cod">Cash on Delivery (COD)</option>
+                    <option value="upi">Prepaid Full (UPI / Cards)</option>
+                    <option value="partial_cod">Partial COD (₹200 Advance, Balance on Delivery)</option>
                   </select>
                 </div>
                 <div>

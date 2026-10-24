@@ -439,13 +439,15 @@ export default function CheckoutPage() {
         }
       }
       const displayContact = (phone || '9182390192').replace(/\D/g, '').slice(-10);
+      const isPartialCod = paymentMethod === 'partial_cod';
+      const amountToPay = isPartialCod ? 200 : subtotal;
 
       // 1. Create order on backend via Razorpay Orders API & save draft in MongoDB
       const res = await fetch('/api/razorpay/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          amount: subtotal,
+          amount: amountToPay,
           items: cartItems,
           notes: {
             customerName: displayName,
@@ -453,6 +455,8 @@ export default function CheckoutPage() {
             contact: displayContact,
             address: `${address.houseNo || ''}, ${address.street || ''}, ${address.city || ''} - ${address.pincode || ''}`,
             method: paymentMethod,
+            totalOrderAmount: String(subtotal),
+            advanceDeposit: isPartialCod ? '200' : '0',
           },
         }),
       });
@@ -468,8 +472,9 @@ export default function CheckoutPage() {
         netbanking: ['block.netbanking', 'block.cards', 'block.upi', 'block.wallets_emi'],
         emi: ['block.wallets_emi', 'block.cards', 'block.upi', 'block.netbanking'],
         upi: ['block.upi', 'block.cards', 'block.netbanking', 'block.wallets_emi'],
+        partial_cod: ['block.upi', 'block.cards', 'block.netbanking', 'block.wallets_emi'],
       };
-      const activeSequence = sequenceMap[paymentMethod] || sequenceMap.card;
+      const activeSequence = sequenceMap[paymentMethod] || sequenceMap.upi;
 
       // 2. Configure and open Razorpay modal with full options
       const options = {
@@ -477,7 +482,9 @@ export default function CheckoutPage() {
         amount: orderData.amount,
         currency: orderData.currency || 'INR',
         name: 'SONU',
-        description: `Order Payment (${totalQuantity} ${totalQuantity === 1 ? 'item' : 'items'})`,
+        description: isPartialCod
+          ? 'Partial COD Advance Deposit (₹200)'
+          : `Order Payment (${totalQuantity} ${totalQuantity === 1 ? 'item' : 'items'})`,
         image: '/images/brand/logo.svg',
         order_id: orderData.orderId,
         one_click_checkout: false,
@@ -533,6 +540,7 @@ export default function CheckoutPage() {
         },
         handler: async function (response) {
           const placedOrderId = `SONU-IN-${Math.floor(100000 + Math.random() * 900000)}`;
+          const isPartial = paymentMethod === 'partial_cod';
           const confirmedData = {
             orderId: placedOrderId,
             razorpayPaymentId: response.razorpay_payment_id,
@@ -542,6 +550,9 @@ export default function CheckoutPage() {
             totalAmount: subtotal,
             address: { ...address },
             paymentMethod,
+            advancePaid: isPartial ? 200 : subtotal,
+            balanceDue: isPartial ? Math.max(0, subtotal - 200) : 0,
+            paymentStatus: isPartial ? 'PARTIALLY_PAID' : 'PAID',
             placedAt: new Date().toISOString(),
             estimatedDelivery: '3-5 business days',
           };
@@ -1504,6 +1515,96 @@ export default function CheckoutPage() {
             )}
           </div>
 
+          {/* Option 5: Partial Cash on Delivery */}
+          <div className="border border-[#e5e5e5] rounded-[16px] p-4 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.02)] transition-all">
+            <div
+              onClick={() => {
+                setPaymentMethod('partial_cod');
+                setSelectedPaymentAccordion(
+                  selectedPaymentAccordion === 'partial_cod' ? '' : 'partial_cod'
+                );
+              }}
+              className="flex items-center justify-between cursor-pointer select-none"
+            >
+              <div className="flex items-center gap-3.5">
+                <span className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0">
+                  <img
+                    src="/images/payments/cod.svg"
+                    alt="Partial COD"
+                    className="w-6 h-6 object-contain"
+                    loading="eager"
+                    fetchPriority="high"
+                    decoding="async"
+                  />
+                </span>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <p
+                      className="text-[16px] font-bold text-[#111111] leading-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
+                      style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                    >
+                      Partial Cash on Delivery
+                    </p>
+                    <span className="px-2 py-0.5 rounded-full bg-neutral-100 text-[11px] font-bold text-[#111111]">
+                      ₹200 Advance
+                    </span>
+                  </div>
+                  <p className="text-[13px] text-[#707072] mt-0.5">
+                    Pay ₹200 advance now &bull; Balance ₹{Math.max(0, subtotal - 200).toLocaleString('en-IN')} on delivery
+                  </p>
+                </div>
+              </div>
+              <img
+                src={
+                  selectedPaymentAccordion === 'partial_cod'
+                    ? '/images/payments/caret-up.svg'
+                    : '/images/payments/caret-down.svg'
+                }
+                alt=""
+                className="w-5 h-5 shrink-0"
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
+              />
+            </div>
+
+            {selectedPaymentAccordion === 'partial_cod' && (
+              <div className="mt-4 pt-3.5 border-t border-[#f0f0f0] space-y-4">
+                <div className="p-3.5 bg-neutral-50 rounded-[12px] border border-neutral-200/80 text-[13px] text-neutral-700 space-y-2">
+                  <div className="flex items-center justify-between font-medium">
+                    <span>Advance Booking Deposit</span>
+                    <span className="text-[#111111] font-bold">₹200</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[#707072]">
+                    <span>Balance Due on Delivery</span>
+                    <span className="text-[#111111] font-semibold">
+                      ₹{Math.max(0, subtotal - 200).toLocaleString('en-IN')}
+                    </span>
+                  </div>
+                  <p className="text-[12px] text-[#707072] pt-1.5 border-t border-neutral-200/60 leading-relaxed">
+                    Pay a flat ₹200 advance deposit online to confirm your shipment. The remaining balance of ₹{Math.max(0, subtotal - 200).toLocaleString('en-IN')} is paid to the courier upon delivery.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  disabled={isPlacingOrder}
+                  onClick={handlePlaceOrder}
+                  className="w-full py-4 rounded-full bg-[#111111] hover:bg-black active:scale-[0.99] text-white text-[16px] font-medium transition-all shadow-sm cursor-pointer disabled:opacity-75 flex items-center justify-center gap-2 font-['Helvetica_Now_Text_Medium',sans-serif]"
+                  style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                >
+                  {isPlacingOrder ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Processing Advance Deposit...</span>
+                    </>
+                  ) : (
+                    'Pay ₹200 to Confirm Order'
+                  )}
+                </button>
+              </div>
+            )}
+          </div>
+
           {/* ORDER INFORMATION (EXACT SCREENSHOT MATCH) */}
           <div className="pt-5 space-y-3.5">
             <h2
@@ -1605,20 +1706,49 @@ export default function CheckoutPage() {
                       <span className="text-[#059669]">Free</span>
                     </div>
                   </div>
-                  <div className="pt-3 border-t border-[#f0f0f0] flex items-center justify-between">
-                    <span
-                      className="text-[15px] sm:text-[16px] font-bold text-[#111111] font-['Helvetica_Now_Text_Medium',sans-serif]"
-                      style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
-                    >
-                      You Pay
-                    </span>
-                    <span
-                      className="text-[15px] sm:text-[16px] font-bold text-[#111111] font-['Helvetica_Now_Text_Medium',sans-serif]"
-                      style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
-                    >
-                      ₹{subtotal.toLocaleString('en-IN')}
-                    </span>
-                  </div>
+                  {paymentMethod === 'partial_cod' ? (
+                    <>
+                      <div className="flex items-center justify-between text-[14px] text-[#707072]">
+                        <span>Advance Paid Online</span>
+                        <span className="text-[#111111] font-medium">₹200</span>
+                      </div>
+                      <div className="flex items-center justify-between text-[14px] text-[#707072]">
+                        <span>Balance Due on Delivery</span>
+                        <span className="text-[#111111] font-medium">
+                          ₹{Math.max(0, subtotal - 200).toLocaleString('en-IN')}
+                        </span>
+                      </div>
+                      <div className="pt-3 border-t border-[#f0f0f0] flex items-center justify-between">
+                        <span
+                          className="text-[15px] sm:text-[16px] font-bold text-[#111111] font-['Helvetica_Now_Text_Medium',sans-serif]"
+                          style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                        >
+                          You Pay Now
+                        </span>
+                        <span
+                          className="text-[15px] sm:text-[16px] font-bold text-[#111111] font-['Helvetica_Now_Text_Medium',sans-serif]"
+                          style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                        >
+                          ₹200
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="pt-3 border-t border-[#f0f0f0] flex items-center justify-between">
+                      <span
+                        className="text-[15px] sm:text-[16px] font-bold text-[#111111] font-['Helvetica_Now_Text_Medium',sans-serif]"
+                        style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                      >
+                        You Pay
+                      </span>
+                      <span
+                        className="text-[15px] sm:text-[16px] font-bold text-[#111111] font-['Helvetica_Now_Text_Medium',sans-serif]"
+                        style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                      >
+                        ₹{subtotal.toLocaleString('en-IN')}
+                      </span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
