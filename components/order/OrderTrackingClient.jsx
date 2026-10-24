@@ -179,7 +179,7 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
   const isProcessing = isShipped || currentFulfillment === 'processing' || currentFulfillment === 'confirmed';
 
   return (
-    <div className="min-h-screen bg-[#fafafa] font-['Helvetica_Now_Text',sans-serif] text-[#111111] pb-24 pt-6 sm:pt-10">
+    <div className="min-h-screen font-['Helvetica_Now_Text',sans-serif] text-[#111111] pb-24 pt-6 sm:pt-10">
       <div className="max-w-[760px] mx-auto px-4 sm:px-6 space-y-6">
         {/* Top Order Confirmation Banner */}
         <div className="bg-white">
@@ -326,16 +326,16 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
               return (
                 <div key={itemKey} className="border-b border-[#e5e5e5] pb-8 mb-8 last:border-b-0 last:mb-0">
                   {/* Product Info Row - exact same as Bag */}
-                  <div className="flex gap-4 sm:gap-6 items-stretch">
-                    {/* Square Product Image - height exactly matches detail section */}
-                    <div className="self-stretch aspect-square shrink-0 rounded-[10px] bg-[#f5f5f5] relative overflow-hidden flex items-center justify-center">
+                  <div className="flex gap-4 sm:gap-6 items-start">
+                    {/* Square Product Image - height matches detail section */}
+                    <div className="w-[135px] h-[135px] sm:w-[150px] sm:h-[150px] shrink-0 rounded-[10px] bg-[#f5f5f5] flex items-center justify-center p-2 overflow-hidden">
                       <img
                         src={item.image || '/images/ad22b92Nike-HQ2593-502_1.avif'}
                         alt={item.name}
                         loading="eager"
                         fetchPriority="high"
                         decoding="async"
-                        className="absolute inset-0 w-full h-full object-contain p-2.5 mix-blend-multiply"
+                        className="w-full h-full object-contain mix-blend-multiply"
                       />
                     </div>
 
