@@ -698,8 +698,8 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
 
               {/* Mobile Carousel Pagination Dots (Overlaid at bottom of product image) */}
               {productImages.length > 1 && (
-                <div className="absolute bottom-3.5 left-0 right-0 flex items-center justify-center z-10 pointer-events-auto">
-                  <div className="flex items-center gap-1.5 bg-white/75 backdrop-blur-xs px-2.5 py-1 rounded-full shadow-xs">
+                <div className="absolute bottom-9 left-0 right-0 flex items-center justify-center z-10 pointer-events-auto">
+                  <div className="flex items-center gap-1  px-2.5 py-1 rounded-full">
                     {productImages.map((_, idx) => (
                       <button
                         key={`mob-dot-${idx}`}
@@ -707,8 +707,8 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
                         onClick={() => scrollToSlide(idx)}
                         className={`transition-all rounded-full cursor-pointer ${
                           currentImageIndex === idx
-                            ? 'w-5 h-2 bg-[#111111]'
-                            : 'w-2 h-2 bg-[#111111]/30 hover:bg-[#111111]/60'
+                            ? 'w-5 h-1.5 bg-[#111111]'
+                            : 'w-2 h-1.5 bg-[#111111]/30 hover:bg-[#111111]/60'
                         }`}
                         aria-label={`Go to slide ${idx + 1}`}
                       />
@@ -762,10 +762,10 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
                             router.push(`/product/${swatch.id || swatch.slug}`);
                           }
                         }}
-                        className={`w-[72px] h-[72px] sm:w-[76px] sm:h-[76px] aspect-square rounded-[8px] p-0 transition-all cursor-pointer overflow-hidden flex items-center justify-center shrink-0 ${
+                        className={`w-[72px] h-[72px] sm:w-[76px] sm:h-[76px] aspect-square rounded-[4px] p-0 transition-all cursor-pointer overflow-hidden flex items-center justify-center shrink-0 ${
                           isCurrent
                             ? 'border-[1.5px] border-[#111111]'
-                            : 'border border-neutral-200 hover:border-neutral-400'
+                            : ''
                         }`}
                         title={swatch.name}
                       >

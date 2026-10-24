@@ -204,7 +204,19 @@ export async function GET(request) {
 
     const query = {};
     if (email) query['customer.email'] = email.toLowerCase().trim();
-    if (mobile) query['customer.mobile'] = mobile.trim();
+    if (mobile) {
+      const cleanMobile = mobile.replace(/\D/g, '').slice(-10);
+      query.$or = [
+        { 'customer.mobile': mobile.trim() },
+        { 'customer.mobile': cleanMobile },
+        { 'customer.mobile': `+91${cleanMobile}` },
+        { 'customer.mobile': `91${cleanMobile}` },
+        { 'address.mobile': mobile.trim() },
+        { 'address.mobile': cleanMobile },
+        { 'address.mobile': `+91${cleanMobile}` },
+        { 'address.mobile': `91${cleanMobile}` },
+      ];
+    }
 
     const orders = await db
       .collection('orders')
