@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { FRESH_DROPS } from '@/components/home/freshDropsData';
-import { addToCart } from '@/components/cart/cartStore';
+import { addToCart, getCartItems, removeFromCart, updateCartQuantity } from '@/components/cart/cartStore';
 
 const CATALOG_SIZES = ['UK 3', 'UK 4', 'UK 5', 'UK 6', 'UK 7', 'UK 8', 'UK 9'];
 
@@ -11,6 +11,16 @@ export default function FavouritesClient() {
   const [wishlistMap, setWishlistMap] = useState({});
   const [isLoaded, setIsLoaded] = useState(false);
   const [addedItemKey, setAddedItemKey] = useState(null);
+
+  // Cart state
+  const [cartItems, setCartItems] = useState([]);
+  const [cartCount, setCartCount] = useState(0);
+
+  // Added to Bag Drawer state
+  const [drawerItem, setDrawerItem] = useState(null);
+  const [isDrawerMounted, setIsDrawerMounted] = useState(false);
+  const [isDrawerVisible, setIsDrawerVisible] = useState(false);
+  const drawerTimerRef = useRef(null);
 
   // Size Picker Modal state
   const [activeModalProduct, setActiveModalProduct] = useState(null);
@@ -20,9 +30,6 @@ export default function FavouritesClient() {
   // Size Guide modal state
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
   const [sizeGuideUnit, setSizeGuideUnit] = useState('cm');
-
-  // Toast confirmation
-  const [toastMessage, setToastMessage] = useState('');
 
   useEffect(() => {
     try {
@@ -54,6 +61,29 @@ export default function FavouritesClient() {
     return () => window.removeEventListener('wishlist-updated', handleUpdate);
   }, []);
 
+  // Sync cart items & count
+  useEffect(() => {
+    const syncCart = () => {
+      const items = getCartItems();
+      setCartItems(items);
+      const count = items.reduce((acc, it) => acc + (it.quantity || 1), 0);
+      setCartCount(count);
+    };
+
+    syncCart();
+    window.addEventListener('cart-updated', syncCart);
+    return () => window.removeEventListener('cart-updated', syncCart);
+  }, []);
+
+  const closeDrawer = () => {
+    setIsDrawerVisible(false);
+    if (drawerTimerRef.current) clearTimeout(drawerTimerRef.current);
+    drawerTimerRef.current = setTimeout(() => {
+      setIsDrawerMounted(false);
+      setDrawerItem(null);
+    }, 300);
+  };
+
   const removeFavourite = (id) => {
     setWishlistMap((prev) => {
       const next = { ...prev };
@@ -82,29 +112,37 @@ export default function FavouritesClient() {
   const handleConfirmMoveToBag = () => {
     if (!activeModalProduct) return;
 
+    const formattedPrice =
+      activeModalProduct.price ||
+      `₹${(activeModalProduct.priceNumber || 13995).toLocaleString('en-IN')}`;
+
     addToCart({
       id: activeModalProduct.id,
       name: activeModalProduct.name,
       category: activeModalProduct.category,
-      price: activeModalProduct.priceNumber || 13995,
-      priceFormatted:
-        activeModalProduct.price ||
-        `₹${(activeModalProduct.priceNumber || 13995).toLocaleString('en-IN')}`,
+      price: formattedPrice,
+      priceNumber: activeModalProduct.priceNumber || 13995,
       image: activeModalProduct.image,
       size: selectedSize,
       quantity: 1,
       color: activeModalProduct.colorways?.[0] || 'Standard',
     });
 
-    const addedId = activeModalProduct.id;
+    const addedItem = {
+      ...activeModalProduct,
+      selectedSize,
+      priceFormatted: formattedPrice,
+    };
+
     closeSizeModal();
 
-    setAddedItemKey(addedId);
-    setToastMessage(`Added ${activeModalProduct.name} (${selectedSize}) to Bag`);
-    setTimeout(() => {
-      setAddedItemKey(null);
-      setToastMessage('');
-    }, 2400);
+    // Open Added to Bag confirmation popup drawer
+    setDrawerItem(addedItem);
+    setIsDrawerMounted(true);
+    if (drawerTimerRef.current) clearTimeout(drawerTimerRef.current);
+    drawerTimerRef.current = setTimeout(() => {
+      setIsDrawerVisible(true);
+    }, 20);
   };
 
   const favouritedProducts = FRESH_DROPS.filter(
@@ -168,7 +206,9 @@ export default function FavouritesClient() {
           /* 2-Column Grid on Mobile matching design */
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-2.5 sm:gap-x-4 md:gap-x-6 gap-y-8 sm:gap-y-10 mt-5 sm:mt-7">
             {favouritedProducts.map((product) => {
-              const isAdded = addedItemKey === product.id;
+              const matchingCartItems = cartItems.filter((it) => it.id === product.id);
+              const qty = matchingCartItems.reduce((acc, it) => acc + (it.quantity || 1), 0);
+              const primaryItem = matchingCartItems[0];
 
               return (
                 <div key={product.id} className="flex flex-col">
@@ -222,7 +262,7 @@ export default function FavouritesClient() {
                         className="text-[14px] sm:text-[15px] font-bold text-[#111111] leading-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
                         style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
                       >
-                        Sonu shoe
+                        Sonu Shoe
                       </p>
 
                       {/* Product Name */}
@@ -248,20 +288,74 @@ export default function FavouritesClient() {
                       </p>
                     </div>
 
-                    {/* Move to Bag Button */}
+                    {/* Move to Bag Button / Quantity Pill */}
                     <div className="mt-3 sm:mt-4">
-                      <button
-                        type="button"
-                        onClick={() => openSizeModal(product)}
-                        className={`w-fit px-4 sm:px-5 py-2 sm:py-2.5 rounded-full border text-[13px] sm:text-[14px] font-medium transition-all cursor-pointer inline-flex items-center justify-center font-['Helvetica_Now_Text_Medium',sans-serif] ${
-                          isAdded
-                            ? 'bg-[#111111] text-white border-[#111111]'
-                            : 'bg-white text-[#111111] border-[#cccccc] hover:border-black active:scale-[0.98]'
-                        }`}
-                        style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
-                      >
-                        {isAdded ? 'Added to Bag ✓' : 'Move to Bag'}
-                      </button>
+                      {qty > 0 ? (
+                        <div className="w-full sm:w-fit h-[36px] sm:h-[40px] px-3 rounded-full border border-[#111111] bg-white flex items-center justify-between sm:gap-4 text-[#111111]">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (primaryItem) {
+                                if (qty <= 1) {
+                                  removeFromCart(primaryItem.id, primaryItem.size, primaryItem.color);
+                                } else {
+                                  updateCartQuantity(primaryItem.id, primaryItem.size, primaryItem.color, -1);
+                                }
+                              }
+                            }}
+                            className="p-1 text-[#111111] hover:text-[#707072] transition-colors cursor-pointer flex items-center justify-center active:scale-90"
+                            aria-label="Decrease quantity"
+                          >
+                            {qty <= 1 ? (
+                              <svg
+                                aria-hidden="true"
+                                focusable="false"
+                                viewBox="0 0 24 24"
+                                className="w-4 h-4"
+                                fill="none"
+                              >
+                                <path
+                                  stroke="currentColor"
+                                  strokeMiterlimit="10"
+                                  strokeWidth="1.5"
+                                  d="M13.75 10v7m-3.5-7v7m-3.5-8.5V17c0 1.24 1.01 2.25 2.25 2.25h6c1.24 0 2.25-1.01 2.25-2.25V7.75h2.25m-10-3h3.75c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5H4.5"
+                                />
+                              </svg>
+                            ) : (
+                              <span className="text-[16px] font-medium leading-none px-0.5">−</span>
+                            )}
+                          </button>
+
+                          <span
+                            className="text-[13px] sm:text-[14px] font-medium text-[#111111] min-w-[20px] text-center select-none font-['Helvetica_Now_Text_Medium',sans-serif]"
+                            style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                          >
+                            {qty}
+                          </span>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (primaryItem) {
+                                updateCartQuantity(primaryItem.id, primaryItem.size, primaryItem.color, 1);
+                              }
+                            }}
+                            className="p-1 text-[#111111] hover:text-[#707072] text-[18px] font-normal transition-colors cursor-pointer leading-none flex items-center justify-center active:scale-90"
+                            aria-label="Increase quantity"
+                          >
+                            +
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => openSizeModal(product)}
+                          className="w-full sm:w-fit px-4 sm:px-5 py-2 sm:py-2.5 rounded-full border border-[#cccccc] hover:border-black text-[13px] sm:text-[14px] font-medium text-[#111111] bg-white transition-all cursor-pointer inline-flex items-center justify-center active:scale-[0.98] font-['Helvetica_Now_Text_Medium',sans-serif]"
+                          style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                        >
+                          Move to Bag
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -487,6 +581,111 @@ export default function FavouritesClient() {
               >
                 Done
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Added to Bag Popup Drawer / Modal */}
+      {isDrawerMounted && (
+        <div className="fixed inset-0 z-50 overflow-hidden font-['Helvetica_Now_Text',sans-serif]">
+          {/* Backdrop overlay */}
+          <div
+            className={`fixed inset-0 bg-black/60 transition-opacity duration-300 ease-out cursor-pointer ${
+              isDrawerVisible ? 'opacity-100' : 'opacity-0'
+            }`}
+            onClick={closeDrawer}
+          />
+
+          {/* Modal / Bottom Sheet */}
+          <div
+            className={`fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 w-full sm:max-w-[500px] bg-white rounded-t-[28px] sm:rounded-[24px] shadow-2xl z-50 p-6 sm:p-7 overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+              isDrawerVisible
+                ? 'translate-y-0 opacity-100 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:scale-100 sm:opacity-100'
+                : 'translate-y-full opacity-0 sm:-translate-x-1/2 sm:translate-y-[100vh] sm:scale-95 sm:opacity-0'
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header: Green Checkmark + Added to Bag + Close Button */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-6 h-6 rounded-full bg-[#008a00] flex items-center justify-center shrink-0">
+                  <svg
+                    className="w-3.5 h-3.5 text-white"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={3}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </div>
+                <h2 className="text-[22px] sm:text-[24px] font-medium text-[#111111] tracking-tight leading-none">
+                  Added to Bag
+                </h2>
+              </div>
+
+              <button
+                type="button"
+                onClick={closeDrawer}
+                className="w-9 h-9 rounded-full bg-[#f5f5f5] hover:bg-[#e8e8e8] flex items-center justify-center text-[#111111] transition-colors cursor-pointer"
+                aria-label="Close"
+              >
+                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Product Details Row */}
+            {drawerItem && (
+              <div className="mt-6 flex items-start gap-4">
+                <div className="w-[104px] h-[104px] sm:w-[112px] sm:h-[112px] rounded-xl flex items-center justify-center shrink-0 overflow-hidden p-2">
+                  <img
+                    src={drawerItem.image}
+                    alt={drawerItem.name}
+                    className="w-full h-full object-contain mix-blend-multiply"
+                  />
+                </div>
+
+                <div className="flex flex-col text-left">
+                  <h3
+                    className="text-[17px] sm:text-[18px] font-medium text-[#111111] leading-snug font-['Helvetica_Now_Text_Medium',sans-serif]"
+                    style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                  >
+                    {drawerItem.name}
+                  </h3>
+                  <p className="text-[15px] text-[#707072] mt-0.5 leading-tight">
+                    {drawerItem.category || "Women's Road-Running Shoes"} ({drawerItem.selectedSize || 'UK 8'})
+                  </p>
+                  <p className="text-[15px] text-[#707072] mt-0.5 leading-tight">
+                    Size {drawerItem.selectedSize || 'UK 8'}
+                  </p>
+                  <p
+                    className="text-[17px] font-medium text-[#111111] mt-0 font-['Helvetica_Now_Text_Medium',sans-serif]"
+                    style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                  >
+                    {drawerItem.priceFormatted}
+                  </p>
+                  <p className="text-[13px] text-[#707072] mt-0.5">
+                    Inclusive of all taxes
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* View Bag CTA Button */}
+            <div className="mt-6">
+              <Link
+                href="/checkout"
+                onClick={closeDrawer}
+                className="w-full py-4 rounded-full bg-[#111111] hover:bg-black text-white text-[16px] font-medium text-center transition-all block shadow-md active:scale-[0.99] cursor-pointer font-['Helvetica_Now_Text_Medium',sans-serif]"
+                style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+              >
+                View Bag ({cartCount})
+              </Link>
             </div>
           </div>
         </div>
