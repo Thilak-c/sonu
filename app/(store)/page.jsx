@@ -64,14 +64,14 @@ export default function HomePage() {
       />
 
       <div className="w-full bg-white flex flex-col font-['Helvetica_Now_Text',sans-serif]">
-        {/* 1. Hero Section (40-50% VH) */}
-        <HeroSection />
+        {/* 1. Hero Section (Commented out per request) */}
+        {/* <HeroSection /> */}
 
         {/* 2. Featured Section (40-50% VH) */}
         <FeaturedSection />
 
-        {/* 3. Trending Section (40-50% VH) */}
-        <TrendingSection />
+        {/* 3. Trending Section (Commented out per request) */}
+        {/* <TrendingSection /> */}
 
         {/* 4. Fresh Drops Section (40-50% VH) */}
         <FreshDropsSection />
@@ -79,8 +79,8 @@ export default function HomePage() {
         {/* 5. Shop by Sport Section (40-50% VH) */}
         <ShopBySportSection />
 
-        {/* 6. Spotlight Section */}
-        <SpotlightSection />
+        {/* 6. Spotlight Section (Commented out per request) */}
+        {/* <SpotlightSection /> */}
 
         {/* 7. Last Minute Addition (copied from Bag page) */}
         <LastMinuteSection />

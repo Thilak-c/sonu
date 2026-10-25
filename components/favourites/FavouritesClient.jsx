@@ -228,7 +228,7 @@ export default function FavouritesClient() {
                         e.stopPropagation();
                         removeFavourite(product.id);
                       }}
-                      className="absolute top-2 right-2 sm:top-2.5 sm:right-2.5 w-7 h-7 sm:w-8 sm:h-8 bg-white rounded-full flex items-center justify-center shadow-[0_1px_4px_rgba(0,0,0,0.12)] hover:bg-[#ececec] transition-colors cursor-pointer z-10"
+                      className="absolute top-2 right-2 sm:top-2.5 sm:right-2.5 w-7 h-7 sm:w-8 sm:h-8 bg-white rounded-full flex items-center justify-center hover:bg-[#ececec] transition-colors cursor-pointer z-10"
                       title="Remove from Favourites"
                       aria-label="Remove from Favourites"
                     >
