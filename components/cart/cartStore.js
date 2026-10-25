@@ -23,13 +23,13 @@ export function getCartItems() {
     const items = raw ? JSON.parse(raw) : [];
     return items.map((item) => {
       let size = item.size;
-      // If item has a mismatched size like UK 10/11/12, normalize to UK 9
-      if (size && !VALID_CATALOG_SIZES.includes(size)) {
+      // If item has a mismatched footwear size like UK 10/11/12, normalize to UK 9 (preserve 'One Size' for accessories/gear)
+      if (size && size !== 'One Size' && !VALID_CATALOG_SIZES.includes(size)) {
         size = 'UK 9';
       }
       return {
         ...item,
-        size: size || 'UK 8',
+        size: size || 'One Size',
         image: LEGACY_IMAGES[item.image] || item.image,
       };
     });
@@ -84,7 +84,12 @@ export function addToCart(productItem) {
 export function removeFromCart(itemId, size, color) {
   const current = getCartItems();
   const updated = current.filter(
-    (item) => !(item.id === itemId && item.size === size && item.color === color)
+    (item) =>
+      !(
+        item.id === itemId &&
+        (!size || item.size === size) &&
+        (!color || item.color === color)
+      )
   );
   saveCartItems(updated);
   return updated;
@@ -92,9 +97,15 @@ export function removeFromCart(itemId, size, color) {
 
 export function updateCartQuantity(itemId, size, color, delta) {
   const current = getCartItems();
+  let matched = false;
   const updated = current
     .map((item) => {
-      if (item.id === itemId && item.size === size && item.color === color) {
+      const match =
+        item.id === itemId &&
+        (!size || item.size === size) &&
+        (!color || item.color === color);
+      if (match && !matched) {
+        matched = true;
         const newQty = (item.quantity || 1) + delta;
         return newQty > 0 ? { ...item, quantity: newQty } : null;
       }

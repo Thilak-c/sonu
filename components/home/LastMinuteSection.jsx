@@ -196,10 +196,12 @@ export default function LastMinuteSection() {
                         <button
                           type="button"
                           onClick={() => {
+                            const targetSize = cartItem?.size || 'One Size';
+                            const targetColor = cartItem?.color || addon.color;
                             if (qty <= 1) {
-                              removeFromCart(addon.id, 'One Size', addon.color);
+                              removeFromCart(addon.id, targetSize, targetColor);
                             } else {
-                              updateCartQuantity(addon.id, 'One Size', addon.color, -1);
+                              updateCartQuantity(addon.id, targetSize, targetColor, -1);
                             }
                           }}
                           className="p-1 text-[#111111] hover:text-[#707072] transition-colors cursor-pointer flex items-center justify-center active:scale-90"
@@ -210,7 +212,7 @@ export default function LastMinuteSection() {
                               aria-hidden="true"
                               focusable="false"
                               viewBox="0 0 24 24"
-                              className="w-4 h-4"
+                              className="w-6 h-6"
                               fill="none"
                             >
                               <path
@@ -221,7 +223,7 @@ export default function LastMinuteSection() {
                               />
                             </svg>
                           ) : (
-                            <span className="text-[16px] font-medium leading-none px-0.5">−</span>
+                            <span className="text-[22px] font-medium leading-none px-0.5">−</span>
                           )}
                         </button>
 
@@ -234,8 +236,12 @@ export default function LastMinuteSection() {
 
                         <button
                           type="button"
-                          onClick={() => updateCartQuantity(addon.id, 'One Size', addon.color, 1)}
-                          className="p-1 text-[#111111] hover:text-[#707072] text-[18px] font-normal transition-colors cursor-pointer leading-none flex items-center justify-center active:scale-90"
+                          onClick={() => {
+                            const targetSize = cartItem?.size || 'One Size';
+                            const targetColor = cartItem?.color || addon.color;
+                            updateCartQuantity(addon.id, targetSize, targetColor, 1);
+                          }}
+                          className="p-1 text-[#111111] hover:text-[#707072] text-[24px] font-normal transition-colors cursor-pointer leading-none flex items-center justify-center active:scale-90"
                           aria-label="Increase quantity"
                         >
                           +
