@@ -701,7 +701,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
               {/* Mobile Carousel Pagination Dots (Overlaid at bottom of product image) */}
               {productImages.length > 1 && (
                 <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center z-10 pointer-events-auto">
-                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/70 backdrop-blur-xs shadow-xs">
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full">
                     {productImages.map((_, idx) => (
                       <button
                         key={`mob-dot-${idx}`}
