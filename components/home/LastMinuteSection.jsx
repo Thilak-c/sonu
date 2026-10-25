@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
-import { addToCart } from '@/components/cart/cartStore';
+import React, { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
+import { addToCart, getCartItems } from '@/components/cart/cartStore';
 
 const LAST_MINUTE_ADDITIONS = [
   {
@@ -44,7 +45,25 @@ const LAST_MINUTE_ADDITIONS = [
 
 export default function LastMinuteSection() {
   const [addedAddonId, setAddedAddonId] = useState(null);
+  const [drawerItem, setDrawerItem] = useState(null);
+  const [isDrawerMounted, setIsDrawerMounted] = useState(false);
+  const [isDrawerVisible, setIsDrawerVisible] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
   const carouselRef = useRef(null);
+  const drawerTimerRef = useRef(null);
+
+  // Sync cart count
+  useEffect(() => {
+    const updateCount = () => {
+      const items = getCartItems();
+      const count = items.reduce((acc, it) => acc + (it.quantity || 1), 0);
+      setCartCount(count);
+    };
+
+    updateCount();
+    window.addEventListener('cart-updated', updateCount);
+    return () => window.removeEventListener('cart-updated', updateCount);
+  }, []);
 
   const scrollAddons = (direction) => {
     if (!carouselRef.current) return;
@@ -68,6 +87,23 @@ export default function LastMinuteSection() {
     setTimeout(() => {
       setAddedAddonId(null);
     }, 2000);
+
+    // Open Added to Bag confirmation popup
+    setDrawerItem(addon);
+    setIsDrawerMounted(true);
+    if (drawerTimerRef.current) clearTimeout(drawerTimerRef.current);
+    drawerTimerRef.current = setTimeout(() => {
+      setIsDrawerVisible(true);
+    }, 20);
+  };
+
+  const closeDrawer = () => {
+    setIsDrawerVisible(false);
+    if (drawerTimerRef.current) clearTimeout(drawerTimerRef.current);
+    drawerTimerRef.current = setTimeout(() => {
+      setIsDrawerMounted(false);
+      setDrawerItem(null);
+    }, 300);
   };
 
   return (
@@ -123,7 +159,7 @@ export default function LastMinuteSection() {
                   key={addon.id}
                   className="flex flex-col group w-[175px] sm:w-[200px] lg:w-auto shrink-0"
                 >
-                  {/* Square Image Box */}
+                  {/* Square Image Box (User custom styling preserved) */}
                   <div className="w-full aspect-square flex items-center justify-center overflow-hidden">
                     <img
                       src={addon.image}
@@ -172,6 +208,108 @@ export default function LastMinuteSection() {
           </div>
         </div>
       </div>
+
+      {/* Added to Bag Popup Drawer / Modal (Exact match to Product Detail Page) */}
+      {isDrawerMounted && (
+        <div className="fixed inset-0 z-50 overflow-hidden font-['Helvetica_Now_Text',sans-serif]">
+          {/* Backdrop overlay */}
+          <div
+            className={`fixed inset-0 bg-black/60 transition-opacity duration-300 ease-out cursor-pointer ${
+              isDrawerVisible ? 'opacity-100' : 'opacity-0'
+            }`}
+            onClick={closeDrawer}
+          />
+
+          {/* Modal / Bottom Sheet */}
+          <div
+            className={`fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 w-full sm:max-w-[500px] bg-white rounded-t-[28px] sm:rounded-[24px] shadow-2xl z-50 p-6 sm:p-7 overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+              isDrawerVisible
+                ? 'translate-y-0 opacity-100 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:scale-100 sm:opacity-100'
+                : 'translate-y-full opacity-0 sm:-translate-x-1/2 sm:translate-y-[100vh] sm:scale-95 sm:opacity-0'
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header: Green Checkmark + Added to Bag + Close Button */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-6 h-6 rounded-full bg-[#008a00] flex items-center justify-center shrink-0">
+                  <svg
+                    className="w-3.5 h-3.5 text-white"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={3}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </div>
+                <h2 className="text-[22px] sm:text-[24px] font-medium text-[#111111] tracking-tight leading-none">
+                  Added to Bag
+                </h2>
+              </div>
+
+              <button
+                type="button"
+                onClick={closeDrawer}
+                className="w-9 h-9 rounded-full bg-[#f5f5f5] hover:bg-[#e8e8e8] flex items-center justify-center text-[#111111] transition-colors cursor-pointer"
+                aria-label="Close"
+              >
+                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Product Details Row */}
+            {drawerItem && (
+              <div className="mt-6 flex items-start gap-4">
+                <div className="w-[104px] h-[104px] sm:w-[112px] sm:h-[112px] bg-[#f5f5f5] rounded-xl flex items-center justify-center shrink-0 overflow-hidden p-2">
+                  <img
+                    src={drawerItem.image}
+                    alt={drawerItem.title}
+                    className="w-full h-full object-contain mix-blend-multiply"
+                  />
+                </div>
+
+                <div className="flex flex-col text-left">
+                  <h3
+                    className="text-[17px] sm:text-[18px] font-medium text-[#111111] leading-snug font-['Helvetica_Now_Text_Medium',sans-serif]"
+                    style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                  >
+                    {drawerItem.title}
+                  </h3>
+                  <p className="text-[15px] text-[#707072] mt-0.5 leading-tight">
+                    {drawerItem.brand} (One Size)
+                  </p>
+                  <p
+                    className="text-[17px] font-medium text-[#111111] mt-2 font-['Helvetica_Now_Text_Medium',sans-serif]"
+                    style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                  >
+                    {drawerItem.priceFormatted}
+                  </p>
+                  <p className="text-[13px] text-[#707072] mt-0.5">
+                    Inclusive of all taxes
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* View Bag CTA Button */}
+            <div className="mt-6">
+              <Link
+                href="/checkout"
+                onClick={closeDrawer}
+                className="w-full py-4 rounded-full bg-[#111111] hover:bg-black text-white text-[16px] font-medium text-center transition-all block shadow-md active:scale-[0.99] cursor-pointer font-['Helvetica_Now_Text_Medium',sans-serif]"
+                style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+              >
+                View Bag ({cartCount})
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
