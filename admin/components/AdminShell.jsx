@@ -219,45 +219,47 @@ export default function AdminShell({ children, onNewProductClick }) {
       )}
 
       {/* Main Content Container */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Top Desktop Navigation Bar */}
-        <header className="hidden md:flex items-center justify-between px-8 h-20 bg-white border-b border-neutral-200/80 sticky top-0 z-30">
-          <div>
-            <div className="flex items-center gap-2 text-[13px] text-neutral-400 font-normal">
-              <span>SONU</span>
-              <span>/</span>
-              <span className="text-neutral-700 capitalize">
-                {pathname === '/' ? 'Dashboard' : pathname.replace('/', '')}
-              </span>
-            </div>
-            <h1 className="text-[20px] font-bold text-[#111111] tracking-tight leading-tight mt-0.5">
-              {getPageTitle()}
-            </h1>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <Link
-              href="/products?action=new"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#111111] hover:bg-black text-white text-[13px] font-medium transition-all shadow-sm active:scale-[0.98] cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>New Drop</span>
-            </Link>
-
-            <div className="flex items-center gap-3 pl-2 border-l border-neutral-200">
-              <div className="w-9 h-9 rounded-full bg-[#111111] text-white flex items-center justify-center text-[13px] font-bold tracking-tight">
-                AD
+      <div className="flex-1 flex flex-col min-w-0 bg-[#f9fafb]">
+        {/* Top Desktop Navigation Bar (Hidden on /orders to render dedicated Shiprocket header) */}
+        {!pathname.startsWith('/orders') && (
+          <header className="hidden md:flex items-center justify-between px-8 h-20 bg-white border-b border-neutral-200/80 sticky top-0 z-30">
+            <div>
+              <div className="flex items-center gap-2 text-[13px] text-neutral-400 font-normal">
+                <span>SONU</span>
+                <span>/</span>
+                <span className="text-neutral-700 capitalize">
+                  {pathname === '/' ? 'Dashboard' : pathname.replace('/', '')}
+                </span>
               </div>
-              <div className="text-left hidden lg:block">
-                <p className="text-[13px] font-semibold text-[#111111] leading-none">Admin</p>
-                <p className="text-[11px] text-neutral-400 mt-0.5 leading-none">Operations Lead</p>
+              <h1 className="text-[20px] font-bold text-[#111111] tracking-tight leading-tight mt-0.5">
+                {getPageTitle()}
+              </h1>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <Link
+                href="/products?action=new"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#111111] hover:bg-black text-white text-[13px] font-medium transition-all shadow-sm active:scale-[0.98] cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>New Drop</span>
+              </Link>
+
+              <div className="flex items-center gap-3 pl-2 border-l border-neutral-200">
+                <div className="w-9 h-9 rounded-full bg-[#111111] text-white flex items-center justify-center text-[13px] font-bold tracking-tight">
+                  AD
+                </div>
+                <div className="text-left hidden lg:block">
+                  <p className="text-[13px] font-semibold text-[#111111] leading-none">Admin</p>
+                  <p className="text-[11px] text-neutral-400 mt-0.5 leading-none">Operations Lead</p>
+                </div>
               </div>
             </div>
-          </div>
-        </header>
+          </header>
+        )}
 
         {/* Page Content */}
-        <main className="flex-1 p-5 sm:p-7 lg:p-8 max-w-[1440px] w-full mx-auto">
+        <main className={`flex-1 ${pathname.startsWith('/orders') ? 'p-4 sm:p-6 w-full' : 'p-5 sm:p-7 lg:p-8 max-w-[1440px] w-full mx-auto'}`}>
           {children}
         </main>
       </div>
