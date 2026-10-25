@@ -90,13 +90,16 @@ export default function LastMinuteSection() {
       setAddedAddonId(null);
     }, 2000);
 
-    // Open Added to Bag confirmation popup
+    // Open Added to Bag confirmation popup with smooth animation
     setDrawerItem(addon);
     setIsDrawerMounted(true);
+    setIsDrawerVisible(false);
     if (drawerTimerRef.current) clearTimeout(drawerTimerRef.current);
-    drawerTimerRef.current = setTimeout(() => {
-      setIsDrawerVisible(true);
-    }, 20);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setIsDrawerVisible(true);
+      });
+    });
   };
 
   const closeDrawer = () => {
@@ -105,7 +108,7 @@ export default function LastMinuteSection() {
     drawerTimerRef.current = setTimeout(() => {
       setIsDrawerMounted(false);
       setDrawerItem(null);
-    }, 300);
+    }, 400);
   };
 
   return (
@@ -276,18 +279,18 @@ export default function LastMinuteSection() {
         <div className="fixed inset-0 z-50 overflow-hidden font-['Helvetica_Now_Text',sans-serif]">
           {/* Backdrop overlay */}
           <div
-            className={`fixed inset-0 bg-black/60 transition-opacity duration-300 ease-out cursor-pointer ${
-              isDrawerVisible ? 'opacity-100' : 'opacity-0'
+            className={`fixed inset-0 bg-black/60 transition-opacity duration-400 ease-out cursor-pointer ${
+              isDrawerVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
             }`}
             onClick={closeDrawer}
           />
 
           {/* Modal / Bottom Sheet */}
           <div
-            className={`fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 w-full sm:max-w-[500px] bg-white rounded-t-[28px] sm:rounded-[24px] shadow-2xl z-50 p-6 sm:p-7 overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+            className={`fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 w-full sm:max-w-[500px] bg-white rounded-t-[28px] sm:rounded-[24px] shadow-2xl z-50 p-6 sm:p-7 overflow-hidden transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] transform will-change-transform ${
               isDrawerVisible
                 ? 'translate-y-0 opacity-100 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:scale-100 sm:opacity-100'
-                : 'translate-y-full opacity-0 sm:-translate-x-1/2 sm:translate-y-[100vh] sm:scale-95 sm:opacity-0'
+                : 'translate-y-full opacity-0 sm:-translate-x-1/2 sm:translate-y-[40%] sm:scale-95 sm:opacity-0 pointer-events-none'
             }`}
             onClick={(e) => e.stopPropagation()}
           >

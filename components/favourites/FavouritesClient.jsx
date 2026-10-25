@@ -81,7 +81,7 @@ export default function FavouritesClient() {
     drawerTimerRef.current = setTimeout(() => {
       setIsDrawerMounted(false);
       setDrawerItem(null);
-    }, 300);
+    }, 400);
   };
 
   const removeFavourite = (id) => {
@@ -99,14 +99,19 @@ export default function FavouritesClient() {
   const openSizeModal = (product) => {
     setActiveModalProduct(product);
     setSelectedSize('UK 8');
-    setIsModalVisible(true);
+    setIsModalVisible(false);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setIsModalVisible(true);
+      });
+    });
   };
 
   const closeSizeModal = () => {
     setIsModalVisible(false);
     setTimeout(() => {
       setActiveModalProduct(null);
-    }, 280);
+    }, 350);
   };
 
   const handleConfirmMoveToBag = () => {
@@ -136,13 +141,16 @@ export default function FavouritesClient() {
 
     closeSizeModal();
 
-    // Open Added to Bag confirmation popup drawer
+    // Open Added to Bag confirmation popup drawer with smooth animation
     setDrawerItem(addedItem);
     setIsDrawerMounted(true);
+    setIsDrawerVisible(false);
     if (drawerTimerRef.current) clearTimeout(drawerTimerRef.current);
-    drawerTimerRef.current = setTimeout(() => {
-      setIsDrawerVisible(true);
-    }, 20);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setIsDrawerVisible(true);
+      });
+    });
   };
 
   const favouritedProducts = FRESH_DROPS.filter(
@@ -357,29 +365,29 @@ export default function FavouritesClient() {
         <div className="fixed inset-0 z-50 overflow-hidden font-['Helvetica_Now_Text',sans-serif]">
           {/* Backdrop */}
           <div
-            className={`fixed inset-0 bg-black/60 transition-opacity duration-300 ease-out cursor-pointer ${
-              isModalVisible ? 'opacity-100' : 'opacity-0'
+            className={`fixed inset-0 bg-black/60 transition-opacity duration-400 ease-out cursor-pointer ${
+              isModalVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
             }`}
             onClick={closeSizeModal}
           />
 
           {/* Modal Container */}
           <div
-            className={`fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 w-full sm:max-w-[460px] bg-white rounded-t-[24px] sm:rounded-[24px] shadow-2xl z-50 p-6 sm:p-7 overflow-y-auto max-h-[85vh] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+            className={`fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 w-full sm:max-w-[460px] bg-white rounded-t-[24px] sm:rounded-[24px] shadow-2xl z-50 p-6 sm:p-7 overflow-y-auto max-h-[85vh] transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] transform will-change-transform ${
               isModalVisible
-                ? 'translate-y-0 opacity-100 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:scale-100'
-                : 'translate-y-full opacity-0 sm:-translate-x-1/2 sm:-translate-y-[45%] sm:scale-95'
+                ? 'translate-y-0 opacity-100 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:scale-100 sm:opacity-100'
+                : 'translate-y-full opacity-0 sm:-translate-x-1/2 sm:translate-y-[40%] sm:scale-95 sm:opacity-0 pointer-events-none'
             }`}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header with Product Preview */}
             <div className="flex items-center justify-between pb-4 border-b border-[#f0f0f0]">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-[#f6f6f6] rounded-lg p-1 flex items-center justify-center shrink-0">
+                <div className="w-16 h-16  flex items-center justify-center shrink-0">
                   <img
                     src={activeModalProduct.image}
                     alt={activeModalProduct.name}
-                    className="w-full h-full object-contain"
+                    className="w-full rounded-[12px] h-full object-contain"
                   />
                 </div>
                 <div>
@@ -399,7 +407,7 @@ export default function FavouritesClient() {
               <button
                 type="button"
                 onClick={closeSizeModal}
-                className="w-8 h-8 rounded-full bg-[#f5f5f5] hover:bg-[#e8e8e8] flex items-center justify-center text-[#111111] transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-full  hover:bg-[#e8e8e8] flex items-center justify-center text-[#111111] transition-colors cursor-pointer"
                 aria-label="Close"
               >
                 <svg viewBox="0 0 24 24" width="16px" height="16px" stroke="currentColor" fill="none" strokeWidth="2">
@@ -578,18 +586,18 @@ export default function FavouritesClient() {
         <div className="fixed inset-0 z-50 overflow-hidden font-['Helvetica_Now_Text',sans-serif]">
           {/* Backdrop overlay */}
           <div
-            className={`fixed inset-0 bg-black/60 transition-opacity duration-300 ease-out cursor-pointer ${
-              isDrawerVisible ? 'opacity-100' : 'opacity-0'
+            className={`fixed inset-0 bg-black/60 transition-opacity duration-400 ease-out cursor-pointer ${
+              isDrawerVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
             }`}
             onClick={closeDrawer}
           />
 
           {/* Modal / Bottom Sheet */}
           <div
-            className={`fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 w-full sm:max-w-[500px] bg-white rounded-t-[28px] sm:rounded-[24px] shadow-2xl z-50 p-6 sm:p-7 overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+            className={`fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 w-full sm:max-w-[500px] bg-white rounded-t-[28px] sm:rounded-[24px] shadow-2xl z-50 p-6 sm:p-7 overflow-hidden transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] transform will-change-transform ${
               isDrawerVisible
                 ? 'translate-y-0 opacity-100 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:scale-100 sm:opacity-100'
-                : 'translate-y-full opacity-0 sm:-translate-x-1/2 sm:translate-y-[100vh] sm:scale-95 sm:opacity-0'
+                : 'translate-y-full opacity-0 sm:-translate-x-1/2 sm:translate-y-[40%] sm:scale-95 sm:opacity-0 pointer-events-none'
             }`}
             onClick={(e) => e.stopPropagation()}
           >
