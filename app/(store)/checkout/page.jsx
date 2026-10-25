@@ -2137,6 +2137,8 @@ export default function CheckoutPage() {
           >
             {LAST_MINUTE_ADDITIONS.map((addon) => {
               const isAdded = addedAddonId === addon.id;
+              const cartItem = cartItems.find((it) => it.id === addon.id);
+              const qty = cartItem ? (cartItem.quantity || 1) : 0;
 
               return (
                 <div
@@ -2169,18 +2171,67 @@ export default function CheckoutPage() {
                       </p>
                     </div>
 
-                    {/* Move to Bag Button */}
-                    <button
-                      type="button"
-                      onClick={() => handleMoveToBag(addon)}
-                      className={`mt-2.5 w-full py-1.5 sm:py-2 rounded-full border text-[12px] sm:text-[13px] font-medium transition-all cursor-pointer active:scale-[0.98] ${
-                        isAdded
-                          ? 'bg-[#0d8240] text-white border-[#0d8240]'
-                          : 'border-[#111111] text-[#111111] bg-white hover:bg-[#111111] hover:text-white'
-                      }`}
-                    >
-                      {isAdded ? 'Added ✓' : 'Move to Bag'}
-                    </button>
+                    {/* Move to Bag Button / Quantity Pill */}
+                    {qty > 0 ? (
+                      <div className="mt-2.5 w-full h-[34px] sm:h-[38px] rounded-full border border-[#111111] bg-white flex items-center justify-between px-3 text-[#111111]">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (qty <= 1) {
+                              removeFromCart(addon.id, 'One Size', addon.color);
+                            } else {
+                              updateCartQuantity(addon.id, 'One Size', addon.color, -1);
+                            }
+                          }}
+                          className="p-1 text-[#111111] hover:text-[#707072] transition-colors cursor-pointer flex items-center justify-center active:scale-90"
+                          aria-label="Decrease quantity"
+                        >
+                          {qty <= 1 ? (
+                            <svg
+                              aria-hidden="true"
+                              focusable="false"
+                              viewBox="0 0 24 24"
+                              className="w-4 h-4"
+                              fill="none"
+                            >
+                              <path
+                                stroke="currentColor"
+                                strokeMiterlimit="10"
+                                strokeWidth="1.5"
+                                d="M13.75 10v7m-3.5-7v7m-3.5-8.5V17c0 1.24 1.01 2.25 2.25 2.25h6c1.24 0 2.25-1.01 2.25-2.25V7.75h2.25m-10-3h3.75c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5H4.5"
+                              />
+                            </svg>
+                          ) : (
+                            <span className="text-[16px] font-medium leading-none px-0.5">−</span>
+                          )}
+                        </button>
+
+                        <span className="text-[13px] sm:text-[14px] font-medium text-[#111111] min-w-[20px] text-center select-none">
+                          {qty}
+                        </span>
+
+                        <button
+                          type="button"
+                          onClick={() => updateCartQuantity(addon.id, 'One Size', addon.color, 1)}
+                          className="p-1 text-[#111111] hover:text-[#707072] text-[18px] font-normal transition-colors cursor-pointer leading-none flex items-center justify-center active:scale-90"
+                          aria-label="Increase quantity"
+                        >
+                          +
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => handleMoveToBag(addon)}
+                        className={`mt-2.5 w-full py-1.5 sm:py-2 rounded-full border text-[12px] sm:text-[13px] font-medium transition-all cursor-pointer active:scale-[0.98] ${
+                          isAdded
+                            ? 'bg-[#0d8240] text-white border-[#0d8240]'
+                            : 'border-[#111111] text-[#111111] bg-white hover:bg-[#111111] hover:text-white'
+                        }`}
+                      >
+                        {isAdded ? 'Added ✓' : 'Move to Bag'}
+                      </button>
+                    )}
                   </div>
                 </div>
               );
