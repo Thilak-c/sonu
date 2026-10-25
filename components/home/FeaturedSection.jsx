@@ -1,47 +1,7 @@
 import Link from 'next/link';
+import { FRESH_DROPS } from './freshDropsData';
 
-const FEATURED_ITEMS = [
-  {
-    id: 'sonu-hybrid-women',
-    name: 'SONU Hybrid RN',
-    subtitle: "Women's Road Running Shoe",
-    colorway: 'Vivid Purple',
-    price: '₹13,995',
-    image: '/images/ad22b92Nike-HQ2593-502_1.avif',
-    alt: 'SONU Hybrid RN road running shoe in vivid purple',
-    link: '/product/drop-hybrid-women',
-  },
-  {
-    id: 'sonu-stealth-rn',
-    name: 'SONU Stealth RN',
-    subtitle: "Men's High-Tempo Runner",
-    colorway: 'Black / Chrome',
-    price: '₹13,995',
-    image: '/images/ad22b92Nike-HJ1101-003_1.avif',
-    alt: 'SONU Stealth RN road running shoe in black and smoke grey',
-    link: '/product/drop-hybrid-men',
-  },
-  {
-    id: 'sonu-pure-low',
-    name: 'SONU Pure Low',
-    subtitle: 'Everyday Court Sneaker',
-    colorway: 'Pure White',
-    price: '₹11,495',
-    image: '/images/1e462d9Nike-IO3815-102_1.avif',
-    alt: 'SONU Pure Low minimalist white leather shoe',
-    link: '/product/drop-court-studio',
-  },
-  {
-    id: 'sonu-offpath-trail',
-    name: 'SONU Off-Path Trail',
-    subtitle: 'All-Terrain Outdoor Traction',
-    colorway: 'Earth Brown',
-    price: '₹14,995',
-    image: '/images/ad22b92Nike-IQ3439-211_1.avif',
-    alt: 'SONU Off-Path Trail outdoor sneaker in earth brown',
-    link: '/product/drop-offpath-trail',
-  },
-];
+const FEATURED_ITEMS = [...FRESH_DROPS].reverse();
 
 export default function FeaturedSection() {
   return (
@@ -60,7 +20,7 @@ export default function FeaturedSection() {
         </h2>
       </div>
 
-      {/* Horizontal Carousel (exact match to Fresh Drops style) */}
+      {/* Horizontal Carousel (loaded in reversed 5-4-3-2-1 order) */}
       <div
         className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 overflow-x-auto no-scrollbar scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden flex items-start gap-3 sm:gap-4 pb-2"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
@@ -68,7 +28,7 @@ export default function FeaturedSection() {
         {FEATURED_ITEMS.map((item) => (
           <Link
             key={item.id}
-            href={item.link}
+            href={`/product/${item.id}`}
             className="group flex-shrink-0 w-[78vw] sm:w-[320px] md:w-[360px] flex flex-col cursor-pointer"
           >
             {/* Grey Product Square Box */}
@@ -90,7 +50,7 @@ export default function FeaturedSection() {
                 {item.name}
               </h3>
               <p className="text-[15px] sm:text-[16px] text-[#707072] mt-0.5 leading-tight">
-                {item.subtitle}
+                {item.category}
               </p>
               <p
                 className="text-[17px] sm:text-[18px] font-medium text-[#111111] font-['Helvetica_Now_Text_Medium',sans-serif]"
@@ -105,3 +65,4 @@ export default function FeaturedSection() {
     </section>
   );
 }
+
