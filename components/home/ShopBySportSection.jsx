@@ -6,24 +6,28 @@ const SPORTS_CATEGORIES = [
     name: 'Running',
     image: '/asset/Urban Sprint on Blue Concrete.webp',
     alt: 'SONU Running Footwear',
+    link: '/product/drop-hybrid-men',
   },
   {
     id: 'basketball',
     name: 'Basketball',
     image: '/asset/Intense Indoor Basketball Drive.webp',
     alt: 'SONU Basketball Footwear',
+    link: '/product/drop-court-studio',
   },
   {
     id: 'sportswear',
     name: 'Sportswear',
     image: '/asset/Cinematic Streetwear on Concrete Steps.webp',
     alt: 'SONU Sportswear Footwear',
+    link: '/product/drop-stride-tempo',
   },
   {
     id: 'training',
     name: 'Training',
     image: '/asset/Industrial Overpass Barbell Split Squat.webp',
     alt: 'SONU Training Footwear',
+    link: '/product/drop-offpath-trail',
   },
 ];
 
@@ -32,7 +36,7 @@ export default function ShopBySportSection() {
     <section
       id="shop-by-sport"
       aria-label="Shop by Sport"
-      className="w-full bg-white pt-[80px] py-6 sm:py-8 select-none font-['Helvetica_Now_Text',sans-serif]"
+      className="w-full bg-white pt-[60px] sm:pt-[80px] py-6 sm:py-8 select-none font-['Helvetica_Now_Text',sans-serif]"
     >
       {/* Section Header */}
       <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 mb-3 sm:mb-4">
@@ -52,7 +56,7 @@ export default function ShopBySportSection() {
         {SPORTS_CATEGORIES.map((sport) => (
           <Link
             key={sport.id}
-            href="/checkout"
+            href={sport.link || '/#fresh-drops'}
             className="group flex-shrink-0 w-[78vw] sm:w-[320px] md:w-[360px] flex flex-col cursor-pointer"
           >
             {/* Grey Product Square Box - exact match to fresh drops */}
