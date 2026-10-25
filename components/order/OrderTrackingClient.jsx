@@ -219,68 +219,68 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
             {/* 4-Step Progress Tracker */}
             <div className="mt-8 pt-2">
               <div className="relative">
-                {/* Horizontal Progress Bar Line */}
-                <div className="absolute top-4 left-6 right-6 h-0.5 bg-neutral-200 -z-0 hidden sm:block" />
+                {/* Horizontal Progress Bar Line (Visible on phone and desktop) */}
+                <div className="absolute top-3.5 sm:top-4 left-[12.5%] right-[12.5%] h-[2px] bg-neutral-200 z-0" />
                 <div
-                  className="absolute top-4 left-6 h-0.5 bg-black -z-0 hidden sm:block transition-all duration-500"
+                  className="absolute top-3.5 sm:top-4 left-[12.5%] h-[2px] bg-[#111111] z-0 transition-all duration-500 ease-out"
                   style={{
-                    width: isDelivered ? '90%' : isShipped ? '60%' : isProcessing ? '30%' : '10%',
+                    width: isDelivered ? '75%' : isShipped ? '50%' : isProcessing ? '25%' : '0%',
                   }}
                 />
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-2 text-center">
+                <div className="grid grid-cols-4 gap-1 sm:gap-2 text-center relative z-10">
                   {/* Step 1: Confirmed */}
                   <div className="flex flex-col items-center">
-                    <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center text-[12px] font-bold mb-2 shadow-sm">
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black text-white ring-4 ring-white flex items-center justify-center text-[11px] sm:text-[12px] font-bold mb-1.5 shadow-sm">
                       ✓
                     </div>
-                    <p className="text-[13px] font-bold text-[#111111]">Order Placed</p>
-                    <p className="text-[11px] text-neutral-400 mt-0.5">Confirmed & Verified</p>
+                    <p className="text-[11px] sm:text-[13px] font-bold text-[#111111] leading-tight">Order Placed</p>
+                    <p className="text-[9.5px] sm:text-[11px] text-neutral-400 mt-0.5 leading-tight">Confirmed</p>
                   </div>
 
                   {/* Step 2: Processing */}
                   <div className="flex flex-col items-center">
                     <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-bold mb-2 shadow-sm transition-colors ${
+                      className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full ring-4 ring-white flex items-center justify-center text-[11px] sm:text-[12px] font-bold mb-1.5 shadow-sm transition-colors ${
                         isProcessing
-                          ? 'bg-black text-white ring-4 ring-neutral-100'
+                          ? 'bg-black text-white'
                           : 'bg-neutral-200 text-neutral-500'
                       }`}
                     >
                       {isShipped ? '✓' : '2'}
                     </div>
-                    <p className="text-[13px] font-bold text-[#111111]">Preparing</p>
-                    <p className="text-[11px] text-neutral-400 mt-0.5">Quality Inspection</p>
+                    <p className="text-[11px] sm:text-[13px] font-bold text-[#111111] leading-tight">Preparing</p>
+                    <p className="text-[9.5px] sm:text-[11px] text-neutral-400 mt-0.5 leading-tight">Quality Check</p>
                   </div>
 
                   {/* Step 3: Shipped */}
                   <div className="flex flex-col items-center">
                     <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-bold mb-2 shadow-sm transition-colors ${
+                      className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full ring-4 ring-white flex items-center justify-center text-[11px] sm:text-[12px] font-bold mb-1.5 shadow-sm transition-colors ${
                         isShipped
-                          ? 'bg-black text-white ring-4 ring-neutral-100'
+                          ? 'bg-black text-white'
                           : 'bg-neutral-200 text-neutral-500'
                       }`}
                     >
                       {isDelivered ? '✓' : '3'}
                     </div>
-                    <p className="text-[13px] font-bold text-[#111111]">Dispatched</p>
-                    <p className="text-[11px] text-neutral-400 mt-0.5">In Transit</p>
+                    <p className="text-[11px] sm:text-[13px] font-bold text-[#111111] leading-tight">Dispatched</p>
+                    <p className="text-[9.5px] sm:text-[11px] text-neutral-400 mt-0.5 leading-tight">In Transit</p>
                   </div>
 
                   {/* Step 4: Delivered */}
                   <div className="flex flex-col items-center">
                     <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-bold mb-2 shadow-sm transition-colors ${
+                      className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full ring-4 ring-white flex items-center justify-center text-[11px] sm:text-[12px] font-bold mb-1.5 shadow-sm transition-colors ${
                         isDelivered
                           ? 'bg-emerald-600 text-white'
                           : 'bg-neutral-200 text-neutral-500'
                       }`}
                     >
-                      4
+                      {isDelivered ? '✓' : '4'}
                     </div>
-                    <p className="text-[13px] font-bold text-[#111111]">Delivered</p>
-                    <p className="text-[11px] text-neutral-400 mt-0.5">To Doorstep</p>
+                    <p className="text-[11px] sm:text-[13px] font-bold text-[#111111] leading-tight">Delivered</p>
+                    <p className="text-[9.5px] sm:text-[11px] text-neutral-400 mt-0.5 leading-tight">To Doorstep</p>
                   </div>
                 </div>
               </div>
