@@ -93,6 +93,7 @@ export default function CheckoutPage() {
   const sizeTimerRef = useRef(null);
 
   const openSizeModal = (item) => {
+    if (!item || item.size === 'One Size' || item.id?.startsWith('addon-')) return;
     if (sizeTimerRef.current) clearTimeout(sizeTimerRef.current);
     setEditingSizeItem(item);
     setTempSelectedSize(item.size || null);
@@ -1856,16 +1857,18 @@ export default function CheckoutPage() {
                         7 Day Return
                       </p>
 
-                      {/* 6. Size */}
-                      <div className="mt-1">
-                        <button
-                          type="button"
-                          onClick={() => openSizeModal(item)}
-                          className="text-[14px] font-medium text-[#111111] underline underline-offset-4 decoration-1 cursor-pointer hover:text-[#707072] transition-colors"
-                        >
-                          Size {item.size || 'UK 8'}
-                        </button>
-                      </div>
+                      {/* 6. Size (Only show for footwear / items with multiple selectable sizes) */}
+                      {item.size && item.size !== 'One Size' && !item.id?.startsWith('addon-') && (
+                        <div className="mt-1">
+                          <button
+                            type="button"
+                            onClick={() => openSizeModal(item)}
+                            className="text-[14px] font-medium text-[#111111] underline underline-offset-4 decoration-1 cursor-pointer hover:text-[#707072] transition-colors"
+                          >
+                            Size {item.size}
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
 
