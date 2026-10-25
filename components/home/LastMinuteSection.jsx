@@ -114,13 +114,15 @@ export default function LastMinuteSection() {
             ref={carouselRef}
             className="-mx-6 px-6 sm:-mx-10 sm:px-10 lg:mx-0 lg:px-0 flex lg:grid lg:grid-cols-4 gap-3 sm:gap-6 overflow-x-auto scrollbar-none pb-4 snap-x snap-mandatory"
           >
-            {LAST_MINUTE_ADDITIONS.map((addon) => {
+            {LAST_MINUTE_ADDITIONS.map((addon, index) => {
               const isAdded = addedAddonId === addon.id;
 
               return (
                 <div
                   key={addon.id}
-                  className="flex flex-col group w-[170px] sm:w-[200px] lg:w-auto shrink-0 snap-start"
+                  className={`flex flex-col group w-[170px] sm:w-[200px] lg:w-auto shrink-0 snap-start ${
+                    index === 0 ? 'ml-3 sm:ml-4 lg:ml-0' : ''
+                  }`}
                 >
                   {/* Square Image Box */}
                   <div className="w-full aspect-square bg-[#f5f5f5] rounded-xl flex items-center justify-center p-3 overflow-hidden">
