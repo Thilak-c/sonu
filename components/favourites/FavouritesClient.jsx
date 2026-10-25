@@ -311,7 +311,7 @@ export default function FavouritesClient() {
                                 aria-hidden="true"
                                 focusable="false"
                                 viewBox="0 0 24 24"
-                                className="w-4 h-4"
+                                className="w-6 h-6"
                                 fill="none"
                               >
                                 <path
@@ -322,7 +322,7 @@ export default function FavouritesClient() {
                                 />
                               </svg>
                             ) : (
-                              <span className="text-[16px] font-medium leading-none px-0.5">−</span>
+                              <span className="text-[18px] font-medium leading-none px-0.5">−</span>
                             )}
                           </button>
 
@@ -340,7 +340,7 @@ export default function FavouritesClient() {
                                 updateCartQuantity(primaryItem.id, primaryItem.size, primaryItem.color, 1);
                               }
                             }}
-                            className="p-1 text-[#111111] hover:text-[#707072] text-[18px] font-normal transition-colors cursor-pointer leading-none flex items-center justify-center active:scale-90"
+                            className="p-1 text-[#111111] hover:text-[#707072] text-[24px] font-normal transition-colors cursor-pointer leading-none flex items-center justify-center active:scale-90"
                             aria-label="Increase quantity"
                           >
                             +
