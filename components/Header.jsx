@@ -134,8 +134,7 @@ export default function Header() {
     { label: 'Men', href: '/#collection', hasArrow: true },
     { label: 'Women', href: '/#collection', hasArrow: true },
     { label: 'Kids', href: '/#collection', hasArrow: true },
-    { label: 'Jordan', href: '/#collection', hasArrow: true },
-    { label: 'Download Nike App', href: '/#download', hasArrow: false },
+ 
   ];
 
   return (
