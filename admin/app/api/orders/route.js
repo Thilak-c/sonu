@@ -13,7 +13,16 @@ export async function GET(request) {
     const filter = {};
 
     if (status && status !== 'all') {
-      filter.fulfillmentStatus = status;
+      if (status === 'pending') {
+        filter.$or = [
+          { fulfillmentStatus: 'pending' },
+          { fulfillmentStatus: 'unfulfilled' },
+          { fulfillmentStatus: null },
+          { fulfillmentStatus: { $exists: false } },
+        ];
+      } else {
+        filter.fulfillmentStatus = status;
+      }
     }
 
     if (query) {

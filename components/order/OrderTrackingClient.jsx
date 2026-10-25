@@ -176,7 +176,9 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
   const currentFulfillment = (order.fulfillmentStatus || order.status || 'confirmed').toLowerCase();
   const isDelivered = currentFulfillment === 'delivered';
   const isShipped = isDelivered || currentFulfillment === 'shipped' || currentFulfillment === 'in_transit';
-  const isProcessing = isShipped || currentFulfillment === 'processing' || currentFulfillment === 'confirmed';
+  const isPickupScheduled = isShipped || currentFulfillment === 'pickup_scheduled' || shiprocket.status === 'PICKUP_SCHEDULED';
+  const isReadyToShip = isPickupScheduled || currentFulfillment === 'ready_to_ship' || !!shiprocket.awbCode;
+  const isProcessing = isReadyToShip || currentFulfillment === 'processing' || currentFulfillment === 'confirmed';
 
   // Payment Breakdown
   const isPartialCod = order.payment?.method === 'partial_cod' || order.payment?.method === 'cod';
