@@ -160,19 +160,6 @@ export default function FavouritesClient() {
 
   return (
     <div className="min-h-screen bg-white font-['Helvetica_Now_Text',sans-serif] text-[#111111] pb-24 pt-4 sm:pt-8">
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-[#111111] text-white text-[13px] sm:text-[14px] px-5 py-2.5 rounded-full shadow-lg flex items-center gap-2 animate-in fade-in slide-in-from-top duration-200">
-          <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-emerald-400">
-            <path
-              fillRule="evenodd"
-              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-              clipRule="evenodd"
-            />
-          </svg>
-          <span>{toastMessage}</span>
-        </div>
-      )}
 
       <div className="max-w-[1440px] mx-auto px-4 sm:px-8">
         {/* Header: Title and Item Count matching design */}
