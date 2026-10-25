@@ -44,18 +44,18 @@ export default function AdminShell({ children, onNewProductClick }) {
   }, []);
 
   const navLinks = [
-    { label: 'Overview', href: '/', icon: LayoutDashboard },
     { label: 'Orders', href: '/orders', icon: ShoppingBag },
     { label: 'Products', href: '/products', icon: Package },
+    { label: 'Overview', href: '/overview', icon: LayoutDashboard },
     { label: 'Customers', href: '/customers', icon: Users },
     { label: 'Inventory', href: '/inventory', icon: Layers },
     { label: 'Settings', href: '/settings', icon: Settings },
   ];
 
   const getPageTitle = () => {
-    if (pathname === '/') return 'Executive Overview';
     if (pathname.startsWith('/orders')) return 'Orders & Fulfillment';
     if (pathname.startsWith('/products')) return 'Product Catalog';
+    if (pathname.startsWith('/overview')) return 'Executive Overview';
     if (pathname.startsWith('/customers')) return 'Customer CRM';
     if (pathname.startsWith('/inventory')) return 'Inventory Matrix';
     if (pathname.startsWith('/settings')) return 'System & Database';
