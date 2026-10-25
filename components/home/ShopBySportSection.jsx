@@ -42,7 +42,7 @@ export default function ShopBySportSection() {
       <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 mb-3 sm:mb-4">
         <h2
           className="text-[26px] sm:text-[30px] font-medium text-[#111111] tracking-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
-          style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+          style={{ fontFamily: "'Helvetica Now Text Bold', sans-serif" }}
         >
           Shop by Sport
         </h2>

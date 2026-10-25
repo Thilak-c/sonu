@@ -4,6 +4,7 @@ import TrendingSection from '@/components/home/TrendingSection';
 import FreshDropsSection from '@/components/home/FreshDropsSection';
 import ShopBySportSection from '@/components/home/ShopBySportSection';
 import SpotlightSection from '@/components/home/SpotlightSection';
+import LastMinuteSection from '@/components/home/LastMinuteSection';
 
 export const metadata = {
   title: 'SONU — For the Long Way Home | Handcrafted Footwear',
@@ -78,8 +79,11 @@ export default function HomePage() {
         {/* 5. Shop by Sport Section (40-50% VH) */}
         <ShopBySportSection />
 
-        {/* 6. Spotlight Section (40-50% VH) */}
+        {/* 6. Spotlight Section */}
         <SpotlightSection />
+
+        {/* 7. Last Minute Addition (copied from Bag page) */}
+        <LastMinuteSection />
       </div>
     </>
   );
