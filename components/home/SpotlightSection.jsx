@@ -2,58 +2,64 @@ import Link from 'next/link';
 
 const SPOTLIGHT_ITEMS = [
   {
-    id: 'hybrid-rn',
-    name: 'Hybrid RN',
-    image: '/images/ad22b92Nike-HQ2593-502_1.avif',
-    link: '/product/drop-hybrid-women',
+    id: 'air-jordan-1',
+    name: 'Air Jordan 1',
+    image: '/images/spotlight/air-jordan-1.png',
   },
   {
-    id: 'stealth-rn',
-    name: 'Stealth RN',
-    image: '/images/ad22b92Nike-HJ1101-003_1.avif',
-    link: '/product/drop-hybrid-men',
+    id: 'air-force-1',
+    name: 'Air Force 1',
+    image: '/images/spotlight/air-force-1.png',
   },
   {
-    id: 'pure-court',
-    name: 'Pure Court',
-    image: '/images/1e462d9Nike-IO3815-102_1.avif',
-    link: '/product/drop-court-studio',
+    id: 'graphic-tees',
+    name: 'Graphic Tees',
+    image: '/images/spotlight/graphic-tees.png',
   },
   {
-    id: 'offpath-trail',
-    name: 'Off-Path Trail',
-    image: '/images/ad22b92Nike-IQ3439-211_1.avif',
-    link: '/product/drop-offpath-trail',
+    id: 'pegasus-premium',
+    name: 'Pegasus Premium',
+    image: '/images/spotlight/pegasus-premium.png',
   },
   {
-    id: 'stride-tempo',
-    name: 'Stride Tempo',
-    image: '/images/ad22b92Nike-HQ3049-502_1.avif',
-    link: '/product/drop-hybrid-women',
+    id: 'vomero-18',
+    name: 'Vomero 18',
+    image: '/images/spotlight/vomero-18.png',
   },
   {
-    id: 'aeroflex-low',
-    name: 'AeroFlex Low',
-    image: '/images/1e462d9Nike-IO3815-500_1.avif',
-    link: '/product/drop-court-studio',
+    id: 'pegasus-42',
+    name: 'Pegasus 42',
+    image: '/images/spotlight/pegasus-42.png',
   },
   {
-    id: 'refuel-bottle',
-    name: 'Refuel Grip 18oz',
-    image: '/images/addons/bottle.jpg',
-    link: '/checkout',
+    id: 'slides',
+    name: 'Slides',
+    image: '/images/spotlight/slides.png',
   },
   {
-    id: 'heritage-duffel',
-    name: 'Training Duffel',
-    image: '/images/addons/duffel.jpg',
-    link: '/checkout',
+    id: 'dunk',
+    name: 'Dunk',
+    image: '/images/spotlight/dunk.png',
   },
   {
-    id: 'heritage-backpack',
-    name: 'Heritage Pack',
-    image: '/images/addons/backpack.jpg',
-    link: '/checkout',
+    id: 'bottoms',
+    name: 'Bottoms',
+    image: '/images/spotlight/bottoms.png',
+  },
+  {
+    id: 'tiempo-elite',
+    name: 'Tiempo Elite',
+    image: '/images/spotlight/tiempo-elite.png',
+  },
+  {
+    id: 'caps',
+    name: 'Caps',
+    image: '/images/spotlight/caps.png',
+  },
+  {
+    id: 'air-max',
+    name: 'Air Max',
+    image: '/images/spotlight/air-max.png',
   },
 ];
 
@@ -62,44 +68,44 @@ export default function SpotlightSection() {
     <section
       id="spotlight"
       aria-label="Spotlight"
-      className="w-full bg-white pt-12 sm:pt-16 pb-16 sm:pb-20 select-none font-['Helvetica_Now_Text',sans-serif]"
+      className="w-full bg-white pt-[80px] sm:pt-14 pb-14 sm:pb-20 select-none font-['Helvetica_Now_Text',sans-serif]"
     >
-      {/* Centered Header */}
+      {/* Centered Header matching screenshot */}
       <div className="w-full max-w-[1440px] mx-auto px-6 text-center">
         <h2
-          className="text-[34px] sm:text-[46px] md:text-[52px] font-bold text-[#111111] tracking-tight leading-none uppercase font-['Helvetica_Now_Text_Medium',sans-serif]"
-          style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+          className="text-[40px] sm:text-[52px] md:text-[60px] font-bold text-[#111111] tracking-tight leading-none uppercase font-['Bold',sans-serif]"
+          style={{ fontFamily: "'Bold', 'Helvetica Now Text Bold', sans-serif" }}
         >
           SPOTLIGHT
         </h2>
-        <p className="text-[15px] sm:text-[16px] text-[#707072] mt-2.5 sm:mt-3 max-w-[420px] mx-auto leading-snug font-normal">
-          Signature footwear and everyday gear engineered for the long way home.
+        <p className="text-[16px] font-medium sm:text-[16px] text-[#000000] mt-2.5 sm:mt-3 max-w-[280px] sm:max-w-[420px] mx-auto leading-snug">
+          Classic silhouettes and cutting-edge innovation to build your game from the ground up.
         </p>
       </div>
 
-      {/* 3-Column Spotlight Grid with #f5f5f5 tiles */}
-      <div className="w-full max-w-[760px] mx-auto px-4 sm:px-6 pt-10 sm:pt-12">
-        <div className="grid grid-cols-3 gap-x-3.5 sm:gap-x-6 gap-y-7 sm:gap-y-10">
+      {/* 3-Column Spotlight Grid strictly matching screenshot */}
+      <div className="w-full max-w-[680px] sm:max-w-[780px] mx-auto px-4 sm:px-6 pt-10 sm:pt-14">
+        <div className="grid grid-cols-3 gap-x-4 sm:gap-x-8 gap-y-9 sm:gap-y-12">
           {SPOTLIGHT_ITEMS.map((item) => (
             <Link
               key={item.id}
-              href={item.link}
+              href="/checkout"
               className="group flex flex-col items-center text-center cursor-pointer select-none"
             >
-              {/* Product Image Area in clean #f5f5f5 box */}
-              <div className="w-full aspect-square bg-[#f5f5f5] rounded-[16px] sm:rounded-[20px] flex items-center justify-center p-3 sm:p-4 overflow-hidden">
+              {/* Product Image Area */}
+              <div className="w-full h-[95px] sm:h-[120px] md:h-[130px] flex items-center justify-center p-0.5">
                 <img
                   src={item.image}
                   alt={item.name}
-                  className="w-full h-full object-contain transform group-hover:scale-108 transition-transform duration-300"
+                  className="max-h-full max-w-full w-auto object-contain transform scale-110 sm:scale-115 group-hover:scale-125 transition-transform duration-300"
                   loading="lazy"
                 />
               </div>
 
               {/* Product Label in Helvetica Now Text */}
               <p
-                className="text-[13px] sm:text-[14px] font-medium text-[#111111] mt-2.5 leading-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
-                style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                className="text-[13px] sm:text-[14px] font-medium text-[#111111] mt-2.5 leading-tight font-['Helvetica_Now_Text',sans-serif]"
+                style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
               >
                 {item.name}
               </p>
