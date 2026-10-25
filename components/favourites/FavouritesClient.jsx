@@ -54,7 +54,7 @@ export default function FavouritesClient() {
       try {
         const updated = localStorage.getItem('sonu_wishlist');
         if (updated) setWishlistMap(JSON.parse(updated));
-      } catch (e) {}
+      } catch (e) { }
     };
 
     window.addEventListener('wishlist-updated', handleUpdate);
@@ -91,7 +91,7 @@ export default function FavouritesClient() {
       try {
         localStorage.setItem('sonu_wishlist', JSON.stringify(next));
         window.dispatchEvent(new Event('wishlist-updated'));
-      } catch (e) {}
+      } catch (e) { }
       return next;
     });
   };
@@ -228,7 +228,7 @@ export default function FavouritesClient() {
                         e.stopPropagation();
                         removeFavourite(product.id);
                       }}
-                      className="absolute top-2 right-2 sm:top-2.5 sm:right-2.5 w-7 h-7 sm:w-8 sm:h-8 bg-white rounded-full flex items-center justify-center hover:bg-[#ececec] transition-colors cursor-pointer z-10"
+                      className="absolute top-2 right-2 sm:top-2.5 sm:right-2.5 w-7 h-7 sm:w-8 sm:h-8 bg-white rounded-full flex items-center justify-center  hover:bg-[#ececec] transition-colors cursor-pointer z-10"
                       title="Remove from Favourites"
                       aria-label="Remove from Favourites"
                     >
@@ -365,19 +365,17 @@ export default function FavouritesClient() {
         <div className="fixed inset-0 z-50 overflow-hidden font-['Helvetica_Now_Text',sans-serif]">
           {/* Backdrop */}
           <div
-            className={`fixed inset-0 bg-black/60 transition-opacity duration-400 ease-out cursor-pointer ${
-              isModalVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
-            }`}
+            className={`fixed inset-0 bg-black/60 transition-opacity duration-400 ease-out cursor-pointer ${isModalVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
+              }`}
             onClick={closeSizeModal}
           />
 
           {/* Modal Container */}
           <div
-            className={`fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 w-full sm:max-w-[460px] bg-white rounded-t-[24px] sm:rounded-[24px] shadow-2xl z-50 p-6 sm:p-7 overflow-y-auto max-h-[85vh] transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] transform will-change-transform ${
-              isModalVisible
-                ? 'translate-y-0 opacity-100 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:scale-100 sm:opacity-100'
-                : 'translate-y-full opacity-0 sm:-translate-x-1/2 sm:translate-y-[40%] sm:scale-95 sm:opacity-0 pointer-events-none'
-            }`}
+            className={`fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 w-full sm:max-w-[460px] bg-white rounded-t-[24px] sm:rounded-[24px] shadow-2xl z-50 p-6 sm:p-7 overflow-y-auto max-h-[85vh] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isModalVisible
+              ? 'translate-y-0 opacity-100 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:scale-100'
+              : 'translate-y-full opacity-0 sm:-translate-x-1/2 sm:-translate-y-[45%] sm:scale-95'
+              }`}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header with Product Preview */}
@@ -407,7 +405,7 @@ export default function FavouritesClient() {
               <button
                 type="button"
                 onClick={closeSizeModal}
-                className="w-8 h-8 rounded-full  hover:bg-[#e8e8e8] flex items-center justify-center text-[#111111] transition-colors cursor-pointer"
+                className="w-12 h-12 rounded-full  hover:bg-[#e8e8e8] flex items-center justify-center text-[#111111] transition-colors cursor-pointer"
                 aria-label="Close"
               >
                 <svg viewBox="0 0 24 24" width="16px" height="16px" stroke="currentColor" fill="none" strokeWidth="2">
@@ -437,11 +435,10 @@ export default function FavouritesClient() {
                       key={size}
                       type="button"
                       onClick={() => setSelectedSize(size)}
-                      className={`py-2.5 rounded-xl border text-[13px] font-medium transition-all cursor-pointer ${
-                        isSelected
-                          ? 'bg-[#111111] text-white border-[#111111] shadow-sm'
-                          : 'bg-white text-[#111111] border-[#e5e5e5] hover:border-black'
-                      }`}
+                      className={`py-2.5 rounded-xl border text-[13px] font-medium transition-all cursor-pointer ${isSelected
+                        ? 'bg-[#111111] text-white border-[#111111] shadow-sm'
+                        : 'bg-white text-[#111111] border-[#e5e5e5] hover:border-black'
+                        }`}
                     >
                       {size}
                     </button>
@@ -507,22 +504,20 @@ export default function FavouritesClient() {
                 <button
                   type="button"
                   onClick={() => setSizeGuideUnit('cm')}
-                  className={`px-3 py-1 text-[13px] rounded-full font-medium transition-all cursor-pointer ${
-                    sizeGuideUnit === 'cm'
-                      ? 'bg-white text-[#111111] shadow-xs'
-                      : 'text-[#707072] hover:text-[#111111]'
-                  }`}
+                  className={`px-3 py-1 text-[13px] rounded-full font-medium transition-all cursor-pointer ${sizeGuideUnit === 'cm'
+                    ? 'bg-white text-[#111111] shadow-xs'
+                    : 'text-[#707072] hover:text-[#111111]'
+                    }`}
                 >
                   cm
                 </button>
                 <button
                   type="button"
                   onClick={() => setSizeGuideUnit('in')}
-                  className={`px-3 py-1 text-[13px] rounded-full font-medium transition-all cursor-pointer ${
-                    sizeGuideUnit === 'in'
-                      ? 'bg-white text-[#111111] shadow-xs'
-                      : 'text-[#707072] hover:text-[#111111]'
-                  }`}
+                  className={`px-3 py-1 text-[13px] rounded-full font-medium transition-all cursor-pointer ${sizeGuideUnit === 'in'
+                    ? 'bg-white text-[#111111] shadow-xs'
+                    : 'text-[#707072] hover:text-[#111111]'
+                    }`}
                 >
                   in
                 </button>
@@ -553,9 +548,8 @@ export default function FavouritesClient() {
                   ].map((row) => (
                     <tr
                       key={row.uk}
-                      className={`hover:bg-[#f9f9f9] transition-colors ${
-                        selectedSize === row.uk ? 'bg-neutral-50 font-semibold text-[#111111]' : ''
-                      }`}
+                      className={`hover:bg-[#f9f9f9] transition-colors ${selectedSize === row.uk ? 'bg-neutral-50 font-semibold text-[#111111]' : ''
+                        }`}
                     >
                       <td className="py-2 px-3 border-r border-[#e5e5e5]">{row.uk}</td>
                       <td className="py-2 px-3 border-r border-[#e5e5e5]">{row.usM}</td>
@@ -586,19 +580,17 @@ export default function FavouritesClient() {
         <div className="fixed inset-0 z-50 overflow-hidden font-['Helvetica_Now_Text',sans-serif]">
           {/* Backdrop overlay */}
           <div
-            className={`fixed inset-0 bg-black/60 transition-opacity duration-400 ease-out cursor-pointer ${
-              isDrawerVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
-            }`}
+            className={`fixed inset-0 bg-black/60 transition-opacity duration-400 ease-out cursor-pointer ${isDrawerVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
+              }`}
             onClick={closeDrawer}
           />
 
           {/* Modal / Bottom Sheet */}
           <div
-            className={`fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 w-full sm:max-w-[500px] bg-white rounded-t-[28px] sm:rounded-[24px] shadow-2xl z-50 p-6 sm:p-7 overflow-hidden transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] transform will-change-transform ${
-              isDrawerVisible
-                ? 'translate-y-0 opacity-100 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:scale-100 sm:opacity-100'
-                : 'translate-y-full opacity-0 sm:-translate-x-1/2 sm:translate-y-[40%] sm:scale-95 sm:opacity-0 pointer-events-none'
-            }`}
+            className={`fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 w-full sm:max-w-[500px] bg-white rounded-t-[28px] sm:rounded-[24px] shadow-2xl z-50 p-6 sm:p-7 overflow-hidden transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] transform will-change-transform ${isDrawerVisible
+              ? 'translate-y-0 opacity-100 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:scale-100 sm:opacity-100'
+              : 'translate-y-full opacity-0 sm:-translate-x-1/2 sm:translate-y-[40%] sm:scale-95 sm:opacity-0 pointer-events-none'
+              }`}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header: Green Checkmark + Added to Bag + Close Button */}
