@@ -109,10 +109,10 @@ export default function LastMinuteSection() {
             </svg>
           </button>
 
-          {/* Addon Items: Strictly ONE row on phone, 4 columns on desktop */}
+          {/* Addon Items: Edge-to-edge bleed on phone, 4 columns on desktop */}
           <div
             ref={carouselRef}
-            className="w-full flex lg:grid lg:grid-cols-4 gap-3.5 sm:gap-6 overflow-x-auto no-scrollbar scrollbar-none pb-4"
+            className="-mx-6 px-6 sm:-mx-10 sm:px-10 lg:mx-0 lg:px-0 flex lg:grid lg:grid-cols-4 gap-3.5 sm:gap-6 overflow-x-auto no-scrollbar scrollbar-none pb-4"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {LAST_MINUTE_ADDITIONS.map((addon) => {
@@ -124,7 +124,7 @@ export default function LastMinuteSection() {
                   className="flex flex-col group w-[175px] sm:w-[200px] lg:w-auto shrink-0"
                 >
                   {/* Square Image Box */}
-                  <div className="w-full aspect-square bg-[#f5f5f5] rounded-xl flex items-center justify-center p-3 overflow-hidden">
+                  <div className="w-full aspect-square flex items-center justify-center overflow-hidden">
                     <img
                       src={addon.image}
                       alt={addon.title}
@@ -166,6 +166,9 @@ export default function LastMinuteSection() {
                 </div>
               );
             })}
+
+            {/* Trailing spacer for smooth edge-to-edge scroll bleed */}
+            <div className="w-1.5 sm:w-2 lg:hidden shrink-0" aria-hidden="true" />
           </div>
         </div>
       </div>
