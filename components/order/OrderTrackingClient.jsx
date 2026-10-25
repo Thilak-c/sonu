@@ -222,7 +222,7 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
                 {/* Horizontal Progress Bar Line (Visible on phone and desktop) */}
                 <div className="absolute top-[7px] left-[12.5%] right-[12.5%] h-[2px] bg-neutral-200 z-0" />
                 <div
-                  className="absolute top-[7px] left-[12.5%] h-[2px] bg-[#111111] z-0 transition-all duration-500 ease-out"
+                  className="absolute top-[7px] left-[12.5%] h-[2px] bg-[#008C01] z-0 transition-all duration-500 ease-out"
                   style={{
                     width: isDelivered ? '75%' : isShipped ? '50%' : isProcessing ? '25%' : '0%',
                   }}
@@ -231,7 +231,7 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
                 <div className="grid grid-cols-4 gap-1 sm:gap-2 text-center relative z-10">
                   {/* Step 1: Confirmed */}
                   <div className="flex flex-col items-center">
-                    <div className="w-4 h-4 rounded-full bg-black ring-4 ring-white mb-2 shadow-xs shrink-0" />
+                    <div className="w-4 h-4 rounded-full bg-[#008C01] ring-4 ring-white mb-2 shadow-xs shrink-0" />
                     <p className="text-[11px] sm:text-[13px] font-bold text-[#111111] leading-tight">Order Placed</p>
                     <p className="text-[9.5px] sm:text-[11px] text-neutral-400 mt-0.5 leading-tight">Confirmed</p>
                   </div>
@@ -241,7 +241,7 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
                     <div
                       className={`w-4 h-4 rounded-full ring-4 ring-white mb-2 shadow-xs shrink-0 transition-colors ${
                         isProcessing
-                          ? 'bg-black'
+                          ? 'bg-[#008C01]'
                           : 'bg-neutral-200'
                       }`}
                     />
@@ -254,7 +254,7 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
                     <div
                       className={`w-4 h-4 rounded-full ring-4 ring-white mb-2 shadow-xs shrink-0 transition-colors ${
                         isShipped
-                          ? 'bg-black'
+                          ? 'bg-[#008C01]'
                           : 'bg-neutral-200'
                       }`}
                     />
@@ -267,7 +267,7 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
                     <div
                       className={`w-4 h-4 rounded-full ring-4 ring-white mb-2 shadow-xs shrink-0 transition-colors ${
                         isDelivered
-                          ? 'bg-emerald-600'
+                          ? 'bg-[#008C01]'
                           : 'bg-neutral-200'
                       }`}
                     />
@@ -290,7 +290,7 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
                    Logistics Tracking
                 </h2>
                 <p className="text-[12px] text-neutral-400">
-                  Real-time package dispatch & courier status
+                  Package dispatch & courier status
                 </p>
               </div>
             </div>
