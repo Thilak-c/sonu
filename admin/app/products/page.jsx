@@ -3198,21 +3198,21 @@ function ProductsContent() {
                     <div className="rounded-[12px] border border-[#e5e5e5] overflow-x-auto bg-white shadow-sm">
                       <table className="w-full text-left text-[13px] min-w-[680px]">
                         <colgroup>
-                          <col className="w-[52px]" />
-                          <col className="w-[100px]" />
+                          <col className="w-[44px]" />
+                          <col className="w-[120px]" />
                           <col className="w-[28%]" />
-                          <col className="w-[20%]" />
+                          <col className="w-[18%]" />
                           <col className="w-[34%]" />
                           <col className="w-[44px]" />
                         </colgroup>
                         <thead className="bg-[#fafafa] border-b border-[#e5e5e5] text-[11px] uppercase tracking-wider text-[#707072] font-semibold">
                           <tr>
-                            <th className="py-3 px-3 text-center">Active</th>
-                            <th className="py-3 px-3">Size</th>
+                            <th className="py-3 px-1 text-center w-[44px]">Active</th>
+                            <th className="py-3 px-3 w-[120px] whitespace-nowrap">Size</th>
                             <th className="py-3 px-3">Variant SKU</th>
                             <th className="py-3 px-3">Stock</th>
                             <th className="py-3 px-3">Price Override</th>
-                            <th className="py-3 px-2 text-center"></th>
+                            <th className="py-3 px-2 text-center w-[44px]"></th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-[#e5e5e5]">
@@ -3231,7 +3231,7 @@ function ProductsContent() {
                                   !isActive ? 'bg-[#fafafa]/80 opacity-60' : 'hover:bg-[#fafafa]/50'
                                 }`}
                               >
-                                <td className="py-3.5 px-3 text-center align-top pt-4.5">
+                                <td className="py-3.5 px-1 text-center align-top pt-3.5 w-[44px]">
                                   <div
                                     onClick={() => updateVariant(idx, 'active', !isActive)}
                                     className="flex justify-center cursor-pointer"
@@ -3259,13 +3259,13 @@ function ProductsContent() {
                                     </div>
                                   </div>
                                 </td>
-                                <td className="py-3.5 px-3 align-top pt-3.5">
+                                <td className="py-3.5 px-3 align-top pt-3 w-[120px]">
                                   <input
                                     type="text"
                                     value={v.size}
                                     disabled={!isActive}
                                     onChange={(e) => updateVariant(idx, 'size', e.target.value)}
-                                    className="w-full font-bold text-[#111111] text-[13.5px] bg-transparent border-b border-transparent hover:border-neutral-300 focus:border-black focus:outline-none py-0.5 transition-colors disabled:opacity-60"
+                                    className="w-full min-w-[70px] font-bold text-[#111111] text-[13.5px] bg-transparent border-b border-transparent hover:border-neutral-300 focus:border-black focus:outline-none py-1 transition-colors disabled:opacity-60"
                                     style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
                                     title="Edit size label"
                                   />
