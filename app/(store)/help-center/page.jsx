@@ -2,33 +2,33 @@ import React from 'react';
 import HelpCenterClient from '@/components/help/HelpCenterClient';
 
 export const metadata = {
-  title: 'Help Center & Customer Support | SONU Footwear',
+  title: 'Help Center & Customer Support | Sonu Shoe',
   description:
-    'Need help with your SONU handcrafted footwear order? Browse topics including order tracking, shipping, returns, refunds, warranty, and connect with customer support.',
+    'Need help with your Sonu Shoe handcrafted order? Browse topics including order tracking, shipping, returns, refunds, warranty, and connect with customer support.',
   keywords: [
-    'SONU help center',
+    'Sonu Shoe help center',
     'customer support',
-    'footwear returns',
+    'shoe returns',
     'shoe warranty',
     'order tracking',
-    'ergonomic footwear customer service',
+    'customer service',
     'handcrafted sneakers support',
   ],
   alternates: {
     canonical: '/help-center',
   },
   openGraph: {
-    title: 'Help Center & Customer Support | SONU Footwear',
+    title: 'Help Center & Customer Support | Sonu Shoe',
     description:
       'Browse topics including order tracking, shipping, returns, refunds, warranty, and connect with customer support.',
     url: '/help-center',
-    siteName: 'SONU Footwear',
+    siteName: 'Sonu Shoe',
     locale: 'en_IN',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Help Center & Customer Support | SONU Footwear',
+    title: 'Help Center & Customer Support | Sonu Shoe',
     description:
       'Browse topics including order tracking, shipping, returns, refunds, warranty, and connect with customer support.',
   },
@@ -41,7 +41,7 @@ export default function HelpCenterPage() {
     mainEntity: [
       {
         '@type': 'Question',
-        name: 'How do I track my SONU footwear order?',
+        name: 'How do I track my Sonu Shoe order?',
         acceptedAnswer: {
           '@type': 'Answer',
           text: 'You can track live courier dispatch and expected delivery directly at /order/[id] with real-time Shiprocket AWB status.',

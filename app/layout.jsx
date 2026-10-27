@@ -3,13 +3,13 @@ import '@/app/globals.css';
 export const metadata = {
   metadataBase: new URL('https://sonushoe.in'),
   title: {
-    default: 'Sonu shoe — Premium Footwear | For the Long Way Home',
-    template: '%s | Sonu shoe',
+    default: 'Sonu Shoe — Premium Footwear | For the Long Way Home',
+    template: '%s | Sonu Shoe',
   },
   description:
-    'Sonu shoe crafts small-run, precision-engineered footwear designed for all-day comfort and timeless minimalism. Discover handcrafted sneakers built for the long way home.',
+    'Sonu Shoe crafts small-run, precision-engineered footwear designed for all-day comfort and timeless minimalism. Discover handcrafted sneakers built for the long way home.',
   keywords: [
-    'Sonu shoe',
+    'Sonu Shoe',
     'premium footwear',
     'small-run sneakers',
     'handcrafted shoes',
@@ -18,26 +18,26 @@ export const metadata = {
     'everyday walking shoes',
     'designer footwear',
   ],
-  authors: [{ name: 'Sonu shoe' }],
-  creator: 'Sonu shoe',
-  publisher: 'Sonu shoe',
+  authors: [{ name: 'Sonu Shoe' }],
+  creator: 'Sonu Shoe',
+  publisher: 'Sonu Shoe',
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
   openGraph: {
-    title: 'Sonu shoe — Premium Footwear | For the Long Way Home',
+    title: 'Sonu Shoe — Premium Footwear | For the Long Way Home',
     description:
       'Small-run, precision-engineered footwear built for timeless street style and ergonomic comfort.',
     url: 'https://sonushoe.in',
-    siteName: 'Sonu shoe',
+    siteName: 'Sonu Shoe',
     images: [
       {
         url: '/Logo/Logo_Full.png',
         width: 1200,
         height: 630,
-        alt: 'Sonu shoe Brand Logo',
+        alt: 'Sonu Shoe Brand Logo',
       },
     ],
     locale: 'en_IN',
@@ -45,7 +45,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Sonu shoe — Premium Footwear | For the Long Way Home',
+    title: 'Sonu Shoe — Premium Footwear | For the Long Way Home',
     description:
       'Small-run, precision-engineered footwear built for timeless street style and ergonomic comfort.',
     images: ['/Logo/Logo_Full.png'],

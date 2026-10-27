@@ -27,7 +27,7 @@ export async function POST(request) {
       sku,
       brand = 'Sonu Shoe',
       role = 'standard', // 'standard' | 'accessory' | 'bundle'
-      category = 'Footwear',
+      category = 'Shoe',
       sport = 'Road Running',
       gender = 'unisex',
       tags = [],

@@ -50,7 +50,7 @@ const CATEGORIES = [
 ];
 
 const ROLES = [
-  { id: 'standard', label: 'Standard', desc: 'Standalone footwear item' },
+  { id: 'standard', label: 'Standard', desc: 'Standalone shoe item' },
   { id: 'accessory', label: 'Accessory', desc: 'Add-ons & shoe care' },
   { id: 'bundle', label: 'Bundle', desc: 'Combo package' },
 ];
@@ -2133,7 +2133,7 @@ function ProductsContent() {
                         {/* Category */}
                         <td className="py-3.5 px-4 border-r border-neutral-200 whitespace-nowrap text-neutral-700">
                           <span className="text-[13px] text-neutral-800">
-                            {prod.category || 'Footwear'}
+                            {prod.category || 'Shoe'}
                           </span>
                         </td>
 
@@ -3156,42 +3156,7 @@ function ProductsContent() {
                         </div>
                       </div>
 
-                      {/* Quick Add Chips for standard sizes not currently active */}
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="text-[11px] text-neutral-500">Quick add:</span>
-                        {ALL_SIZES.filter((sz) => !formData.variants?.some((v) => v.size.toLowerCase() === sz.toLowerCase() && v.active)).map((sz) => (
-                          <button
-                            key={sz}
-                            type="button"
-                            onClick={() => {
-                              setFormData((prev) => {
-                                const variants = Array.isArray(prev.variants) ? [...prev.variants] : [];
-                                const idx = variants.findIndex((v) => v.size.toLowerCase() === sz.toLowerCase());
-                                if (idx >= 0) {
-                                  variants[idx] = { ...variants[idx], active: true, stock: variants[idx].stock || 12 };
-                                  return { ...prev, variants };
-                                }
-                                return {
-                                  ...prev,
-                                  variants: [
-                                    ...variants,
-                                    {
-                                      size: sz,
-                                      sku: prev.sku ? `${prev.sku}-${sz.replace(/\s+/g, '')}` : '',
-                                      stock: 12,
-                                      priceOverride: '',
-                                      active: true,
-                                    },
-                                  ],
-                                };
-                              });
-                            }}
-                            className="px-2 py-0.5 rounded-full border border-neutral-200 bg-white hover:border-black text-[11px] font-medium text-neutral-700 hover:text-black transition-colors cursor-pointer"
-                          >
-                            + {sz}
-                          </button>
-                        ))}
-                      </div>
+              
                     </div>
 
                     {/* Size Variants Table */}
@@ -4013,7 +3978,7 @@ function ProductsContent() {
                           onChange={(e) =>
                             setFormData({ ...formData, weight: e.target.value === '' ? '' : Number(e.target.value) })
                           }
-                          helper="Standard footwear: ~850g"
+                          helper="Standard shoe: ~850g"
                         />
 
                         <FloatingSelect
@@ -4192,11 +4157,11 @@ function ProductsContent() {
                             <span className="font-medium">Sonu Shoe</span>
                             <span className="text-neutral-400">›</span>
                             <span className="text-[#707072] truncate">
-                              https://sonu.store/products/{formData.slug || 'product-slug'}
+                              https://sonushoe.in/products/{formData.slug || 'product-slug'}
                             </span>
                           </div>
                           <h4 className="text-[15px] font-medium text-[#1a0dab] hover:underline cursor-pointer leading-snug truncate">
-                            {formData.seo?.metaTitle || formData.name || 'Handcrafted Footwear'} | Sonu Footwear
+                            {formData.seo?.metaTitle || formData.name || 'Handcrafted Shoe'} | Sonu Shoe
                           </h4>
                           <p className="text-[12.5px] text-[#4d5156] line-clamp-2 leading-relaxed">
                             {formData.seo?.metaDescription ||

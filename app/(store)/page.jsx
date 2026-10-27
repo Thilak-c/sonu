@@ -8,23 +8,23 @@ import LastMinuteSection from '@/components/home/LastMinuteSection';
 import { getAllProducts } from '@/lib/products';
 
 export const metadata = {
-  title: 'SONU — For the Long Way Home | Handcrafted Footwear',
+  title: 'Sonu Shoe — For the Long Way Home',
   description:
-    'Small-run, handcrafted footwear designed with ergonomic gum rubber soles, full-grain leather, and all-day comfort. Explore the 01, runners, and fresh drops.',
+    'Small-run, handcrafted shoes designed with ergonomic gum rubber soles, full-grain leather, and all-day comfort. Explore the 01, runners, and fresh drops.',
   keywords: [
-    'handcrafted footwear',
+    'handcrafted shoes',
     'small-run sneakers',
     'ergonomic comfort',
     'premium soles',
     'minimalist luxury shoe',
     'for the long way home',
-    'Sonu shoe',
-    'city walking footwear',
+    'Sonu Shoe',
+    'city walking shoes',
   ],
   openGraph: {
-    title: 'Sonu shoe — For the Long Way Home',
+    title: 'Sonu Shoe — For the Long Way Home',
     description:
-      'Discover handcrafted footwear engineered in limited runs for maximum walking comfort and timeless street minimalism.',
+      'Discover handcrafted shoes engineered in limited runs for maximum walking comfort and timeless street minimalism.',
     url: 'https://sonushoe.in',
     images: ['/Logo/Logo_Full.png'],
   },
@@ -39,18 +39,18 @@ export default async function HomePage() {
       {
         '@type': 'Organization',
         '@id': 'https://sonushoe.in/#organization',
-        name: 'Sonu shoe',
+        name: 'Sonu Shoe',
         url: 'https://sonushoe.in',
         logo: 'https://sonushoe.in/Logo/Logo_Full.png',
         slogan: 'For the long way home',
         description:
-          'Small-run handcrafted luxury footwear engineered with ergonomic comfort and timeless minimalism.',
+          'Small-run handcrafted luxury shoes engineered with ergonomic comfort and timeless minimalism.',
       },
       {
         '@type': 'WebSite',
         '@id': 'https://sonushoe.in/#website',
         url: 'https://sonushoe.in',
-        name: 'Sonu shoe',
+        name: 'Sonu Shoe',
         publisher: {
           '@id': 'https://sonushoe.in/#organization',
         },
@@ -77,7 +77,7 @@ export default async function HomePage() {
               Crafted in Small Runs.
             </h1>
             <p className="text-[15px] sm:text-[16px] text-[#707072] mt-3 max-w-md mx-auto leading-relaxed">
-              Our handcrafted footwear is currently in preparation. Add products through the admin panel to populate your store catalog.
+              Our handcrafted shoes are currently in preparation. Add products through the admin panel to populate your store catalog.
             </p>
           </div>
         )}

@@ -16,17 +16,17 @@ export const metadata = {
     canonical: 'https://sonushoe.in/orders',
   },
   openGraph: {
-    title: 'Track Orders & Deliveries | Sonu shoe',
-    description: 'Track live courier delivery status for your Sonu shoe footwear orders.',
+    title: 'Track Orders & Deliveries | Sonu Shoe',
+    description: 'Track live courier delivery status for your Sonu Shoe orders.',
     url: 'https://sonushoe.in/orders',
-    siteName: 'Sonu shoe',
+    siteName: 'Sonu Shoe',
     locale: 'en_IN',
     type: 'website',
   },
   twitter: {
     card: 'summary',
-    title: 'Track Orders & Deliveries | Sonu shoe',
-    description: 'Track live courier delivery status for your Sonu shoe footwear orders.',
+    title: 'Track Orders & Deliveries | Sonu Shoe',
+    description: 'Track live courier delivery status for your Sonu Shoe orders.',
   },
   robots: {
     index: true,

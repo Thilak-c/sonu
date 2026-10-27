@@ -287,7 +287,7 @@ export default async function RunningPage() {
   const itemListSchema = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
-    name: 'Sonu Shoe-Running Footwear Collection',
+    name: 'Sonu Shoe - Running Shoe Collection',
     description: 'High-performance road and trail running shoes engineered for ergonomic comfort and endurance.',
     itemListElement: allRunningProducts.map((p, idx) => ({
       '@type': 'ListItem',
