@@ -6,11 +6,15 @@ import sharp from 'sharp';
 export const dynamic = 'force-dynamic';
 
 function getUploadDir() {
-  const cwd = process.cwd();
-  if (cwd.endsWith('/admin') || cwd.endsWith('\\admin')) {
-    return path.resolve(cwd, '../uploads');
+  if (process.env.UPLOADS_DIR) {
+    return path.resolve(process.env.UPLOADS_DIR);
   }
-  return path.resolve(cwd, 'uploads');
+  const cleanCwd = process.cwd().replace(/[/\\]+$/, '');
+  const adminIndex = cleanCwd.search(/[/\\]admin$/i);
+  if (adminIndex !== -1) {
+    return path.resolve(cleanCwd.slice(0, adminIndex), 'uploads');
+  }
+  return path.resolve(cleanCwd, 'uploads');
 }
 
 export async function POST(request) {
