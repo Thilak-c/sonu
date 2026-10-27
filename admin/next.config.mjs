@@ -4,6 +4,12 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  allowedDevOrigins: ['*.trycloudflare.com'],
+  experimental: {
+    serverActions: {
+      allowedOrigins: ['*.trycloudflare.com'],
+    },
+  },
 };
 
 export default nextConfig;

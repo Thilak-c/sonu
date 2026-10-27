@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { initDb } from '@/lib/mongodb';
-import { FRESH_DROPS } from '@/components/home/freshDropsData';
+import { ObjectId } from 'mongodb';
 
 export async function GET(request) {
   try {
@@ -8,25 +8,32 @@ export async function GET(request) {
     const slug = searchParams.get('slug');
 
     const db = await initDb();
+    if (!db) {
+      return NextResponse.json({ success: false, error: 'Database unavailable' }, { status: 500 });
+    }
 
     if (slug) {
-      let product = await db.collection('products').findOne({ slug });
-      if (!product) {
-        // Fallback to static data if not found yet
-        product = FRESH_DROPS.find((p) => p.slug === slug);
+      const queries = [{ slug }, { itemId: slug }, { sku: slug }];
+      if (ObjectId.isValid(slug)) {
+        queries.push({ _id: new ObjectId(slug) });
       }
+      const product = await db.collection('products').findOne({ $or: queries });
       if (!product) {
         return NextResponse.json({ error: 'Product not found' }, { status: 404 });
       }
       return NextResponse.json({ success: true, product });
     }
 
-    const products = await db.collection('products').find({}).toArray();
+    const products = await db
+      .collection('products')
+      .find({ hidden: { $ne: true } })
+      .sort({ createdAt: -1 })
+      .toArray();
 
     return NextResponse.json({
       success: true,
       count: products.length,
-      products: products.length > 0 ? products : FRESH_DROPS,
+      products,
     });
   } catch (error) {
     console.error('[MongoDB] Error fetching products:', error);

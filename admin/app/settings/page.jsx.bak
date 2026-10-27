@@ -1,0 +1,263 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import AdminShell from '@/components/AdminShell';
+import {
+  Database,
+  RefreshCw,
+  CheckCircle2,
+  AlertCircle,
+  ExternalLink,
+  ShieldCheck,
+  Server,
+  Layers,
+  Smartphone,
+  Mail,
+  Lock,
+} from 'lucide-react';
+
+export default function SettingsPage() {
+  const [seeding, setSeeding] = useState(false);
+  const [seedResult, setSeedResult] = useState(null);
+
+  // Auth Verification Settings State
+  const [enableNumberVerification, setEnableNumberVerification] = useState(false);
+  const [enableEmailVerification, setEnableEmailVerification] = useState(false);
+  const [isAuthSettingsLoading, setIsAuthSettingsLoading] = useState(true);
+  const [authSaveStatus, setAuthSaveStatus] = useState(null); // { success: boolean, message: string }
+
+  // Load current auth settings from MongoDB
+  useEffect(() => {
+    fetch('/api/settings')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setEnableNumberVerification(data.enableNumberVerification === true);
+          setEnableEmailVerification(data.enableEmailVerification === true);
+        }
+      })
+      .catch((err) => console.warn('Failed to load settings:', err))
+      .finally(() => setIsAuthSettingsLoading(false));
+  }, []);
+
+  const handleToggleSetting = async (key) => {
+    const newNumber = key === 'number' ? !enableNumberVerification : enableNumberVerification;
+    const newEmail = key === 'email' ? !enableEmailVerification : enableEmailVerification;
+
+    if (key === 'number') setEnableNumberVerification(newNumber);
+    if (key === 'email') setEnableEmailVerification(newEmail);
+
+    setAuthSaveStatus(null);
+    try {
+      const res = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          enableNumberVerification: newNumber,
+          enableEmailVerification: newEmail,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setAuthSaveStatus({ success: true, message: 'Verification settings updated successfully.' });
+      } else {
+        setAuthSaveStatus({ success: false, message: data.error || 'Failed to save settings.' });
+      }
+    } catch (err) {
+      setAuthSaveStatus({ success: false, message: err.message });
+    }
+  };
+
+  const handleSeedDatabase = async () => {
+    if (!confirm('This will reset sample products while preserving customer orders. Continue?')) {
+      return;
+    }
+    try {
+      setSeeding(true);
+      setSeedResult(null);
+      const res = await fetch('/api/seed', { method: 'POST' });
+      const json = await res.json();
+      if (res.ok) {
+        setSeedResult({ success: true, message: 'Sample catalog restored successfully.' });
+      } else {
+        setSeedResult({ success: false, message: json.error || 'Failed to sync catalog' });
+      }
+    } catch (err) {
+      setSeedResult({ success: false, message: err.message });
+    } finally {
+      setSeeding(false);
+    }
+  };
+
+  return (
+    <AdminShell>
+      <div className="space-y-6 max-w-[800px]">
+        <div>
+          <h2 className="text-[24px] font-bold tracking-tight text-[#111111]">
+            Settings
+          </h2>
+        </div>
+
+        {/* Authentication & Verification Controls Card */}
+        <div className="bg-white rounded-[20px] border border-neutral-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.02)] p-6 space-y-5">
+          <div className="flex items-center justify-between pb-4 border-b border-neutral-100">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-bold text-[16px] text-[#111111]">Customer Verification</h3>
+                <p className="text-[12px] text-neutral-400">
+                  Require OTP verification during checkout
+                </p>
+              </div>
+            </div>
+            <span
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-medium border ${
+                !enableNumberVerification && !enableEmailVerification
+                  ? 'bg-amber-50 text-amber-700 border-amber-200'
+                  : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+              }`}
+            >
+              <Lock className="w-3.5 h-3.5" />
+              {!enableNumberVerification && !enableEmailVerification
+                ? 'OTP-Free Checkout'
+                : 'OTP Verification Active'}
+            </span>
+          </div>
+
+          <div className={`grid-collapse ${authSaveStatus ? 'grid-collapse-open' : 'grid-collapse-closed'}`}>
+            <div className="grid-collapse-inner">
+              {authSaveStatus && (
+                <div
+                  className={`p-3 rounded-[12px] text-[13px] flex items-center gap-2 mb-1 ${
+                    authSaveStatus.success
+                      ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                      : 'bg-rose-50 text-rose-800 border border-rose-200'
+                  }`}
+                >
+                  {authSaveStatus.success ? (
+                    <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+                  ) : (
+                    <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+                  )}
+                  <span>{authSaveStatus.message}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-4 pt-1">
+            {/* Option 1: Number Verification Toggle */}
+            <div className="flex items-center justify-between p-4 rounded-[14px] bg-neutral-50/70 border border-neutral-200/70">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-lg bg-white border border-neutral-200 flex items-center justify-center text-neutral-700 shrink-0 mt-0.5">
+                  <Smartphone className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-[14px] font-bold text-[#111111]">Phone Verification</h4>
+                  <p className="text-[12px] text-neutral-500 mt-0.5 leading-snug">
+                    Require customers to verify their mobile number via SMS OTP.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => handleToggleSetting('number')}
+                disabled={isAuthSettingsLoading}
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                  enableNumberVerification ? 'bg-[#111111]' : 'bg-neutral-300'
+                }`}
+                aria-label="Toggle Number Verification"
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                    enableNumberVerification ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Option 2: Email Verification Toggle */}
+            <div className="flex items-center justify-between p-4 rounded-[14px] bg-neutral-50/70 border border-neutral-200/70">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-lg bg-white border border-neutral-200 flex items-center justify-center text-neutral-700 shrink-0 mt-0.5">
+                  <Mail className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-[14px] font-bold text-[#111111]">Email Verification</h4>
+                  <p className="text-[12px] text-neutral-500 mt-0.5 leading-snug">
+                    Send a 6-digit verification code to the customer&apos;s email address.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => handleToggleSetting('email')}
+                disabled={isAuthSettingsLoading}
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                  enableEmailVerification ? 'bg-[#111111]' : 'bg-neutral-300'
+                }`}
+                aria-label="Toggle Email Verification"
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                    enableEmailVerification ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Catalog Synchronization Card */}
+        <div className="bg-white rounded-[20px] border border-neutral-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.02)] p-6 space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center">
+              <Layers className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-bold text-[16px] text-[#111111]">Sample Products</h3>
+              <p className="text-[12px] text-neutral-400">
+                Restore default catalog items without affecting customer orders
+              </p>
+            </div>
+          </div>
+
+          <div className={`grid-collapse ${seedResult ? 'grid-collapse-open' : 'grid-collapse-closed'}`}>
+            <div className="grid-collapse-inner">
+              {seedResult && (
+                <div
+                  className={`p-3.5 rounded-[12px] text-[13px] flex items-center gap-2 mb-2 ${
+                    seedResult.success
+                      ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                      : 'bg-rose-50 text-rose-800 border border-rose-200'
+                  }`}
+                >
+                  {seedResult.success ? (
+                    <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+                  ) : (
+                    <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+                  )}
+                  <span>{seedResult.message}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleSeedDatabase}
+            disabled={seeding}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#111111] hover:bg-black text-white text-[13px] font-medium transition-all shadow-sm active:scale-95 disabled:opacity-50 cursor-pointer"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${seeding ? 'animate-spin' : ''}`} />
+            <span>{seeding ? 'Restoring...' : 'Restore Sample Products'}</span>
+          </button>
+        </div>
+      </div>
+    </AdminShell>
+  );
+}

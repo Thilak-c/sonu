@@ -10,6 +10,8 @@ import {
   updateCartQuantity,
   updateCartItemSize,
   clearCart,
+  calculateCartSubtotal,
+  getCartPricingSummary,
   preloadImage,
   preloadCartImages,
   PAYMENT_ICONS,
@@ -140,9 +142,10 @@ export default function CheckoutPage() {
   };
 
   const getProductHref = (item) => {
-    if (item.slug) return `/product/${item.slug}`;
-    if (item.id && (item.id.includes('hybrid') || item.id.includes('stealth') || item.id.includes('drop-'))) {
-      return `/product/${item.id}`;
+    if (!item) return '/';
+    const target = item.slug || item.id;
+    if (target) {
+      return `/product/${target}`;
     }
     const name = (item.name || '').toLowerCase();
     if (name.includes('stealth') || name.includes("men") || name.includes('black')) {
@@ -302,10 +305,8 @@ export default function CheckoutPage() {
   }, [checkoutStep]);
 
   const totalQuantity = cartItems.reduce((acc, item) => acc + (item.quantity || 1), 0);
-  const subtotal = cartItems.reduce(
-    (acc, item) => acc + (item.priceNumber || 13995) * (item.quantity || 1),
-    0
-  );
+  const cartSummary = getCartPricingSummary(cartItems);
+  const subtotal = cartSummary.subtotal;
   const promoDiscountAmount = appliedPromo
     ? Math.round((subtotal * appliedPromo.discountPercent) / 100)
     : 0;
@@ -878,12 +879,25 @@ export default function CheckoutPage() {
 
                 {isPriceDetailsOpen && (
                   <div className="px-4 pb-4 pt-1 border-t border-[#f0f0f0] space-y-2.5 text-[13.5px]">
-                    <div className="flex justify-between items-center text-[#707072]">
-                      <span>Bag Total</span>
-                      <span className="text-[#111111] font-medium">
-                        ₹{subtotal.toLocaleString('en-IN')}
-                      </span>
-                    </div>
+                    {cartSummary.items.map((it, idx) => (
+                      <div key={idx} className="flex justify-between items-center text-[#707072]">
+                        <span className="truncate max-w-[200px] text-[#111111]">
+                          {it.name}{it.quantity > 1 ? ` (${it.quantity}x)` : ''}
+                        </span>
+                        <span className="text-[#111111] font-medium shrink-0">
+                          ₹ {it.totalPrice.toLocaleString('en-IN')}
+                        </span>
+                      </div>
+                    ))}
+
+                    {cartSummary.combos.map((combo, idx) => (
+                      <div key={`combo-${idx}`} className="flex justify-between items-center text-[#0d8240] font-medium">
+                        <span className="capitalize">{combo.title || 'combo offer'}</span>
+                        <span className="text-[#111111] font-bold shrink-0">
+                          ₹ {combo.comboPrice.toLocaleString('en-IN')}
+                        </span>
+                      </div>
+                    ))}
                     <div className="flex justify-between items-center text-[#707072]">
                       <span className="flex items-center gap-1.5">
                         Shipping Charges
@@ -1687,12 +1701,25 @@ export default function CheckoutPage() {
 
               {isPaymentPriceDetailsOpen && (
                 <div className="mt-4 pt-3.5 border-t border-[#f0f0f0] space-y-3.5">
-                  <div className="flex items-center justify-between text-[14px] text-[#707072]">
-                    <span>Bag Total</span>
-                    <span className="text-[#111111] font-medium">
-                      ₹{subtotal.toLocaleString('en-IN')}
-                    </span>
-                  </div>
+                  {cartSummary.items.map((it, idx) => (
+                    <div key={idx} className="flex items-center justify-between text-[14px] text-[#707072]">
+                      <span className="truncate max-w-[200px] text-[#111111]">
+                        {it.name}{it.quantity > 1 ? ` (${it.quantity}x)` : ''}
+                      </span>
+                      <span className="text-[#111111] font-medium shrink-0">
+                        ₹ {it.totalPrice.toLocaleString('en-IN')}
+                      </span>
+                    </div>
+                  ))}
+
+                  {cartSummary.combos.map((combo, idx) => (
+                    <div key={`combo-${idx}`} className="flex items-center justify-between text-[14px] text-[#0d8240] font-medium">
+                      <span className="capitalize">{combo.title || 'combo offer'}</span>
+                      <span className="text-[#111111] font-bold shrink-0">
+                        ₹ {combo.comboPrice.toLocaleString('en-IN')}
+                      </span>
+                    </div>
+                  ))}
                   <div className="flex items-center justify-between text-[14px] text-[#707072]">
                     <span className="flex items-center gap-1.5">
                       Shipping Charges
@@ -1965,17 +1992,42 @@ export default function CheckoutPage() {
           </h2>
 
           <div className="space-y-3.5 text-[15px] sm:text-[16px] text-[#111111]">
-            <div className="flex items-center justify-between">
-              <span>Bag Total</span>
-              <span>₹ {subtotal.toLocaleString('en-IN')}</span>
-            </div>
+            {/* Itemized shoes breakdown (e.g. shoe 1 - 1999, shoe 2 - 3000) */}
+            {cartSummary.items.map((it, idx) => (
+              <div key={idx} className="flex items-center justify-between text-[#707072]">
+                <span className="truncate max-w-[210px] text-[#111111]">
+                  {it.name}{it.quantity > 1 ? ` (${it.quantity}x)` : ''}
+                </span>
+                <span className="text-[#111111] font-medium shrink-0">
+                  ₹ {it.totalPrice.toLocaleString('en-IN')}
+                </span>
+              </div>
+            ))}
 
-            <div className="flex items-center justify-between">
+            {/* Active Combo Offers (e.g. combo offer - 3999) */}
+            {cartSummary.combos.map((combo, idx) => (
+              <div
+                key={`combo-${idx}`}
+                className="flex items-center justify-between text-[#0d8240] font-medium py-0.5"
+              >
+                <div className="flex items-center gap-1.5">
+                  <span className="capitalize">{combo.title || 'combo offer'}</span>
+              
+                </div>
+                <span className="font-bold text-[#228B5A] shrink-0">
+                  - ₹ {combo.savings.toLocaleString('en-IN')}
+                </span>
+              </div>
+            ))}
+
+            <div className="border-t border-[#f0f0f0] my-2" />
+
+            <div className="flex items-center justify-between text-[#707072]">
               <span>Sub Total</span>
-              <span>₹ {subtotal.toLocaleString('en-IN')}</span>
+              <span className="text-[#111111] font-medium">₹ {subtotal.toLocaleString('en-IN')}</span>
             </div>
 
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between text-[#707072]">
               <span>Shipping Charges</span>
               <span className="text-[#0d8240] font-normal">Free</span>
             </div>
@@ -2070,7 +2122,7 @@ export default function CheckoutPage() {
                         setPromoInput(e.target.value);
                         setPromoError('');
                       }}
-                      className="flex-1 px-3.5 py-2.5 rounded-full border border-[#8d8d8d] focus:border-[#111111] text-[14px] outline-none uppercase"
+                      className="flex-1 px-3.5 py-2.5 rounded-full border border-[#8d8d8d] focus:border-[#111111] text-[14px] outline-none"
                     />
                     <button
                       type="submit"

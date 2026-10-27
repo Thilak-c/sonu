@@ -53,13 +53,13 @@ export default function AdminShell({ children, onNewProductClick }) {
   ];
 
   const getPageTitle = () => {
-    if (pathname.startsWith('/orders')) return 'Orders & Fulfillment';
-    if (pathname.startsWith('/products')) return 'Product Catalog';
-    if (pathname.startsWith('/overview')) return 'Executive Overview';
-    if (pathname.startsWith('/customers')) return 'Customer CRM';
-    if (pathname.startsWith('/inventory')) return 'Inventory Matrix';
-    if (pathname.startsWith('/settings')) return 'System & Database';
-    return 'Operations Control';
+    if (pathname.startsWith('/orders')) return 'Orders';
+    if (pathname.startsWith('/products')) return 'Products';
+    if (pathname.startsWith('/overview')) return 'Overview';
+    if (pathname.startsWith('/customers')) return 'Customers';
+    if (pathname.startsWith('/inventory')) return 'Inventory';
+    if (pathname.startsWith('/settings')) return 'Settings';
+    return 'Admin';
   };
 
   return (
@@ -75,15 +75,14 @@ export default function AdminShell({ children, onNewProductClick }) {
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-[18px] tracking-tight">SONU</span>
-            <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-white/10 text-white/70">
-              Admin
-            </span>
-          </div>
+          <img
+            src="/Logo/Logo_Full_white.png"
+            alt="Sonu Shoe"
+            className="h-6 w-auto object-contain"
+          />
         </div>
 
-        <a
+        {/* <a
           href="http://localhost:3000"
           target="_blank"
           rel="noopener noreferrer"
@@ -91,95 +90,103 @@ export default function AdminShell({ children, onNewProductClick }) {
         >
           <span>Store</span>
           <ExternalLink className="w-3.5 h-3.5" />
-        </a>
+        </a> */}
       </header>
 
-      {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col w-[260px] bg-[#111111] text-white shrink-0 sticky top-0 h-screen border-r border-[#222222]">
-        {/* Brand Header */}
-        <div className="px-6 py-6 border-b border-[#222222] flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-[22px] tracking-tight">SONU</span>
-              <span className="text-[11px] font-medium tracking-wide uppercase px-2 py-0.5 rounded-full bg-white/10 text-neutral-300">
-                Ops v1.0
-              </span>
+      {/* Desktop Sidebar Wrapper (Keeps layout width constant at 68px so page doesn't shift) */}
+      <div className="hidden md:block w-[68px] shrink-0">
+        <aside className="group fixed top-0 left-0 h-screen w-[68px] hover:w-[240px] transition-all duration-300 ease-in-out bg-[#111111] text-white z-40 border-r border-[#222222] flex flex-col overflow-hidden">
+          {/* Brand Header */}
+          <div className="h-16 flex items-center px-4 border-b border-[#222222] shrink-0 overflow-hidden whitespace-nowrap">
+            <img
+              src="/favicon.ico"
+              alt="SONU"
+              className="w-9 h-9 rounded-xl object-contain shrink-0"
+            />
+            <div className="ml-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <img
+                src="/Logo/Logo_Full_white.png"
+                alt="Sonu Shoe"
+                className="h-6 w-auto object-contain"
+              />
             </div>
-            <p className="text-[12px] text-neutral-400 mt-0.5 tracking-normal">
-              Footwear Control Plane
-            </p>
           </div>
-        </div>
 
-        {/* Database Status Pill */}
-        <div className="px-6 pt-5 pb-2">
-          <div className="flex items-center justify-between px-3 py-2 rounded-[10px] bg-[#1a1a1a] border border-[#282828]">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[12px] font-medium text-neutral-300">MongoDB</span>
+          {/* Navigation Links */}
+          <nav className="flex-1 px-2.5 py-2 space-y-1 overflow-y-auto overflow-x-hidden scrollbar-none">
+            {navLinks.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  title={item.label}
+                  className={`flex items-center h-11 px-2 rounded-xl text-[14px] font-medium transition-all whitespace-nowrap overflow-hidden ${
+                    isActive
+                      ? 'bg-white text-[#111111]'
+                      : 'text-neutral-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <div className="w-7 flex items-center justify-center shrink-0">
+                    <Icon className={`w-5 h-5 ${isActive ? 'text-[#111111]' : 'text-neutral-400'}`} />
+                  </div>
+                  <span className="ml-2.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    {item.label}
+                  </span>
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* Bottom Store Link & Time */}
+          <div className="p-2.5 border-t border-[#222222] space-y-2 shrink-0 overflow-hidden">
+            <a
+              href="http://localhost:3000"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Live Storefront (:3000)"
+              className="flex items-center h-10 px-2 rounded-[10px] bg-[#1a1a1a] hover:bg-[#252525] text-neutral-300 hover:text-white text-[13px] font-medium transition-colors whitespace-nowrap overflow-hidden"
+            >
+              <div className="w-7 flex items-center justify-center shrink-0">
+                <ExternalLink className="w-4 h-4 text-neutral-400" />
+              </div>
+              <div className="ml-2.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-between flex-1">
+                <span>Storefront</span>
+                <span className="text-[10px] text-neutral-500">:3000</span>
+              </div>
+            </a>
+
+            <div
+              className="h-7 flex items-center px-2 text-[11px] text-neutral-500 whitespace-nowrap overflow-hidden"
+              title={`IST (Local): ${currentTime || 'Live'}`}
+            >
+              <div className="w-7 flex items-center justify-center shrink-0">
+                <span className="w-1.5 h-1.5 rounded-full bg-neutral-600" />
+              </div>
+              <div className="ml-2.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-between flex-1">
+                <span>IST</span>
+                <span className="text-neutral-400">{currentTime || 'Live'}</span>
+              </div>
             </div>
-            <span className="text-[11px] text-emerald-400 font-medium">sonu_shoes</span>
           </div>
-        </div>
-
-        {/* Navigation Links */}
-        <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto scrollbar-none">
-          {navLinks.map((item) => {
-            const Icon = item.icon;
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center gap-3.5 px-3.5 py-3 rounded-[12px] text-[14px] font-medium transition-all ${
-                  isActive
-                    ? 'bg-white text-[#111111] shadow-sm'
-                    : 'text-neutral-400 hover:text-white hover:bg-white/5'
-                }`}
-              >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-[#111111]' : 'text-neutral-400'}`} />
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Bottom Store Link & Time */}
-        <div className="p-4 border-t border-[#222222] space-y-3">
-          <a
-            href="http://localhost:3000"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-between px-3.5 py-2.5 rounded-[10px] bg-[#1a1a1a] hover:bg-[#252525] text-neutral-300 hover:text-white text-[13px] font-medium transition-colors group"
-          >
-            <span className="flex items-center gap-2">
-              <ExternalLink className="w-3.5 h-3.5 text-neutral-400 group-hover:text-white" />
-              <span>Live Storefront</span>
-            </span>
-            <span className="text-[11px] text-neutral-500 font-mono">:3000</span>
-          </a>
-
-          <div className="flex items-center justify-between px-1 text-[11px] text-neutral-500">
-            <span>IST (Local)</span>
-            <span className="font-mono text-neutral-400">{currentTime || 'Live'}</span>
-          </div>
-        </div>
-      </aside>
+        </aside>
+      </div>
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
         <div className="md:hidden fixed inset-0 z-50 flex">
           <div
-            className="fixed inset-0 bg-black/60"
+            className="fixed inset-0 bg-black/60 animate-modal-backdrop backdrop-blur-[2px]"
             onClick={() => setMobileMenuOpen(false)}
           />
-          <div className="relative w-[280px] bg-[#111111] text-white h-full flex flex-col p-6 z-10 shadow-2xl">
+          <div className="relative w-[280px] bg-[#111111] text-white h-full flex flex-col p-6 z-10 shadow-2xl animate-drawer-left">
             <div className="flex items-center justify-between pb-6 border-b border-[#222222]">
-              <span className="font-bold text-[20px]">SONU Ops</span>
+              <span className="font-bold text-[20px]">Sonu Shoe</span>
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(false)}
-                className="p-1 text-neutral-400"
+                className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-white/10 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -194,8 +201,8 @@ export default function AdminShell({ children, onNewProductClick }) {
                     key={item.href}
                     href={item.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className={`flex items-center gap-3.5 px-3.5 py-3 rounded-[12px] text-[15px] font-medium ${
-                      isActive ? 'bg-white text-[#111111]' : 'text-neutral-400'
+                    className={`flex items-center gap-3.5 px-3.5 py-3 rounded-[12px] text-[15px] font-medium transition-all duration-150 ease-out active:scale-[0.98] ${
+                      isActive ? 'bg-white text-[#111111] shadow-sm' : 'text-neutral-400 hover:text-white hover:bg-white/5'
                     }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -205,15 +212,15 @@ export default function AdminShell({ children, onNewProductClick }) {
               })}
             </nav>
 
-            <a
+            {/* <a
               href="http://localhost:3000"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 py-3 rounded-full bg-white text-[#111111] font-medium text-[14px]"
+              className="flex items-center justify-center gap-2 py-3 rounded-full bg-white hover:bg-neutral-100 text-[#111111] font-medium text-[14px] transition-all duration-150 ease-out active:scale-95 shadow-sm"
             >
               <span>Go to Storefront</span>
               <ArrowUpRight className="w-4 h-4" />
-            </a>
+            </a> */}
           </div>
         </div>
       )}
@@ -222,44 +229,22 @@ export default function AdminShell({ children, onNewProductClick }) {
       <div className="flex-1 flex flex-col min-w-0 bg-[#f9fafb]">
         {/* Top Desktop Navigation Bar (Hidden on /orders to render dedicated Shiprocket header) */}
         {!pathname.startsWith('/orders') && (
-          <header className="hidden md:flex items-center justify-between px-8 h-20 bg-white border-b border-neutral-200/80 sticky top-0 z-30">
+          <header className="hidden md:flex items-center justify-between px-8 h-10 bg-white sticky top-0 z-30">
             <div>
               <div className="flex items-center gap-2 text-[13px] text-neutral-400 font-normal">
-                <span>SONU</span>
+                <span>Sonu Shoe</span>
                 <span>/</span>
                 <span className="text-neutral-700 capitalize">
-                  {pathname === '/' ? 'Dashboard' : pathname.replace('/', '')}
+                  {pathname === '/' ? '' : pathname.replace('/', '')}
                 </span>
               </div>
-              <h1 className="text-[20px] font-bold text-[#111111] tracking-tight leading-tight mt-0.5">
-                {getPageTitle()}
-              </h1>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <Link
-                href="/products?action=new"
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#111111] hover:bg-black text-white text-[13px] font-medium transition-all shadow-sm active:scale-[0.98] cursor-pointer"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>New Drop</span>
-              </Link>
-
-              <div className="flex items-center gap-3 pl-2 border-l border-neutral-200">
-                <div className="w-9 h-9 rounded-full bg-[#111111] text-white flex items-center justify-center text-[13px] font-bold tracking-tight">
-                  AD
-                </div>
-                <div className="text-left hidden lg:block">
-                  <p className="text-[13px] font-semibold text-[#111111] leading-none">Admin</p>
-                  <p className="text-[11px] text-neutral-400 mt-0.5 leading-none">Operations Lead</p>
-                </div>
-              </div>
+            
             </div>
           </header>
         )}
 
         {/* Page Content */}
-        <main className={`flex-1 ${pathname.startsWith('/orders') ? 'p-4 sm:p-6 w-full' : 'p-5 sm:p-7 lg:p-8 max-w-[1440px] w-full mx-auto'}`}>
+        <main className={`flex-1 ${pathname.startsWith('/orders') ? 'p-4 sm:p-6 w-full' : ''}`}>
           {children}
         </main>
       </div>

@@ -149,7 +149,7 @@ export default function Header() {
           <div className="flex items-center">
             <Link href="/" className="inline-block transition-opacity hover:opacity-85" aria-label="Home">
               <img
-                src="/Logo/Logo_Full.png"
+                src="/Logo/Logo_Full_orig.png"
                 alt="Sonu shoe"
                 className="h-7 sm:h-9 w-auto object-contain"
                 loading="eager"

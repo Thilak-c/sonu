@@ -5,6 +5,7 @@ import FreshDropsSection from '@/components/home/FreshDropsSection';
 import ShopBySportSection from '@/components/home/ShopBySportSection';
 import SpotlightSection from '@/components/home/SpotlightSection';
 import LastMinuteSection from '@/components/home/LastMinuteSection';
+import { getAllProducts } from '@/lib/products';
 
 export const metadata = {
   title: 'SONU — For the Long Way Home | Handcrafted Footwear',
@@ -29,7 +30,9 @@ export const metadata = {
   },
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  const products = await getAllProducts();
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@graph': [
@@ -64,25 +67,31 @@ export default function HomePage() {
       />
 
       <div className="w-full bg-white flex flex-col font-['Helvetica_Now_Text',sans-serif]">
-        {/* 1. Hero Section (Commented out per request) */}
-        {/* <HeroSection /> */}
+        {/* Empty state when no products in DB yet */}
+        {products.length === 0 && (
+          <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 py-20 text-center">
+            <span className="text-[12px] tracking-[0.2em] uppercase font-medium text-[#707072] block mb-2 font-['Helvetica_Now_Text_Medium',sans-serif]">
+              New Drop Coming Soon
+            </span>
+            <h1 className="text-[28px] sm:text-[38px] font-medium text-[#111111] tracking-tight font-['Helvetica_Now_Text_Medium',sans-serif]">
+              Crafted in Small Runs.
+            </h1>
+            <p className="text-[15px] sm:text-[16px] text-[#707072] mt-3 max-w-md mx-auto leading-relaxed">
+              Our handcrafted footwear is currently in preparation. Add products through the admin panel to populate your store catalog.
+            </p>
+          </div>
+        )}
 
-        {/* 2. Featured Section (40-50% VH) */}
-        <FeaturedSection />
+        {/* 2. Featured Section (from DB) */}
+        {products.length > 0 && <FeaturedSection products={products} />}
 
-        {/* 3. Trending Section (Commented out per request) */}
-        {/* <TrendingSection /> */}
+        {/* 4. Fresh Drops Section (from DB) */}
+        {products.length > 0 && <FreshDropsSection products={products} />}
 
-        {/* 4. Fresh Drops Section (40-50% VH) */}
-        <FreshDropsSection />
-
-        {/* 5. Shop by Sport Section (40-50% VH) */}
+        {/* 5. Shop by Sport Section */}
         <ShopBySportSection />
 
-        {/* 6. Spotlight Section (Commented out per request) */}
-        {/* <SpotlightSection /> */}
-
-        {/* 7. Last Minute Addition (copied from Bag page) */}
+        {/* 7. Last Minute Addition */}
         <LastMinuteSection />
       </div>
     </>

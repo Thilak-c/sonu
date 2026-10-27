@@ -2,12 +2,11 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { FRESH_DROPS } from '@/components/home/freshDropsData';
 import { addToCart, getCartItems, removeFromCart, updateCartQuantity } from '@/components/cart/cartStore';
 
 const CATALOG_SIZES = ['UK 3', 'UK 4', 'UK 5', 'UK 6', 'UK 7', 'UK 8', 'UK 9'];
 
-export default function FavouritesClient() {
+export default function FavouritesClient({ initialProducts = [] }) {
   const [wishlistMap, setWishlistMap] = useState({});
   const [isLoaded, setIsLoaded] = useState(false);
   const [addedItemKey, setAddedItemKey] = useState(null);
@@ -37,13 +36,7 @@ export default function FavouritesClient() {
       if (raw) {
         setWishlistMap(JSON.parse(raw));
       } else {
-        // Seed initial 2 items so layout matches user mockup on initial visit
-        const initialSeed = {
-          [FRESH_DROPS[0].id]: true,
-          [FRESH_DROPS[1].id]: true,
-        };
-        localStorage.setItem('sonu_wishlist', JSON.stringify(initialSeed));
-        setWishlistMap(initialSeed);
+        setWishlistMap({});
       }
     } catch (e) {
       console.error('Failed to load wishlist', e);
@@ -153,8 +146,8 @@ export default function FavouritesClient() {
     });
   };
 
-  const favouritedProducts = FRESH_DROPS.filter(
-    (p) => wishlistMap[p.id] || wishlistMap[p.slug]
+  const favouritedProducts = (initialProducts || []).filter(
+    (p) => wishlistMap[p.id] || wishlistMap[p.slug] || wishlistMap[String(p._id)]
   );
   const count = favouritedProducts.length;
 

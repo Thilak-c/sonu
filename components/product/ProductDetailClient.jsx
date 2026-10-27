@@ -481,6 +481,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
 
     const updated = addToCart({
       id: product.id || product.slug,
+      slug: product.slug || product.id,
       name: product.name,
       category: product.category,
       price: product.price || `₹${(product.priceNumber || 13995).toLocaleString('en-IN')}`,
@@ -489,6 +490,8 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
       availableSizes: availableSizesList,
       color: Array.isArray(product.colorways) ? product.colorways[0] : (product.color || 'Signature Tone'),
       image: productImages[0] || product.image || product.mainImage,
+      comboItems: product.comboItems || [],
+      comboPrice: product.comboPrice || null,
     });
     const totalCount = updated.reduce((acc, it) => acc + (it.quantity || 1), 0);
     setCartCount(totalCount);
@@ -499,6 +502,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
     setSelectedSize(sz);
     const updated = addToCart({
       id: product.id || product.slug,
+      slug: product.slug || product.id,
       name: product.name,
       category: product.category,
       price: product.price || `₹${(product.priceNumber || 13995).toLocaleString('en-IN')}`,
@@ -507,6 +511,8 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
       availableSizes: availableSizesList,
       color: Array.isArray(product.colorways) ? product.colorways[0] : (product.color || 'Signature Tone'),
       image: productImages[0] || product.image || product.mainImage,
+      comboItems: product.comboItems || [],
+      comboPrice: product.comboPrice || null,
     });
     const totalCount = updated.reduce((acc, it) => acc + (it.quantity || 1), 0);
     setCartCount(totalCount);

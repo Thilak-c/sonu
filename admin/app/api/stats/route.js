@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { initDb } from '@/lib/mongodb';
-import { FRESH_DROPS } from '@/lib/initialProducts';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,16 +19,7 @@ export async function GET() {
     const paidOrders = orders.filter((o) => o.paymentStatus === 'paid' || o.razorpayPaymentId).length;
 
     // 2. Products Stats
-    let productCount = await db.collection('products').countDocuments();
-    if (productCount === 0) {
-      // Auto-seed if empty
-      const now = new Date();
-      await db.collection('products').insertMany(
-        FRESH_DROPS.map((p) => ({ ...p, createdAt: now, updatedAt: now }))
-      );
-      productCount = FRESH_DROPS.length;
-    }
-
+    const productCount = await db.collection('products').countDocuments();
     const inStockCount = await db.collection('products').countDocuments({ inStock: { $ne: false } });
 
     // 3. Customers Stats

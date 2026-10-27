@@ -6,7 +6,7 @@ const SPORTS_CATEGORIES = [
     name: 'Running',
     image: '/asset/Urban Sprint on Blue Concrete.webp',
     alt: 'SONU Running Footwear',
-    link: '/product/drop-hybrid-men',
+    link: '/running',
   },
   {
     id: 'basketball',

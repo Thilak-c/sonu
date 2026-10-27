@@ -1,5 +1,6 @@
 import React from 'react';
 import FavouritesClient from '@/components/favourites/FavouritesClient';
+import { getAllProducts } from '@/lib/products';
 
 export const metadata = {
   title: 'Favourites & Wishlist | Sonu shoe',
@@ -29,12 +30,14 @@ export const metadata = {
     description: 'Review and manage your saved handcrafted footwear pairs.',
   },
   robots: {
-    index: false, // User private wishlist should not clutter search indexes
+    index: false,
     follow: true,
   },
 };
 
-export default function FavouritesPage() {
+export default async function FavouritesPage() {
+  const products = await getAllProducts();
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
@@ -54,7 +57,7 @@ export default function FavouritesPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <FavouritesClient />
+      <FavouritesClient initialProducts={products} />
     </>
   );
 }

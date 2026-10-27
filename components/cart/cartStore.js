@@ -39,6 +39,119 @@ export function getCartItems() {
   }
 }
 
+export function calculateCartSubtotal(cartItems) {
+  return getCartPricingSummary(cartItems).subtotal;
+}
+
+export function getCartPricingSummary(cartItems) {
+  if (!Array.isArray(cartItems) || cartItems.length === 0) {
+    return {
+      items: [],
+      combos: [],
+      rawTotal: 0,
+      comboDiscount: 0,
+      subtotal: 0,
+    };
+  }
+
+  const pool = cartItems.map((item) => {
+    let pNum = Number(item.priceNumber);
+    if (!pNum || isNaN(pNum)) {
+      if (typeof item.price === 'string') {
+        const parsed = Number(item.price.replace(/[^\d.]/g, ''));
+        pNum = !isNaN(parsed) && parsed > 0 ? parsed : 13995;
+      } else if (typeof item.price === 'number') {
+        pNum = item.price;
+      } else {
+        pNum = 13995;
+      }
+    }
+    return {
+      ...item,
+      remainingQty: Number(item.quantity || 1),
+      unitPrice: pNum,
+    };
+  });
+
+  const combos = [];
+  let total = 0;
+  let rawTotal = 0;
+
+  for (const item of pool) {
+    rawTotal += item.remainingQty * item.unitPrice;
+  }
+
+  // Check for combo packages
+  for (const base of pool) {
+    const comboPriceNum = Number(base.comboPrice);
+    const hasCombo =
+      comboPriceNum > 0 &&
+      Array.isArray(base.comboItems) &&
+      base.comboItems.length > 0;
+
+    if (hasCombo && base.remainingQty > 0) {
+      const requiredSlugs = base.comboItems.map((ci) => ci.slug || ci.id);
+
+      while (base.remainingQty > 0) {
+        const matchedItems = requiredSlugs.map((slug) =>
+          pool.find(
+            (p) =>
+              (p.id === slug || p.slug === slug) &&
+              p !== base &&
+              p.remainingQty > 0
+          )
+        );
+
+        if (matchedItems.every(Boolean)) {
+          base.remainingQty -= 1;
+          const matchedNames = [base.name];
+          let individualComboSum = base.unitPrice;
+
+          matchedItems.forEach((m) => {
+            m.remainingQty -= 1;
+            matchedNames.push(m.name);
+            individualComboSum += m.unitPrice;
+          });
+
+          const savings = Math.max(0, individualComboSum - comboPriceNum);
+
+          combos.push({
+            title: 'combo offer',
+            items: matchedNames,
+            comboPrice: comboPriceNum,
+            originalPrice: individualComboSum,
+            savings,
+          });
+
+          total += comboPriceNum;
+        } else {
+          break;
+        }
+      }
+    }
+  }
+
+  // Add remaining unbundled items at standard selling price
+  for (const item of pool) {
+    if (item.remainingQty > 0) {
+      total += item.remainingQty * item.unitPrice;
+    }
+  }
+
+  return {
+    items: pool.map((item) => ({
+      name: item.name || 'Shoe',
+      quantity: Number(item.quantity || 1),
+      unitPrice: item.unitPrice,
+      totalPrice: item.unitPrice * Number(item.quantity || 1),
+    })),
+    combos,
+    rawTotal,
+    comboDiscount: Math.max(0, rawTotal - total),
+    subtotal: total,
+  };
+}
+
 export function saveCartItems(items) {
   if (typeof window === 'undefined') return;
   try {

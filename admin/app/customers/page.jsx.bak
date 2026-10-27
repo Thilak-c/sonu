@@ -1,0 +1,206 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import AdminShell from '@/components/AdminShell';
+import {
+  Users,
+  Search,
+  RefreshCw,
+  Phone,
+  Mail,
+  MapPin,
+  ShoppingBag,
+  CreditCard,
+} from 'lucide-react';
+
+export default function CustomersPage() {
+  const [customers, setCustomers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const fetchCustomers = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch('/api/customers');
+      if (res.ok) {
+        const json = await res.json();
+        setCustomers(json.customers || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch customers:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCustomers();
+  }, []);
+
+  const filteredCustomers = customers.filter((c) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      c.name?.toLowerCase().includes(q) ||
+      c.mobile?.includes(q) ||
+      c.email?.toLowerCase().includes(q) ||
+      c.primaryAddress?.city?.toLowerCase().includes(q)
+    );
+  });
+
+  return (
+    <AdminShell>
+      <div className="space-y-6">
+        {/* Header Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <h2 className="text-[22px] font-bold tracking-tight text-[#111111]">
+              Customers
+            </h2>
+            <span className="text-[12px] font-medium px-2.5 py-0.5 rounded-full bg-neutral-100 text-neutral-600 border border-neutral-200/80">
+              {filteredCustomers.length}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2.5">
+            <div className="relative min-w-[240px]">
+              <input
+                type="text"
+                placeholder="Search customers..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full h-10 pl-4 pr-10 rounded-lg border border-neutral-200 bg-white text-[13.5px] text-neutral-800 placeholder:text-neutral-400 outline-none focus:border-neutral-900 transition-colors"
+              />
+              <Search className="w-4 h-4 text-neutral-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none stroke-[1.75]" />
+            </div>
+            <button
+              type="button"
+              onClick={fetchCustomers}
+              className="h-10 px-3.5 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 flex items-center justify-center cursor-pointer transition-colors"
+              title="Refresh"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+            </button>
+          </div>
+        </div>
+
+        {/* Customer Table */}
+        <div className="bg-white rounded-lg border border-neutral-200 overflow-hidden shadow-none">
+          {loading ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-neutral-200 bg-white text-[13px] font-semibold text-neutral-800">
+                    <th className="py-3 px-4 border-r border-neutral-200 min-w-[220px]"><span className="w-20 h-3 rounded skeleton-shimmer block" /></th>
+                    <th className="py-3 px-4 border-r border-neutral-200 min-w-[200px]"><span className="w-24 h-3 rounded skeleton-shimmer block" /></th>
+                    <th className="py-3 px-4 border-r border-neutral-200 min-w-[180px]"><span className="w-24 h-3 rounded skeleton-shimmer block" /></th>
+                    <th className="py-3 px-4 border-r border-neutral-200 w-[120px]"><span className="w-14 h-3 rounded skeleton-shimmer block" /></th>
+                    <th className="py-3 px-4 w-[140px] text-right"><span className="w-20 h-3 rounded skeleton-shimmer block ml-auto" /></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-200">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <tr key={i}>
+                      <td className="py-3.5 px-4 border-r border-neutral-200"><div className="flex items-center gap-3"><div className="w-9 h-9 rounded-full skeleton-shimmer" /><div className="space-y-1.5"><div className="w-28 h-3.5 rounded skeleton-shimmer" /><div className="w-16 h-2.5 rounded skeleton-shimmer" /></div></div></td>
+                      <td className="py-3.5 px-4 border-r border-neutral-200"><div className="space-y-1.5"><div className="w-28 h-3 rounded skeleton-shimmer" /><div className="w-36 h-2.5 rounded skeleton-shimmer" /></div></td>
+                      <td className="py-3.5 px-4 border-r border-neutral-200"><div className="w-32 h-3 rounded skeleton-shimmer" /></td>
+                      <td className="py-3.5 px-4 border-r border-neutral-200"><div className="w-16 h-5 rounded-full skeleton-shimmer" /></td>
+                      <td className="py-3.5 px-4 text-right"><div className="w-20 h-3.5 rounded skeleton-shimmer ml-auto" /></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : filteredCustomers.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-neutral-200 bg-white text-[13px] font-semibold text-neutral-800">
+                    <th className="py-3 px-4 border-r border-neutral-200 min-w-[220px]">Customer</th>
+                    <th className="py-3 px-4 border-r border-neutral-200 min-w-[200px]">Contact Details</th>
+                    <th className="py-3 px-4 border-r border-neutral-200 min-w-[180px]">Delivery Location</th>
+                    <th className="py-3 px-4 border-r border-neutral-200 w-[120px]">Orders</th>
+                    <th className="py-3 px-4 w-[140px] text-right">Lifetime Spend</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-200 text-[13.5px] text-neutral-800">
+                  {filteredCustomers.map((user, idx) => {
+                    const initials = (user.name || user.firstName || 'C')
+                      .split(' ')
+                      .map((n) => n[0])
+                      .join('')
+                      .slice(0, 2)
+                      .toUpperCase();
+
+                    return (
+                      <tr key={user._id || idx} className="hover:bg-neutral-50/70 transition-colors">
+                        <td className="py-3.5 px-4 border-r border-neutral-200">
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-full bg-[#111111] text-white flex items-center justify-center font-bold text-[12px] shrink-0">
+                              {initials}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-medium text-neutral-900 truncate">{user.name || 'Footwear Enthusiast'}</p>
+                              <p className="text-[11px] text-neutral-400">
+                                ID: {(user._id || '').slice(-6)}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4 border-r border-neutral-200">
+                          <div className="space-y-1 text-[13px]">
+                            {user.mobile && (
+                              <p className="flex items-center gap-1.5 text-neutral-700">
+                                <Phone className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+                                <span>+91 {user.mobile}</span>
+                              </p>
+                            )}
+                            {user.email && (
+                              <p className="flex items-center gap-1.5 text-neutral-500 text-[12px]">
+                                <Mail className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+                                <span className="truncate">{user.email}</span>
+                              </p>
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4 border-r border-neutral-200 text-[13px] text-neutral-600">
+                          {user.primaryAddress?.city ? (
+                            <div className="flex items-center gap-1.5">
+                              <MapPin className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+                              <span className="truncate">
+                                {user.primaryAddress.city} - {user.primaryAddress.pincode}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-neutral-400">Direct Online Order</span>
+                          )}
+                        </td>
+                        <td className="py-3.5 px-4 border-r border-neutral-200">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-neutral-100 text-neutral-700">
+                            <ShoppingBag className="w-3 h-3" />
+                            <span>{user.orderCount || 1} orders</span>
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 text-right font-medium text-neutral-900">
+                          ₹{(user.totalSpent || 13995).toLocaleString('en-IN')}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="py-16 text-center">
+              <Users className="w-10 h-10 text-neutral-300 mx-auto mb-3" />
+              <h3 className="text-[16px] font-medium text-[#111111]">No customers registered</h3>
+              <p className="text-[13px] text-neutral-400 mt-1">
+                New customers will appear here when they register or place orders on the storefront.
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </AdminShell>
+  );
+}

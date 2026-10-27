@@ -20,3 +20,6 @@ admin/.env*
 whatsapp-gateway/node_modules/
 whatsapp-gateway/.wwebjs_auth/
 whatsapp-gateway/.wwebjs_cache/
+
+uploads/
+!uploads/.gitkeep

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { getCartPricingSummary } from '@/components/cart/cartStore';
 
 export default function OrderTrackingClient({ initialOrder, orderId }) {
   const [order, setOrder] = useState(initialOrder);
@@ -181,6 +182,7 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
   const isProcessing = isReadyToShip || currentFulfillment === 'processing' || currentFulfillment === 'confirmed';
 
   // Payment Breakdown
+  const orderPricing = getCartPricingSummary(items);
   const isPartialCod = order.payment?.method === 'partial_cod' || order.payment?.method === 'cod';
   const advancePaid = isPartialCod ? Number(order.payment?.advancePaid ?? 200) : Number(order.totalAmount || 13995);
   const balanceDue = isPartialCod ? Number(order.payment?.balanceDue ?? Math.max(0, Number(order.totalAmount || 13995) - advancePaid)) : 0;
@@ -327,17 +329,20 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
                 <div key={itemKey} className="border-b border-[#e5e5e5] pb-8 mb-8 last:border-b-0 last:mb-0">
                   {/* Product Info Row - exact same as Bag */}
                   <div className="flex gap-4 sm:gap-6 items-start">
-                    {/* Square Product Image - no padding, no background */}
-                    <div className="w-[135px] h-[135px] sm:w-[150px] sm:h-[150px] shrink-0 flex items-center justify-center overflow-hidden">
+                    {/* Square Product Image - Clickable to Product Detail */}
+                    <Link
+                      href={`/product/${item.slug || item.id}`}
+                      className="w-[135px] h-[135px] sm:w-[150px] sm:h-[150px] shrink-0 flex items-center justify-center overflow-hidden group cursor-pointer"
+                    >
                       <img
                         src={item.image || '/images/ad22b92Nike-HQ2593-502_1.avif'}
                         alt={item.name}
                         loading="eager"
                         fetchPriority="high"
                         decoding="async"
-                        className="w-full h-full object-contain"
+                        className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
                       />
-                    </div>
+                    </Link>
 
                     {/* Details Column - exact same as Bag */}
                     <div className="flex-1 min-w-0 flex flex-col justify-between">
@@ -347,14 +352,14 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
                       </p>
 
                       {/* 2. Product Name */}
-                      <div className="block">
+                      <Link href={`/product/${item.slug || item.id}`} className="block hover:underline">
                         <h3
                           className="text-[16px] sm:text-[17px] font-bold text-[#111111] leading-snug font-['Helvetica_Now_Text_Medium',sans-serif]"
                           style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
                         >
                           {item.name}
                         </h3>
-                      </div>
+                      </Link>
 
                       {/* 3. Category */}
                       <p className="text-[14px] text-[#707072] leading-normal">
@@ -391,9 +396,31 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
 
           {/* Pricing Summary - exact same as Bag */}
           <div className="border-t border-[#e5e5e5] pt-6 mt-6 space-y-3.5 text-[15px] sm:text-[16px] text-[#111111]">
+            {orderPricing.items.map((it, idx) => (
+              <div key={idx} className="flex items-center justify-between text-[#707072]">
+                <span className="truncate max-w-[210px] text-[#111111]">
+                  {it.name}{it.quantity > 1 ? ` (${it.quantity}x)` : ''}
+                </span>
+                <span className="text-[#111111] font-medium shrink-0">
+                  ₹ {it.totalPrice.toLocaleString('en-IN')}
+                </span>
+              </div>
+            ))}
+
+            {orderPricing.combos.map((combo, idx) => (
+              <div key={`combo-${idx}`} className="flex items-center justify-between text-[#0d8240] font-medium py-0.5">
+                <span className="capitalize">{combo.title || 'combo offer'}</span>
+                <span className="font-bold text-[#111111] shrink-0">
+                  ₹ {combo.comboPrice.toLocaleString('en-IN')}
+                </span>
+              </div>
+            ))}
+
+            <div className="border-t border-[#f0f0f0] my-2" />
+
             <div className="flex items-center justify-between">
-              <span>Bag Total</span>
-              <span>₹ {(order.totalAmount || 13995).toLocaleString('en-IN')}</span>
+              <span>Sub Total</span>
+              <span>₹ {(order.totalAmount || orderPricing.subtotal || 13995).toLocaleString('en-IN')}</span>
             </div>
 
             <div className="flex items-center justify-between">
