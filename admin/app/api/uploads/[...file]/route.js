@@ -37,8 +37,8 @@ export async function GET(request, { params }) {
       return new NextResponse('File not found', { status: 404 });
     }
 
-    const fileBuffer = await fs.promises.readFile(normalizedPath);
-    const ext = path.extname(normalizedPath).toLowerCase();
+    const fileBuffer = await fs.promises.readFile(resolvedPath);
+    const ext = path.extname(resolvedPath).toLowerCase();
 
     const mimeTypes = {
       '.webp': 'image/webp',
