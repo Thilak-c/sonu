@@ -300,13 +300,38 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
             </div>
           </div>
 
-          <div className="">
-         
-            <div className="">
-              <p className="text-[11px] ">Courier AWB Number</p>
-              <p className="underline">
-                {liveTrack?.awbCode || shiprocket.awbCode || 'Assigned at Dispatch'}
-              </p>
+          <div className="pt-2">
+            <div>
+              <p className="text-[11.5px] text-[#111111] mb-1">Courier AWB Number</p>
+              {(() => {
+                const assignedAwb = liveTrack?.awbCode || shiprocket.awbCode;
+                const hasAwb = Boolean(
+                  assignedAwb &&
+                  typeof assignedAwb === 'string' &&
+                  assignedAwb.trim() !== '' &&
+                  !assignedAwb.toLowerCase().includes('pending') &&
+                  !assignedAwb.toLowerCase().includes('assigned')
+                );
+
+                if (hasAwb) {
+                  return (
+                    <a
+                      href={publicTrackingUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[15px] font-bold text-[#111111] underline hover:text-black inline-block"
+                    >
+                      {assignedAwb}
+                    </a>
+                  );
+                }
+
+                return (
+                  <p className="text-[13px] font-medium text-[#707072]">
+                    Assigned upon dispatch
+                  </p>
+                );
+              })()}
             </div>
           </div>
 

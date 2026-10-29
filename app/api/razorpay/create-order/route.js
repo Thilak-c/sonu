@@ -3,7 +3,7 @@ import { initDb } from '@/lib/mongodb';
 
 export async function POST(request) {
   try {
-    const { amount, receipt, notes, items } = await request.json();
+    const { amount, receipt, orderId, notes, items } = await request.json();
 
     if (!amount || amount <= 0) {
       return NextResponse.json(
@@ -19,7 +19,8 @@ export async function POST(request) {
 
     // Razorpay amount is in paise (1 INR = 100 paise)
     const amountInPaise = Math.round(Number(amount) * 100);
-    const receiptId = receipt || `rcpt_${Date.now()}`;
+    const finalOrderId = orderId || receipt || `SONU-IN-${Math.floor(100000 + Math.random() * 900000)}`;
+    const receiptId = String(finalOrderId).slice(0, 40);
 
     const res = await fetch('https://api.razorpay.com/v1/orders', {
       method: 'POST',
@@ -51,7 +52,7 @@ export async function POST(request) {
         { razorpayOrderId: data.id },
         {
           $set: {
-            orderId: receiptId,
+            orderId: finalOrderId,
             razorpayOrderId: data.id,
             amount: Number(amount),
             currency: data.currency || 'INR',

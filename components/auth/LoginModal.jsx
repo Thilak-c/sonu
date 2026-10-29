@@ -56,6 +56,8 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
   const [detectedState, setDetectedState] = useState('');
   const [pincodeServiceable, setPincodeServiceable] = useState(null);
   const [deliveryEtd, setDeliveryEtd] = useState('');
+  const [serviceabilityMessage, setServiceabilityMessage] = useState('');
+  const [courierPartner, setCourierPartner] = useState('');
   const [addrHouseNo, setAddrHouseNo] = useState('');
   const [addrRoadArea, setAddrRoadArea] = useState('');
   const [addrName, setAddrName] = useState('');
@@ -68,6 +70,7 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
   const [isPrefDropdownOpen, setIsPrefDropdownOpen] = useState(false);
   const prefContainerRef = useRef(null);
   const firstNameInputRef = useRef(null);
+  const roadAreaTextareaRef = useRef(null);
 
   // Modal mount/visibility animation
   const [isMounted, setIsMounted] = useState(false);
@@ -79,11 +82,17 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
     if (isOpen) {
       clearTimeout(closeTimerRef.current);
       // Pre-fill existing user info if available in localStorage
+      let storedMobile = '';
+      let storedName = '';
+      let storedEmail = '';
       try {
-        const storedMobile = localStorage.getItem('sonu_user_mobile') || '';
-        const storedName = localStorage.getItem('sonu_user_name') || '';
-        const storedEmail = localStorage.getItem('sonu_user_email') || '';
-        if (storedMobile) setMobileNumber(storedMobile);
+        storedMobile = localStorage.getItem('sonu_user_mobile') || '';
+        storedName = localStorage.getItem('sonu_user_name') || '';
+        storedEmail = localStorage.getItem('sonu_user_email') || '';
+        if (storedMobile) {
+          setMobileNumber(storedMobile);
+          setAddrMobile((prev) => prev || storedMobile);
+        }
         if (storedEmail) setEmail(storedEmail);
         if (storedName) {
           const parts = storedName.split(' ');
@@ -104,14 +113,19 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
               setAddrPincode(parsed.pincode || '');
               setAddrHouseNo(parsed.houseNo || '');
               setAddrRoadArea(parsed.roadArea || parsed.street || '');
-              setAddrName(parsed.name || '');
-              setAddrMobile(parsed.mobile || '');
+              setAddrName(parsed.name || storedName || '');
+              setAddrMobile(parsed.mobile || storedMobile || mobileNumber || '');
               setDetectedCity(parsed.city || '');
               setDetectedState(parsed.state || '');
               setDeliveryEtd(parsed.deliveryEtd || '');
               setPincodeServiceable(true);
+            } else {
+              setAddrMobile(storedMobile || mobileNumber || '');
+              if (storedName) setAddrName(storedName);
             }
-          } catch (e) {}
+          } catch (e) {
+            setAddrMobile(storedMobile || mobileNumber || '');
+          }
         } else {
           // Always ask for the phone number first
           setStep('mobile');
@@ -270,7 +284,6 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
     firstName.trim().length > 0 &&
     lastName.trim().length > 0 &&
     preference.length > 0 &&
-    dob.length === 10 &&
     isEmailValid &&
     agreed;
   const isEmailOtpValid = emailOtp.join('').length === 6;
@@ -283,11 +296,13 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
   const handleMobileChange = (e) => {
     const val = e.target.value.replace(/\D/g, '').slice(0, 10);
     setMobileNumber(val);
+    setAddrMobile(val);
   };
 
   const handleMobileSubmit = async (e) => {
     e?.preventDefault();
     if (!isMobileValid || isCheckingUser) return;
+    setAddrMobile((prev) => prev || mobileNumber.trim());
 
     if (authSettings.enableNumberVerification) {
       setStep('otp');
@@ -647,29 +662,34 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
   // Fetch delivery estimate from Shiprocket API
   const fetchShiprocketEtd = async (code) => {
     setIsPincodeLoading(true);
+    setServiceabilityMessage('');
+    setCourierPartner('');
     try {
       const res = await fetch(`/api/shiprocket/serviceability?pincode=${code}`);
       const json = await res.json();
       if (json.success && json.data) {
-        if (json.data.deliverable) {
-          setDetectedCity(json.data.city || '');
-          setDetectedState(json.data.state || '');
-          setDeliveryEtd(json.data.etd || (json.data.estimatedDays ? `In ${json.data.estimatedDays} days` : ''));
+        const d = json.data;
+        setDetectedCity(d.city || '');
+        setDetectedState(d.state || '');
+        setCourierPartner(d.courierName || '');
+        setServiceabilityMessage(d.message || '');
+
+        if (d.deliverable) {
+          setDeliveryEtd(d.etd || (d.estimatedDays ? `In ${d.estimatedDays} days` : ''));
           setPincodeServiceable(true);
         } else {
-          setDetectedCity(json.data.city || '');
-          setDetectedState(json.data.state || '');
           setDeliveryEtd('');
           setPincodeServiceable(false);
         }
       } else {
-        setDetectedCity('');
-        setDetectedState('');
+        const errorMsg = json.error || json.data?.message || 'Delivery not available to this PIN code via Shiprocket';
+        setServiceabilityMessage(errorMsg);
         setDeliveryEtd('');
         setPincodeServiceable(false);
       }
     } catch (err) {
       console.error('Shiprocket serviceability error:', err);
+      setServiceabilityMessage('Unable to connect to Shiprocket delivery network.');
       setDetectedCity('');
       setDetectedState('');
       setDeliveryEtd('');
@@ -690,6 +710,8 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
       setDeliveryEtd('');
       setDetectedCity('');
       setDetectedState('');
+      setServiceabilityMessage('');
+      setCourierPartner('');
       setPincodeServiceable(null);
     }
   };
@@ -712,7 +734,7 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
       setAddrName(computedName || storedName || '');
 
       const storedMobile = typeof window !== 'undefined' ? localStorage.getItem('sonu_user_mobile') : '';
-      setAddrMobile(mobileNumber || storedMobile || '');
+      setAddrMobile((prev) => prev || mobileNumber || storedMobile || '');
 
       // Check Shiprocket ETD for default/entered pincode
       if (addrPincode.length === 6) {
@@ -1351,52 +1373,7 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
                     )}
                   </div>
 
-                  {/* 4. Date of Birth (DD-MM-YYYY)* with Calendar Icon */}
-                  <div
-                    className={`relative w-full h-[52px] sm:h-[54px] px-4 rounded-[8px] border transition-colors cursor-text bg-white flex items-center justify-between ${
-                      focusedField === 'dob' ? 'border-[#111111]' : 'border-[#8d8d8d]'
-                    }`}
-                  >
-                    <span
-                      className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${
-                        focusedField === 'dob' || dob.length > 0
-                          ? '-top-2.5 left-3 px-1.5 bg-white text-[12px] text-[#111111] font-normal leading-none z-10'
-                          : 'top-1/2 -translate-y-1/2 left-4 text-[15px] sm:text-[16px] text-[#707072]'
-                      }`}
-                      style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
-                    >
-                      Date of Birth (DD-MM-YYYY)*
-                    </span>
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      value={dob}
-                      onChange={handleDobChange}
-                      onFocus={() => setFocusedField('dob')}
-                      onBlur={() => setFocusedField(null)}
-                      placeholder={focusedField === 'dob' ? 'DD-MM-YYYY' : ''}
-                      maxLength={10}
-                      className="w-full bg-transparent text-[15px] sm:text-[16px] text-[#111111] placeholder-[#c4c4c4] font-normal outline-none p-0"
-                      style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
-                    />
-                    {/* Calendar Icon matching Nike screenshot */}
-                    <svg
-                      className="w-5 h-5 text-[#707072] shrink-0 ml-2 pointer-events-none"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                      <line x1="16" y1="2" x2="16" y2="6" />
-                      <line x1="8" y1="2" x2="8" y2="6" />
-                      <line x1="3" y1="10" x2="21" y2="10" />
-                    </svg>
-                  </div>
-
-                  {/* 5. Email Address* */}
+                  {/* 4. Email Address* */}
                   <div
                     className={`relative w-full h-[52px] sm:h-[54px] px-4 rounded-[8px] border transition-colors cursor-text bg-white flex items-center ${
                       focusedField === 'email' ? 'border-[#111111]' : 'border-[#8d8d8d]'
@@ -1781,8 +1758,8 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
                     >
                       {detectedCity}{detectedState ? `, ${detectedState}` : ''}
                     </h3>
-                    <p className="text-[13px] text-[#707072] mt-0.5 font-['Helvetica_Now_Text',sans-serif]">
-                      Location auto-detected
+                    <p className={`text-[13px] mt-0.5 font-['Helvetica_Now_Text',sans-serif] ${pincodeServiceable === false ? 'text-[#e53935] font-medium' : 'text-[#707072]'}`}>
+                      {pincodeServiceable === false ? (serviceabilityMessage || 'Delivery not available via Shiprocket') : 'Location auto-detected'}
                     </p>
                   </div>
                 ) : pincodeServiceable === false ? (
@@ -1860,7 +1837,7 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
                   {isPincodeLoading ? (
                     <div className="flex items-center gap-2 mt-2 px-1 text-[13px] text-[#707072] animate-pulse">
                       <div className="w-3.5 h-3.5 rounded-full border-2 border-[#111111] border-t-transparent animate-spin shrink-0" />
-                      <span>Checking delivery date via Shiprocket...</span>
+                      <span>Checking delivery via Shiprocket...</span>
                     </div>
                   ) : pincodeServiceable === false ? (
                     <div className="flex items-center gap-2 mt-2 px-1 text-[13px] text-[#e53935]">
@@ -1877,13 +1854,13 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
                         <line x1="15" y1="9" x2="9" y2="15" />
                         <line x1="9" y1="9" x2="15" y2="15" />
                       </svg>
-                      <span>Delivery not available for PIN code {addrPincode}</span>
+                      <span>{serviceabilityMessage || `Delivery not available for PIN code ${addrPincode}`}</span>
                     </div>
                   ) : deliveryEtd ? (
-                    <div className="flex items-center gap-2 px-1 text-[13px] text-[#111111]">
-                    
+                    <div className="flex items-center gap-2 mt-2 px-1 text-[13px] text-[#111111]">
                       <span>
                         Expected delivery by <strong className="font-semibold text-[#111111]">{deliveryEtd}</strong>
+                        {courierPartner ? ` via ${courierPartner}` : ''}
                       </span>
                     </div>
                   ) : null}
@@ -1937,10 +1914,11 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
                   )}
                 </div>
 
-                {/* 3. Road Name/ Area /Colony */}
+                {/* 3. Road Name/ Area /Colony (3x Height Multi-line with Floating Label) */}
                 <div>
                   <div
-                    className={`relative w-full rounded-[10px] border transition-colors cursor-text bg-white p-3.5 ${
+                    onClick={() => roadAreaTextareaRef.current?.focus()}
+                    className={`relative w-full min-h-[150px] p-3.5 rounded-[10px] border transition-colors cursor-text bg-white flex flex-col ${
                       addrErrors.roadArea
                         ? 'border-[#e53935]'
                         : addrFocusedField === 'roadArea'
@@ -1948,8 +1926,21 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
                         : 'border-[#8d8d8d]'
                     }`}
                   >
+                    <span
+                      className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${
+                        addrFocusedField === 'roadArea' || addrRoadArea.length > 0
+                          ? '-top-2.5 left-3 px-1.5 bg-white text-[12px] font-normal leading-none z-10 ' +
+                            (addrErrors.roadArea ? 'text-[#e53935]' : 'text-[#111111]')
+                          : 'top-3.5 left-4 text-[15px] sm:text-[16px] ' +
+                            (addrErrors.roadArea ? 'text-[#e53935]' : 'text-[#707072]')
+                      }`}
+                      style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
+                    >
+                      Road Name/ Area /Colony
+                    </span>
                     <textarea
-                      rows={3}
+                      ref={roadAreaTextareaRef}
+                      rows={4}
                       value={addrRoadArea}
                       onChange={(e) => {
                         setAddrRoadArea(e.target.value);
@@ -1964,8 +1955,7 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
                           setAddrErrors((prev) => ({ ...prev, roadArea: true }));
                         }
                       }}
-                      placeholder="Road Name/ Area /Colony"
-                      className="w-full bg-transparent text-[15px] sm:text-[16px] text-[#111111] placeholder-[#707072] font-normal outline-none resize-none leading-relaxed"
+                      className="w-full flex-1 bg-transparent text-[16px] text-[#111111] font-normal outline-none resize-none p-0 leading-relaxed mt-0.5"
                       style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
                     />
                   </div>
@@ -2008,25 +1998,33 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
                   />
                 </div>
 
-                {/* 5. Mobile Number (Autofilled) */}
+                {/* 5. Mobile Number (Autofilled & Fully Editable) */}
                 <div
                   className={`relative w-full h-[54px] px-4 rounded-[10px] border transition-colors cursor-text bg-white flex items-center ${
                     addrFocusedField === 'mobile' ? 'border-[#111111]' : 'border-[#8d8d8d]'
                   }`}
                 >
                   <span
-                    className="absolute -top-2.5 left-3 px-1.5 bg-white text-[12px] text-[#111111] font-normal leading-none z-10 select-none"
+                    className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${
+                      addrFocusedField === 'mobile' || (addrMobile && addrMobile.length > 0)
+                        ? '-top-2.5 left-3 px-1.5 bg-white text-[12px] text-[#111111] font-normal leading-none z-10'
+                        : 'top-1/2 -translate-y-1/2 left-4 text-[15px] sm:text-[16px] text-[#707072]'
+                    }`}
                     style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
                   >
                     Mobile Number
                   </span>
                   <input
                     type="tel"
+                    inputMode="numeric"
+                    maxLength={10}
                     value={addrMobile}
-                    onChange={(e) => setAddrMobile(e.target.value)}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                      setAddrMobile(val);
+                    }}
                     onFocus={() => setAddrFocusedField('mobile')}
                     onBlur={() => setAddrFocusedField(null)}
-                    placeholder="Mobile Number"
                     className="w-full bg-transparent text-[16px] text-[#111111] font-normal outline-none p-0"
                     style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
                   />

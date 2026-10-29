@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getDb, initDb } from '@/lib/mongodb';
 import { createShiprocketOrder } from '@/lib/shiprocket';
+import { sendOrderConfirmationEmail } from '@/lib/email';
 
 export async function POST(request) {
   try {
@@ -80,9 +81,19 @@ export async function POST(request) {
       updatedAt: new Date(),
     };
 
-    // 1. Insert or update order in MongoDB
+    // 1. Insert or update existing order draft in MongoDB
+    const orderFilter = razorpayOrderId
+      ? {
+          $or: [
+            { orderId },
+            { razorpayOrderId },
+            { 'payment.razorpayOrderId': razorpayOrderId },
+          ],
+        }
+      : { orderId };
+
     await db.collection('orders').updateOne(
-      { orderId },
+      orderFilter,
       { $set: orderDoc },
       { upsert: true }
     );
@@ -161,6 +172,13 @@ export async function POST(request) {
             },
           },
         }
+      );
+    }
+
+    // 4. Send Order Confirmation Email via Hostinger SMTP
+    if (orderDoc.customer?.email) {
+      sendOrderConfirmationEmail(orderDoc).catch((e) =>
+        console.warn(`[Email Service] Non-blocking order confirmation error for #${orderId}:`, e.message)
       );
     }
 

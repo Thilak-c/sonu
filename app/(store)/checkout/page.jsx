@@ -168,7 +168,7 @@ export default function CheckoutPage() {
     street: '',
     landmark: '',
     city: '',
-    state: 'Bihar',
+    state: '',
   });
   const [addressErrors, setAddressErrors] = useState({});
   const [isDeliveryEstimateOpen, setIsDeliveryEstimateOpen] = useState(false);
@@ -231,7 +231,7 @@ export default function CheckoutPage() {
               houseNo: parsed.houseNo || '',
               street: parsed.street || parsed.roadArea || '',
               city: parsed.city || '',
-              state: parsed.state || prev.state || 'Bihar',
+              state: parsed.state || prev.state || '',
               pincode: parsed.pincode || '',
               firstName: parsed.firstName || prev.firstName || '',
               lastName: parsed.lastName || prev.lastName || '',
@@ -270,7 +270,7 @@ export default function CheckoutPage() {
             houseNo: parsed.houseNo || '',
             street: parsed.street || parsed.roadArea || '',
             city: parsed.city || '',
-            state: parsed.state || prev.state || 'Bihar',
+            state: parsed.state || prev.state || '',
             pincode: parsed.pincode || '',
             firstName: parsed.firstName || prev.firstName || '',
             lastName: parsed.lastName || prev.lastName || '',
@@ -440,9 +440,10 @@ export default function CheckoutPage() {
           // ignore
         }
       }
-      const displayContact = (phone || '9182390192').replace(/\D/g, '').slice(-10);
+      const displayContact = (phone || address.mobile || '').replace(/\D/g, '').slice(-10);
       const isPartialCod = paymentMethod === 'partial_cod';
       const amountToPay = isPartialCod ? 200 : subtotal;
+      const placedOrderId = `SONU-IN-${Math.floor(100000 + Math.random() * 900000)}`;
 
       // 1. Create order on backend via Razorpay Orders API & save draft in MongoDB
       const res = await fetch('/api/razorpay/create-order', {
@@ -451,6 +452,8 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           amount: amountToPay,
           items: cartItems,
+          orderId: placedOrderId,
+          receipt: placedOrderId,
           notes: {
             customerName: displayName,
             customerEmail: address.email || '',
@@ -541,7 +544,6 @@ export default function CheckoutPage() {
           },
         },
         handler: async function (response) {
-          const placedOrderId = `SONU-IN-${Math.floor(100000 + Math.random() * 900000)}`;
           const isPartial = paymentMethod === 'partial_cod';
           const confirmedData = {
             orderId: placedOrderId,
@@ -693,18 +695,18 @@ export default function CheckoutPage() {
       address.name ||
       `${address.firstName || ''} ${address.lastName || ''}`.trim() ||
       (typeof window !== 'undefined' ? localStorage.getItem('sonu_user_name') : '') ||
-      'Thilak';
+      '';
     const displayMobile =
       address.mobile ||
       (typeof window !== 'undefined' ? localStorage.getItem('sonu_user_mobile') : '') ||
-      '8008439762';
-    const displayPincode = address.pincode || '800013';
-    const displayHouse = address.houseNo || '33a';
-    const displayStreet = address.street || address.roadArea || "Pata lok, behind S'mart, Nehru Nagar";
+      '';
+    const displayPincode = address.pincode || '';
+    const displayHouse = address.houseNo || '';
+    const displayStreet = address.street || address.roadArea || '';
     const displayLandmark = address.landmark || '';
     const displayAddressLine = [displayHouse, displayStreet, displayLandmark].filter(Boolean).join(', ');
-    const displayCity = (address.city || 'PATNA').toUpperCase();
-    const displayCityStatePin = `${displayCity}-${displayPincode}`;
+    const displayCity = (address.city || '').toUpperCase();
+    const displayCityStatePin = [displayCity, address.state, displayPincode].filter(Boolean).join(' - ');
 
     const handleChangeAddress = () => {
       window.dispatchEvent(
@@ -752,14 +754,22 @@ export default function CheckoutPage() {
               className="text-[15px] sm:text-[16px] font-bold text-[#111111] leading-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
               style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
             >
-              Deliver to {displayName}, {displayPincode}
+              {displayAddressLine || displayPincode
+                ? `Deliver to ${displayName || 'Customer'}${displayPincode ? `, ${displayPincode}` : ''}`
+                : 'No Delivery Address Selected'}
             </h2>
 
-            <div className="text-[13px] sm:text-[13.5px] text-[#707072] mt-2 space-y-0.5 leading-relaxed font-['Helvetica_Now_Text',sans-serif]">
-              <p className="line-clamp-2">{displayAddressLine}...</p>
-              <p>{displayCityStatePin}</p>
-              <p>+91-{displayMobile}</p>
-            </div>
+            {displayAddressLine || displayPincode ? (
+              <div className="text-[13px] sm:text-[13.5px] text-[#707072] mt-2 space-y-0.5 leading-relaxed font-['Helvetica_Now_Text',sans-serif]">
+                {displayAddressLine && <p className="line-clamp-2">{displayAddressLine}</p>}
+                {displayCityStatePin && <p>{displayCityStatePin}</p>}
+                {displayMobile && <p>+91-{displayMobile}</p>}
+              </div>
+            ) : (
+              <p className="text-[13px] sm:text-[13.5px] text-[#707072] mt-2 font-['Helvetica_Now_Text',sans-serif]">
+                Please add your delivery address to proceed with checkout.
+              </p>
+            )}
 
             <button
               type="button"
@@ -767,7 +777,7 @@ export default function CheckoutPage() {
               className="w-full py-3 mt-4 rounded-full border border-[#111111] text-[14px] font-medium text-[#111111] bg-white hover:bg-[#f7f7f7] active:scale-[0.99] transition-all cursor-pointer font-['Helvetica_Now_Text_Medium',sans-serif]"
               style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
             >
-              Change or Add Address
+              {displayAddressLine || displayPincode ? 'Change or Add Address' : 'Add Delivery Address'}
             </button>
           </div>
 
@@ -974,14 +984,19 @@ export default function CheckoutPage() {
     const displayName =
       address.name ||
       `${address.firstName || ''} ${address.lastName || ''}`.trim() ||
-      'Thilak';
-    const displayPhone = address.mobile || '9182390192';
-    const displayPincode = address.pincode || '800013';
-    const displayHouse = address.houseNo || '33a';
-    const displayStreet = address.street || address.roadArea || "Pata lok, behind S'mart, Nehru Nagar";
+      (typeof window !== 'undefined' ? localStorage.getItem('sonu_user_name') : '') ||
+      '';
+    const displayPhone =
+      address.mobile ||
+      (typeof window !== 'undefined' ? localStorage.getItem('sonu_user_mobile') : '') ||
+      '';
+    const displayPincode = address.pincode || '';
+    const displayHouse = address.houseNo || '';
+    const displayStreet = address.street || address.roadArea || '';
     const displayLandmark = address.landmark || '';
     const displayAddressLine = [displayHouse, displayStreet, displayLandmark].filter(Boolean).join(', ');
-    const displayCity = (address.city || 'PATNA').toUpperCase();
+    const displayCity = (address.city || '').toUpperCase();
+    const displayCityStatePin = [displayCity, address.state, displayPincode].filter(Boolean).join(' - ');
 
     const handleChangeAddress = () => {
       window.dispatchEvent(
@@ -1637,7 +1652,9 @@ export default function CheckoutPage() {
                   className="text-[15px] sm:text-[16px] font-bold text-[#111111] font-['Helvetica_Now_Text_Medium',sans-serif]"
                   style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
                 >
-                  Deliver to {displayName}, {displayPincode}
+                  {displayAddressLine || displayPincode
+                    ? `Deliver to ${displayName || 'Customer'}${displayPincode ? `, ${displayPincode}` : ''}`
+                    : 'Select Delivery Address'}
                 </p>
                 <img
                   src={
@@ -1655,13 +1672,13 @@ export default function CheckoutPage() {
 
               {isPaymentOrderAddressOpen && (
                 <div className="mt-3.5 pt-3.5 border-t border-[#f0f0f0] text-[13px] text-[#707072] space-y-1">
-                  <p className="text-[#111111] font-medium">
-                    {displayName} &bull; +91 {displayPhone}
-                  </p>
-                  <p>{displayAddressLine}</p>
-                  <p>
-                    {displayCity} - {displayPincode}
-                  </p>
+                  {(displayName || displayPhone) && (
+                    <p className="text-[#111111] font-medium">
+                      {[displayName, displayPhone ? `+91 ${displayPhone}` : ''].filter(Boolean).join(' • ')}
+                    </p>
+                  )}
+                  {displayAddressLine && <p>{displayAddressLine}</p>}
+                  {displayCityStatePin && <p>{displayCityStatePin}</p>}
                   <button
                     type="button"
                     onClick={handleChangeAddress}
@@ -1904,16 +1921,67 @@ export default function CheckoutPage() {
                     <div className="inline-flex items-center border border-[#e5e5e5] rounded-full h-10 px-3 bg-white">
                       <button
                         type="button"
+                        onClick={() => {
+                          const currentQty = Number(item.quantity || 1);
+                          if (currentQty <= 1) {
+                            removeFromCart(item.id, item.size, item.color);
+                          } else {
+                            updateCartQuantity(item.id, item.size, item.color, -1);
+                          }
+                        }}
+                        className="p-1 text-[#111111] hover:text-[#707072] transition-colors cursor-pointer flex items-center justify-center active:scale-90"
+                        aria-label={Number(item.quantity || 1) > 1 ? 'Decrease quantity' : 'Remove item'}
+                      >
+                        {Number(item.quantity || 1) > 1 ? (
+                          <span className="text-[20px] font-medium leading-none px-1 select-none">−</span>
+                        ) : (
+                          <svg
+                            aria-hidden="true"
+                            focusable="false"
+                            viewBox="0 0 24 24"
+                            width="22px"
+                            height="22px"
+                            fill="none"
+                          >
+                            <path
+                              stroke="currentColor"
+                              strokeMiterlimit="10"
+                              strokeWidth="1.5"
+                              d="M13.75 10v7m-3.5-7v7m-3.5-8.5V17c0 1.24 1.01 2.25 2.25 2.25h6c1.24 0 2.25-1.01 2.25-2.25V7.75h2.25m-10-3h3.75c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5H4.5"
+                            />
+                          </svg>
+                        )}
+                      </button>
+
+                      <span className="px-3 text-[15px] font-medium text-[#111111] min-w-[24px] text-center select-none font-['Helvetica_Now_Text_Medium',sans-serif]">
+                        {item.quantity || 1}
+                      </span>
+
+                      <button
+                        type="button"
+                        onClick={() => updateCartQuantity(item.id, item.size, item.color, 1)}
+                        className="p-1 text-[#111111] hover:text-[#707072] text-[20px] font-normal transition-colors cursor-pointer leading-none flex items-center justify-center active:scale-90 select-none"
+                        aria-label="Increase quantity"
+                      >
+                        +
+                      </button>
+                    </div>
+
+                    {/* Standalone Delete Button when quantity > 1 (allows 1-click total deletion) */}
+                    {Number(item.quantity || 1) > 1 && (
+                      <button
+                        type="button"
                         onClick={() => removeFromCart(item.id, item.size, item.color)}
-                        className="p-1 text-[#111111] hover:text-[#707072] transition-colors cursor-pointer"
-                        aria-label="Remove item"
+                        className="w-10 h-10 rounded-full border border-[#e5e5e5] flex items-center justify-center text-[#111111] hover:text-rose-600 hover:border-rose-200 transition-colors cursor-pointer hover:bg-neutral-50 active:scale-95"
+                        aria-label="Remove all items from bag"
+                        title="Remove item"
                       >
                         <svg
                           aria-hidden="true"
                           focusable="false"
                           viewBox="0 0 24 24"
-                          width="22px"
-                          height="22px"
+                          width="18px"
+                          height="18px"
                           fill="none"
                         >
                           <path
@@ -1924,20 +1992,7 @@ export default function CheckoutPage() {
                           />
                         </svg>
                       </button>
-
-                      <span className="px-3 text-[15px] font-medium text-[#111111] min-w-[24px] text-center">
-                        {item.quantity || 1}
-                      </span>
-
-                      <button
-                        type="button"
-                        onClick={() => updateCartQuantity(item.id, item.size, item.color, 1)}
-                        className="p-1 text-[#111111] hover:text-[#707072] text-[18px] font-normal transition-colors cursor-pointer leading-none flex items-center justify-center"
-                        aria-label="Increase quantity"
-                      >
-                        +
-                      </button>
-                    </div>
+                    )}
 
                     <button
                       type="button"

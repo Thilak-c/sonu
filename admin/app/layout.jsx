@@ -32,7 +32,8 @@ export default function RootLayout({ children }) {
       </head>
       <body
         suppressHydrationWarning
-        className="min-h-screen text-[#111111] antialiased selection:bg-[#111111] selection:text-white font-['Helvetica_Now_Text',sans-serif]"
+        className="min-h-screen text-[#111111] antialiased selection:bg-[#111111] selection:text-white"
+        style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
       >
         {children}
       </body>

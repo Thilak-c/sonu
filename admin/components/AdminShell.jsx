@@ -244,7 +244,7 @@ export default function AdminShell({ children, onNewProductClick }) {
         )}
 
         {/* Page Content */}
-        <main className={`flex-1 ${pathname.startsWith('/orders') ? 'p-4 sm:p-6 w-full' : ''}`}>
+        <main className={`flex-1 flex flex-col ${pathname.startsWith('/orders') ? 'p-4 sm:p-6 w-full' : ''}`}>
           {children}
         </main>
       </div>

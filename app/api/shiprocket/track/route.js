@@ -47,7 +47,7 @@ export async function GET(request) {
         trackInfo = {
           currentStatus: shipmentTrack.current_status || details.error || 'Booked',
           courierName: shipmentTrack.courier_name || '',
-          awbCode: shipmentTrack.awb_code || awbCode || '',
+          awbCode: shipmentTrack.awb_code || awbCode || null,
           edd: shipmentTrack.edd || '',
           origin: shipmentTrack.origin || '',
           destination: shipmentTrack.destination || '',
@@ -62,7 +62,7 @@ export async function GET(request) {
       trackInfo = {
         currentStatus: shipmentTrack.current_status || 'In Transit',
         courierName: shipmentTrack.courier_name || '',
-        awbCode: shipmentTrack.awb_code || awbCode || '',
+        awbCode: shipmentTrack.awb_code || awbCode || null,
         edd: shipmentTrack.edd || '',
         activities: details.shipment_track_activities || [],
         trackUrl: trackUrl || (shiprocketOrderId ? `https://shiprocket.co/tracking/?order_id=${shiprocketOrderId}` : ''),
@@ -72,7 +72,9 @@ export async function GET(request) {
     return NextResponse.json({
       success: true,
       data: trackInfo || {
-        currentStatus: 'Order Confirmed & Booked on Shiprocket',
+        currentStatus: 'Order Confirmed - Preparing at Studio',
+        courierName: 'Pending Assignment upon Dispatch',
+        awbCode: null,
         trackUrl: awbCode
           ? `https://shiprocket.co/tracking/${awbCode}`
           : (shiprocketOrderId ? `https://shiprocket.co/tracking/?order_id=${shiprocketOrderId}` : 'https://shiprocket.co/tracking'),

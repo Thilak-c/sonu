@@ -502,7 +502,7 @@ export default function TestOrderPage() {
             {/* Account Info Pill */}
             <div className="p-4 rounded-[20px] bg-white border border-[#e5e5e5] text-[12px] space-y-1.5 text-neutral-600">
               <p className="font-bold text-[#111111]">Active Shiprocket Account Details:</p>
-              <p>&bull; Email: <span className="font-mono text-[#111111]">imdyashodanand2006@gmail.com</span></p>
+              <p>&bull; Email: <span className="font-mono text-[#111111]">flowify.sonushoe@gmail.com</span></p>
               <p>&bull; Company: <span className="font-mono text-[#111111]">Thilak</span></p>
               <p>&bull; Primary Pickup: <span className="font-mono text-[#111111]">Home (800013, Patna)</span></p>
             </div>
