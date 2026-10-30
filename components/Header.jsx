@@ -150,25 +150,6 @@ export default function Header() {
     return () => document.removeEventListener('keydown', onKeyDown);
   }, [searchOpen, menuOpen]);
 
-  // Global window event listeners to trigger search and mobile side menu
-  useEffect(() => {
-    const handleOpenSearch = () => {
-      setMenuOpen(false);
-      setSearchOpen(true);
-    };
-    const handleOpenMenu = () => {
-      setSearchOpen(false);
-      setMenuOpen(true);
-    };
-
-    window.addEventListener('open-search', handleOpenSearch);
-    window.addEventListener('open-menu', handleOpenMenu);
-    return () => {
-      window.removeEventListener('open-search', handleOpenSearch);
-      window.removeEventListener('open-menu', handleOpenMenu);
-    };
-  }, []);
-
   // Lock body scroll and immediately focus input so mobile keyboard opens on search click
   useEffect(() => {
     if (searchOpen) {
@@ -546,16 +527,130 @@ export default function Header() {
             </button>
           </div>
 
-          {/* Centered Coming Soon Section */}
-          <div className="flex-1 flex flex-col items-center justify-center text-center py-20 px-4">
-      
-            <h2
-              className="text-[32px] sm:text-[36px] font-black uppercase text-[#111111] tracking-tight leading-none font-['Helvetica_Now_Text_Medium',sans-serif]"
-              style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+          {/* Primary Nav Links */}
+          <nav className="flex flex-col gap-1 pt-2">
+            {primaryMenuItems.map((item) => (
+              <Link
+                key={item.label}
+                href={item.href}
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center justify-between py-2.5 text-[22px] sm:text-[24px] font-bold text-[#111111] hover:text-[#707072] transition-colors"
+              >
+                <span>{item.label}</span>
+                {item.hasArrow && (
+                  <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" role="img" width="24px" height="24px" fill="none">
+                    <path stroke="#111111" strokeWidth="1.5" d="M8.474 18.966L15.44 12 8.474 5.033" />
+                  </svg>
+                )}
+              </Link>
+            ))}
+          </nav>
+
+          {/* Personalised Picks Prompt */}
+          <div className="mt-8 mb-6">
+            <p className="text-[17px] text-[#707072] font-medium leading-snug max-w-[240px]">
+              Get personalised picks & faster checkout
+            </p>
+            <div className="flex items-center gap-3 mt-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false);
+                  setIsLoginOpen(true);
+                }}
+                className="bg-[#111111] text-white text-[15px] font-semibold px-5 py-2.5 rounded-full hover:bg-neutral-800 transition-colors cursor-pointer"
+              >
+                Sign Up
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false);
+                  setIsLoginOpen(true);
+                }}
+                className="bg-white text-[#111111] border border-[#e5e5e5] text-[15px] font-semibold px-5 py-2.5 rounded-full hover:border-[#111111] transition-colors cursor-pointer"
+              >
+                Login
+              </button>
+            </div>
+          </div>
+
+          {/* Secondary List with exact icons provided */}
+          <div className="flex flex-col gap-3 pt-4 border-t border-neutral-100">
+            {/* Help */}
+            <Link
+              href="/checkout"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-3.5 py-1.5 text-[15px] font-medium text-[#111111] hover:text-[#707072] transition-colors"
             >
-              Coming Soon
-            </h2>
-            
+              <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" role="img" width="24px" height="24px" fill="none">
+                <path stroke="#111111" strokeMiterlimit="10" strokeWidth="1.5" d="M11.99 18v-1.5M9 9.75a3 3 0 114.29 2.71c-.78.37-1.29 1.16-1.29 2.03V15m9.75-3c0 5.385-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12 6.615 2.25 12 2.25s9.75 4.365 9.75 9.75z" />
+              </svg>
+              <p>Help</p>
+            </Link>
+
+            {/* Bag */}
+            <Link
+              href="/checkout"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-3.5 py-1.5 text-[15px] font-medium text-[#111111] hover:text-[#707072] transition-colors text-left"
+              aria-label="Bag Items"
+            >
+              <div className="relative w-6 h-6 flex items-center justify-center">
+                <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" role="img" width="24px" height="24px" fill="none">
+                  <path stroke="#111111" strokeWidth="1.5" d="M8.25 8.25V6a2.25 2.25 0 012.25-2.25h3a2.25 2.25 0 110 4.5H3.75v8.25a3.75 3.75 0 003.75 3.75h9a3.75 3.75 0 003.75-3.75V8.25H17.5" />
+                  {cartCount > 0 && (
+                    <text
+                      x="12"
+                      y="14.8"
+                      textAnchor="middle"
+                      dominantBaseline="central"
+                      fill="#111111"
+                      fontSize="9"
+                      fontWeight="700"
+                      style={{ fontFamily: "'Helvetica Now Text Medium', 'Helvetica Now Text', sans-serif" }}
+                    >
+                      {cartCount}
+                    </text>
+                  )}
+                </svg>
+              </div>
+              <p>Bag</p>
+            </Link>
+
+            {/* Favourites */}
+            <Link
+              href="/favourites"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-3.5 py-1.5 text-[15px] font-medium text-[#111111] hover:text-[#707072] transition-colors"
+              aria-label="Wishlist"
+            >
+              <svg viewBox="0 0 24 24" width="24px" height="24px">
+                <path d="M17.3062 5.00888C18.1009 5.00888 18.7963 5.31065 19.3923 5.71302C20.8824 6.92012 21.0811 9.13314 19.7897 10.5414C19.6904 10.642 19.6904 10.7426 19.591 10.7426L12.0412 18.4882L4.49139 10.8432C3.19998 9.5355 3.19998 7.32249 4.49139 5.9142C4.59073 5.81361 4.59073 5.81361 4.69007 5.71302C5.28611 5.31065 6.08083 5.00888 6.77621 5.00888C7.7696 5.00888 8.763 5.41124 9.45837 6.11538L10.9485 7.62426L12.0412 8.73077L13.1339 7.62426L14.624 6.11538C15.3194 5.41124 16.3128 5.00888 17.3062 5.00888ZM17.3062 3.5C15.9154 3.5 14.5247 4.10355 13.5313 5.10947L12.0412 6.61834L10.5511 5.10947C9.55771 4.10355 8.16696 3.5 6.77621 3.5C5.68347 3.5 4.59073 3.90237 3.69668 4.60651C1.70989 6.31657 1.41187 9.43491 3.10064 11.5473C3.19998 11.6479 3.29932 11.7485 3.39866 11.8491L12.0412 20.5L20.5844 11.8491C22.4719 9.93787 22.4719 6.81953 20.5844 4.80769C20.4851 4.7071 20.3857 4.60651 20.2864 4.50592C19.4917 3.90237 18.3989 3.5 17.3062 3.5Z" fill="#111111" />
+              </svg>
+              <p>Favourites</p>
+            </Link>
+
+            {/* Orders */}
+            <Link
+              href="/orders"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-3.5 py-1.5 text-[15px] font-medium text-[#111111] hover:text-[#707072] transition-colors"
+            >
+              <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" role="img" width="24px" height="24px" fill="none">
+                <path stroke="#111111" strokeMiterlimit="10" strokeWidth="1.5" d="M12 13.5v-7c0-1.74 1.01-2.75 2.25-2.75h4.39l1.61 6m0 0H3.75m16.5 0v10.5H3.75V9.75m0 0l1.61-6h5.14" />
+              </svg>
+              <p>Orders </p>
+            </Link>
+
+            {/* Saved Payments */}
+            <div className="flex items-center gap-3.5 py-1.5 text-[15px] font-medium text-[#111111] cursor-pointer hover:text-[#707072] transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="none" viewBox="0 0 24 24">
+                <path fill="#111111" d="M18 16.25h-3a.75.75 0 1 1 0-1.5h3a.75.75 0 1 1 0 1.5Z" />
+                <path fill="#111111" d="M21 5H3a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1Zm-.5 12.5h-17v-6.1h17v6.1Zm-17-7.6V6.5h17v3.4h-17Z" />
+              </svg>
+              <p>Saved Payments</p>
+            </div>
           </div>
         </div>
       </aside>
@@ -647,17 +742,34 @@ export default function Header() {
           </button>
         </div>
 
-        {/* Search Canvas Body with Centered Coming Soon Section */}
-        <div className="flex-1 w-full overflow-y-auto px-6 sm:px-8 py-16 flex flex-col items-center justify-center text-center select-none">
-          <div className="max-w-md mx-auto">
-        
-            <h2
-              className="text-[36px] sm:text-[44px] font-black uppercase text-[#111111] tracking-tight leading-none font-['Helvetica_Now_Text_Medium',sans-serif]"
-              style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
-            >
-              Coming Soon
-            </h2>
-       
+        {/* Suggestions Canvas Body strictly matching user design */}
+        <div className="flex-1 w-full overflow-y-auto px-6 sm:px-8 pt-4 sm:pt-6 pb-12 select-none">
+          <div className="w-full max-w-2xl">
+            {/* Header: Top Suggestions */}
+            <h3 className="text-[13px] sm:text-[14px] text-[#707072] font-normal mb-2 sm:mb-3">
+              Top Suggestions
+            </h3>
+
+            {/* Suggestions List */}
+            <ul className="flex flex-col w-full divide-y-0">
+              {filteredSuggestions.map((item) => (
+                <li key={item.id} className="w-full">
+                  <button
+                    type="button"
+                    onClick={() => handleSuggestionClick(item)}
+                    className="w-full text-left py-2.5 sm:py-3 text-[17px] sm:text-[18px] text-[#707072] hover:text-[#111111] transition-colors truncate block focus:outline-none focus:text-[#111111]"
+                    title={item.title}
+                  >
+                    {renderHighlightedText(item.title, searchQuery)}
+                  </button>
+                </li>
+              ))}
+              {filteredSuggestions.length === 0 && (
+                <li className="py-4 text-[#707072] text-[15px] sm:text-[16px]">
+                  No suggestions found for &ldquo;{searchQuery}&rdquo;
+                </li>
+              )}
+            </ul>
           </div>
         </div>
       </div>

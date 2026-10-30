@@ -11,10 +11,10 @@ export default function StoreLayout({ children }) {
   const pathname = usePathname();
   const router = useRouter();
 
-  // Redirect any other page back to the home page during the Launching Soon phase
+  // Force all visitors to /launching-soon during the launch preview phase
   useEffect(() => {
-    if (pathname && pathname !== '/') {
-      router.replace('/');
+    if (pathname && pathname !== '/launching-soon') {
+      router.replace('/launching-soon');
     }
   }, [pathname, router]);
 
@@ -28,7 +28,7 @@ export default function StoreLayout({ children }) {
       <main id="main" className="flex-1 flex flex-col">
         <PageTransition>{children}</PageTransition>
       </main>
-      {/* <Footer /> */}
+      <Footer />
     </div>
   );
 }

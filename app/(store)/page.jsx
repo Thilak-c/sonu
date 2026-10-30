@@ -1,51 +1,102 @@
-'use client';
+import HeroSection from '@/components/home/HeroSection';
+import FeaturedSection from '@/components/home/FeaturedSection';
+import TrendingSection from '@/components/home/TrendingSection';
+import FreshDropsSection from '@/components/home/FreshDropsSection';
+import ShopBySportSection from '@/components/home/ShopBySportSection';
+import SpotlightSection from '@/components/home/SpotlightSection';
+import LastMinuteSection from '@/components/home/LastMinuteSection';
+import { getAllProducts } from '@/lib/products';
 
-import React, { useState } from 'react';
+export const metadata = {
+  title: 'Sonu Shoe — For the Long Way Home',
+  description:
+    'Small-run, handcrafted shoes designed with ergonomic gum rubber soles, full-grain leather, and all-day comfort. Explore the 01, runners, and fresh drops.',
+  keywords: [
+    'handcrafted shoes',
+    'small-run sneakers',
+    'ergonomic comfort',
+    'premium soles',
+    'minimalist luxury shoe',
+    'for the long way home',
+    'Sonu Shoe',
+    'city walking shoes',
+  ],
+  openGraph: {
+    title: 'Sonu Shoe — For the Long Way Home',
+    description:
+      'Discover handcrafted shoes engineered in limited runs for maximum walking comfort and timeless street minimalism.',
+    url: 'https://sonushoe.in',
+    images: ['/Logo/Logo_Full.png'],
+  },
+};
 
-export default function HomePage() {
-  const [email, setEmail] = useState('');
-  const [submitted, setSubmitted] = useState(false);
+export default async function HomePage() {
+  const products = await getAllProducts();
 
-  const handleNotifyMe = (e) => {
-    e.preventDefault();
-    if (email && email.includes('@')) {
-      setSubmitted(true);
-      try {
-        localStorage.setItem('sonu_early_access_email', email);
-      } catch (err) {}
-    }
-  };
-
-  const openSearch = () => {
-    window.dispatchEvent(new CustomEvent('open-search'));
-  };
-
-  const openSidebar = () => {
-    window.dispatchEvent(new CustomEvent('open-menu'));
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Organization',
+        '@id': 'https://sonushoe.in/#organization',
+        name: 'Sonu Shoe',
+        url: 'https://sonushoe.in',
+        logo: 'https://sonushoe.in/Logo/Logo_Full.png',
+        slogan: 'For the long way home',
+        description:
+          'Small-run handcrafted luxury shoes engineered with ergonomic comfort and timeless minimalism.',
+      },
+      {
+        '@type': 'WebSite',
+        '@id': 'https://sonushoe.in/#website',
+        url: 'https://sonushoe.in',
+        name: 'Sonu Shoe',
+        publisher: {
+          '@id': 'https://sonushoe.in/#organization',
+        },
+      },
+    ],
   };
 
   return (
-    <div
-      className="w-full flex-1 flex flex-col justify-between bg-white text-[#111111] select-none"
-      style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
-    >
-  
+    <>
+      {/* Schema.org SSR JSON-LD */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
 
-      {/* Hero / Main Centered Section */}
-      <div className="w-full max-w-[1240px] mx-auto px-6 sm:px-10 lg:px-12 py-16 sm:py-24 lg:py-28 flex flex-col items-center justify-center text-center flex-1">
-   
+      <div className="w-full bg-white flex flex-col font-['Helvetica_Now_Text',sans-serif]">
+        {/* Empty state when no products in DB yet */}
+        {products.length === 0 && (
+          <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 py-20 text-center">
+            <span className="text-[12px] tracking-[0.2em] uppercase font-medium text-[#707072] block mb-2 font-['Helvetica_Now_Text_Medium',sans-serif]">
+              New Drop Coming Soon
+            </span>
+            <h1 className="text-[28px] sm:text-[38px] font-medium text-[#111111] tracking-tight font-['Helvetica_Now_Text_Medium',sans-serif]">
+              Crafted in Small Runs.
+            </h1>
+            <p className="text-[15px] sm:text-[16px] text-[#707072] mt-3 max-w-md mx-auto leading-relaxed">
+              Our handcrafted shoes are currently in preparation. Add products through the admin panel to populate your store catalog.
+            </p>
+          </div>
+        )}
 
-        {/* Big Signature Headline: LAUNCHING SOON */}
-        <h1
-          className="text-[44px] sm:text-[72px] lg:text-[96px] font-black uppercase text-[#111111] tracking-[-0.03em] leading-[0.95] max-w-4xl"
-          style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
-        >
-          Launching Soon.
-        </h1>
+        {/* 1. Hero Showcase (Editable via Admin Settings) */}
+        <HeroSection />
 
+        {/* 2. Featured Section (from DB) */}
+        {products.length > 0 && <FeaturedSection products={products} />}
 
+        {/* 4. Fresh Drops Section (from DB) */}
+        {products.length > 0 && <FreshDropsSection products={products} />}
 
+        {/* 5. Shop by Sport Section */}
+        <ShopBySportSection />
+
+        {/* 7. Last Minute Addition */}
+        <LastMinuteSection />
       </div>
-    </div>
+    </>
   );
 }
