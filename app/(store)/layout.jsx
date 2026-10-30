@@ -1,6 +1,7 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
+import { useEffect } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import PageTransition from '@/components/PageTransition';
@@ -8,6 +9,15 @@ import GlobalImageCache from '@/components/GlobalImageCache';
 
 export default function StoreLayout({ children }) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  // Redirect any other page back to the home page during the Launching Soon phase
+  useEffect(() => {
+    if (pathname && pathname !== '/') {
+      router.replace('/');
+    }
+  }, [pathname, router]);
+
   const isCheckout = pathname === '/checkout';
   const isHelpCenter = pathname === '/help-center' || pathname?.startsWith('/help-center');
 
@@ -18,7 +28,7 @@ export default function StoreLayout({ children }) {
       <main id="main" className="flex-1 flex flex-col">
         <PageTransition>{children}</PageTransition>
       </main>
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 }
