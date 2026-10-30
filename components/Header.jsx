@@ -150,6 +150,25 @@ export default function Header() {
     return () => document.removeEventListener('keydown', onKeyDown);
   }, [searchOpen, menuOpen]);
 
+  // Global window event listeners to trigger search and mobile side menu
+  useEffect(() => {
+    const handleOpenSearch = () => {
+      setMenuOpen(false);
+      setSearchOpen(true);
+    };
+    const handleOpenMenu = () => {
+      setSearchOpen(false);
+      setMenuOpen(true);
+    };
+
+    window.addEventListener('open-search', handleOpenSearch);
+    window.addEventListener('open-menu', handleOpenMenu);
+    return () => {
+      window.removeEventListener('open-search', handleOpenSearch);
+      window.removeEventListener('open-menu', handleOpenMenu);
+    };
+  }, []);
+
   // Lock body scroll and immediately focus input so mobile keyboard opens on search click
   useEffect(() => {
     if (searchOpen) {
