@@ -566,18 +566,24 @@ export default function Header() {
           </nav>
 
           {/* Personalised Picks Prompt */}
-          <div className="mt-8 mb-6">
-            <p className="text-[17px] text-[#707072] font-medium leading-snug max-w-[240px]">
-              Get personalised picks & faster checkout
+          <div className="mt-6 mb-6 p-4 rounded-xl bg-neutral-50 border border-neutral-200/80 text-center">
+            <span className="inline-block px-2.5 py-0.5 rounded-full bg-neutral-200 text-[#111111] text-[10.5px] font-bold uppercase tracking-wider mb-1.5">
+              Notice
+            </span>
+            <p className="text-[17px] font-bold uppercase text-[#111111] tracking-tight">
+              Launching Soon
             </p>
-            <div className="flex items-center gap-3 mt-4">
+            <p className="text-[12.5px] text-[#707072] font-medium leading-snug mt-1">
+              Private member drops & early footwear reservation opening shortly.
+            </p>
+            <div className="flex items-center justify-center gap-3 mt-4">
               <button
                 type="button"
                 onClick={() => {
                   setMenuOpen(false);
                   setIsLoginOpen(true);
                 }}
-                className="bg-[#111111] text-white text-[15px] font-semibold px-5 py-2.5 rounded-full hover:bg-neutral-800 transition-colors cursor-pointer"
+                className="bg-[#111111] text-white text-[14px] font-semibold px-5 py-2 rounded-full hover:bg-neutral-800 transition-colors cursor-pointer"
               >
                 Sign Up
               </button>
@@ -587,7 +593,7 @@ export default function Header() {
                   setMenuOpen(false);
                   setIsLoginOpen(true);
                 }}
-                className="bg-white text-[#111111] border border-[#e5e5e5] text-[15px] font-semibold px-5 py-2.5 rounded-full hover:border-[#111111] transition-colors cursor-pointer"
+                className="bg-white text-[#111111] border border-[#e5e5e5] text-[14px] font-semibold px-5 py-2 rounded-full hover:border-[#111111] transition-colors cursor-pointer"
               >
                 Login
               </button>
@@ -762,8 +768,21 @@ export default function Header() {
         </div>
 
         {/* Suggestions Canvas Body strictly matching user design */}
-        <div className="flex-1 w-full overflow-y-auto px-6 sm:px-8 pt-4 sm:pt-6 pb-12 select-none">
+        <div className="flex-1 w-full overflow-y-auto px-6 sm:px-8 pt-4 sm:pt-6 pb-12 select-none flex flex-col justify-between">
           <div className="w-full max-w-2xl">
+            {/* Centered Launching Soon Notice inside Search */}
+            <div className="my-6 p-6 rounded-2xl bg-[#fafafa] border border-neutral-200 text-center">
+              <span className="inline-block px-3 py-1 rounded-full bg-neutral-200/70 text-[#111111] text-[11px] font-bold uppercase tracking-wider mb-2">
+                Drop Edition 01
+              </span>
+              <h4 className="text-[22px] sm:text-[26px] font-bold uppercase text-[#111111] tracking-tight">
+                Launching Soon
+              </h4>
+              <p className="text-[13px] sm:text-[14px] text-[#707072] mt-1 max-w-sm mx-auto">
+                Handcrafted small-run footwear catalog drops shortly. Explore preview styles below.
+              </p>
+            </div>
+
             {/* Header: Top Suggestions */}
             <h3 className="text-[13px] sm:text-[14px] text-[#707072] font-normal mb-2 sm:mb-3">
               Top Suggestions
