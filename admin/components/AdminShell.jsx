@@ -8,7 +8,6 @@ import {
   ShoppingBag,
   Package,
   Users,
-  Layers,
   Settings,
   ExternalLink,
   Menu,
@@ -48,7 +47,6 @@ export default function AdminShell({ children, onNewProductClick }) {
     { label: 'Products', href: '/products', icon: Package },
     { label: 'Overview', href: '/overview', icon: LayoutDashboard },
     { label: 'Customers', href: '/customers', icon: Users },
-    { label: 'Inventory', href: '/inventory', icon: Layers },
     { label: 'Settings', href: '/settings', icon: Settings },
   ];
 
@@ -57,7 +55,6 @@ export default function AdminShell({ children, onNewProductClick }) {
     if (pathname.startsWith('/products')) return 'Products';
     if (pathname.startsWith('/overview')) return 'Overview';
     if (pathname.startsWith('/customers')) return 'Customers';
-    if (pathname.startsWith('/inventory')) return 'Inventory';
     if (pathname.startsWith('/settings')) return 'Settings';
     return 'Admin';
   };
@@ -227,24 +224,25 @@ export default function AdminShell({ children, onNewProductClick }) {
 
       {/* Main Content Container */}
       <div className="flex-1 flex flex-col min-w-0 bg-[#f9fafb]">
-        {/* Top Desktop Navigation Bar (Hidden on /orders to render dedicated Shiprocket header) */}
-        {!pathname.startsWith('/orders') && (
-          <header className="hidden md:flex items-center justify-between px-8 h-10 bg-white sticky top-0 z-30">
-            <div>
-              <div className="flex items-center gap-2 text-[13px] text-neutral-400 font-normal">
-                <span>Sonu Shoe</span>
-                <span>/</span>
-                <span className="text-neutral-700 capitalize">
-                  {pathname === '/' ? '' : pathname.replace('/', '')}
-                </span>
-              </div>
+        {/* Top Desktop Navigation Bar */}
+        {!pathname.startsWith('/overview') && (
+          <header className="hidden md:flex items-center justify-between px-8 h-14 bg-white border-b border-neutral-200/80 sticky top-0 z-30">
+            <div className="flex items-center gap-2 text-[13px] text-neutral-400 font-normal">
+              <span>Sonu Shoe</span>
+              <span>/</span>
+              <span className="text-neutral-800 font-medium capitalize">
+                {pathname === '/' ? 'Dashboard' : pathname.replace('/', '')}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-4">
             
             </div>
           </header>
         )}
 
         {/* Page Content */}
-        <main className={`flex-1 flex flex-col ${pathname.startsWith('/orders') ? 'p-4 sm:p-6 w-full' : ''}`}>
+        <main className="flex-1 flex flex-col w-full">
           {children}
         </main>
       </div>

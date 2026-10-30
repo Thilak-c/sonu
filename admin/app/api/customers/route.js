@@ -4,11 +4,14 @@ import { ObjectId } from 'mongodb';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const limit = Math.min(Number(searchParams.get('limit')) || 250, 500);
+
     const db = await initDb();
-    const users = await db.collection('users').find({}).sort({ updatedAt: -1 }).toArray();
-    const orders = await db.collection('orders').find({}).sort({ createdAt: -1, placedAt: -1 }).toArray();
+    const users = await db.collection('users').find({}).sort({ updatedAt: -1 }).limit(limit).toArray();
+    const orders = await db.collection('orders').find({}).sort({ createdAt: -1, placedAt: -1 }).limit(limit * 2).toArray();
 
     // Map existing users
     const matchedEmailSet = new Set();

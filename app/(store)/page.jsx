@@ -82,6 +82,9 @@ export default async function HomePage() {
           </div>
         )}
 
+        {/* 1. Hero Showcase (Editable via Admin Settings) */}
+        <HeroSection />
+
         {/* 2. Featured Section (from DB) */}
         {products.length > 0 && <FeaturedSection products={products} />}
 

@@ -15,6 +15,21 @@ export const transporter = nodemailer.createTransport({
 
 const DEFAULT_FROM = process.env.EMAIL_FROM || '"Sonu Shoe" <support@sonushoe.in>';
 
+export function isReservedTestEmail(email) {
+  if (!email || typeof email !== 'string') return true;
+  const lower = email.toLowerCase().trim();
+  const domain = lower.split('@')[1] || '';
+  return (
+    domain.endsWith('example.com') ||
+    domain.endsWith('example.org') ||
+    domain.endsWith('example.net') ||
+    domain.endsWith('.test') ||
+    domain.endsWith('.invalid') ||
+    domain.endsWith('.localhost') ||
+    domain.endsWith('test.com')
+  );
+}
+
 /**
  * Send Pixel-to-Pixel Order Confirmation Email (Matching Storefront Order Tracking Page)
  */
@@ -23,6 +38,10 @@ export async function sendOrderConfirmationEmail(order) {
 
   const orderId = order.orderId;
   const to = order.customer.email;
+  if (isReservedTestEmail(to)) {
+    console.log(`[Email Service] Mock mode: Skipped sending to test domain ${to}`);
+    return { messageId: `mock_${Date.now()}` };
+  }
   const customerName = order.customer.name || `${order.customer.firstName || ''} ${order.customer.lastName || ''}`.trim() || 'Customer';
   const items = Array.isArray(order.items) ? order.items : [];
   const total = Number(order.totalAmount || 0);
@@ -535,6 +554,10 @@ export async function sendShippingNotificationEmail(order, awbCode, courierName)
 
   const orderId = order.orderId;
   const to = order.customer.email;
+  if (isReservedTestEmail(to)) {
+    console.log(`[Email Service] Mock mode: Skipped sending to test domain ${to}`);
+    return { messageId: `mock_${Date.now()}` };
+  }
   const name = order.customer.name || 'Valued Customer';
   const courier = courierName || order.shiprocket?.courierName || 'Delhivery Surface Express';
   const awb = awbCode || order.shiprocket?.awbCode || 'Pending';
@@ -573,6 +596,10 @@ export async function sendOrderStatusEmail(order, template = 'ORDER_CONFIRMED') 
 
   const orderId = order.orderId;
   const to = order.customer.email;
+  if (isReservedTestEmail(to)) {
+    console.log(`[Email Service] Mock mode: Skipped sending to test domain ${to}`);
+    return { messageId: `mock_${Date.now()}` };
+  }
   const name = order.customer.name || 'Valued Customer';
 
   const mailOptions = {

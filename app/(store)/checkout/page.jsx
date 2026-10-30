@@ -186,6 +186,41 @@ export default function CheckoutPage() {
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [confirmedOrder, setConfirmedOrder] = useState(null);
 
+  // Dynamic Store Checkout Settings
+  const [checkoutSettings, setCheckoutSettings] = useState({
+    freeDelivery: true,
+    standardDeliveryFee: 99,
+    freeDeliveryThreshold: 0,
+    deliveryTimelineText: 'Express delivery in 3-5 business days across India',
+    enableFullCod: false,
+    fullCodFee: 200,
+    fullCodNote: 'Pay in full with cash or UPI directly upon doorstep delivery. An extra COD handling fee applies.',
+    enablePartialCod: true,
+    partialCodAdvance: 200,
+    partialCodNote: 'Pay a flat advance deposit online to confirm your shipment. The remaining balance is paid to the courier upon delivery.',
+    enablePrepaid: true,
+    prepaidDiscount: 0,
+    prepaidNote: 'Fastest dispatch with zero extra handling fees.',
+  });
+
+  // Fetch Checkout Settings from backend on mount
+  useEffect(() => {
+    async function loadSettings() {
+      try {
+        const res = await fetch('/api/settings');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.checkout) {
+            setCheckoutSettings((prev) => ({ ...prev, ...data.checkout }));
+          }
+        }
+      } catch (err) {
+        // Keep fallback defaults
+      }
+    }
+    loadSettings();
+  }, []);
+
   // Sync cart & profile on mount
   useEffect(() => {
     const syncCart = () => {
@@ -310,7 +345,24 @@ export default function CheckoutPage() {
   const promoDiscountAmount = appliedPromo
     ? Math.round((subtotal * appliedPromo.discountPercent) / 100)
     : 0;
-  const youPay = Math.max(0, subtotal - promoDiscountAmount);
+
+  // Shipping charge computation based on dynamic settings
+  const isFreeShipping = checkoutSettings.freeDelivery && (Number(checkoutSettings.freeDeliveryThreshold || 0) === 0 || subtotal >= Number(checkoutSettings.freeDeliveryThreshold || 0));
+  const shippingCharge = isFreeShipping ? 0 : Number(checkoutSettings.standardDeliveryFee || 0);
+
+  // Full COD fee computation
+  const isFullCodSelected = paymentMethod === 'full_cod';
+  const fullCodExtraFee = (isFullCodSelected && checkoutSettings.enableFullCod) ? Number(checkoutSettings.fullCodFee || 0) : 0;
+
+  // Prepaid discount computation
+  const isPrepaidSelected = paymentMethod !== 'partial_cod' && paymentMethod !== 'full_cod';
+  const prepaidDiscountPercent = (isPrepaidSelected && Number(checkoutSettings.prepaidDiscount || 0) > 0) ? Number(checkoutSettings.prepaidDiscount) : 0;
+  const prepaidDiscountAmount = prepaidDiscountPercent > 0 ? Math.round((subtotal * prepaidDiscountPercent) / 100) : 0;
+
+  const totalOrderAmount = Math.max(0, subtotal - promoDiscountAmount - prepaidDiscountAmount + shippingCharge + fullCodExtraFee);
+  const youPay = totalOrderAmount;
+
+  const advanceDepositAmount = Number(checkoutSettings.partialCodAdvance || 200);
 
   const scrollAddons = (direction) => {
     if (carouselRef.current) {
@@ -410,13 +462,6 @@ export default function CheckoutPage() {
     setIsPlacingOrder(true);
 
     try {
-      const isScriptLoaded = await loadRazorpayScript();
-      if (!isScriptLoaded) {
-        alert('Could not load payment gateway. Please check your internet connection.');
-        setIsPlacingOrder(false);
-        return;
-      }
-
       // Prepare customer display info & verified mobile
       const displayName =
         address.name ||
@@ -441,11 +486,66 @@ export default function CheckoutPage() {
         }
       }
       const displayContact = (phone || address.mobile || '').replace(/\D/g, '').slice(-10);
-      const isPartialCod = paymentMethod === 'partial_cod';
-      const amountToPay = isPartialCod ? 200 : subtotal;
       const placedOrderId = `SONU-IN-${Math.floor(100000 + Math.random() * 900000)}`;
 
-      // 1. Create order on backend via Razorpay Orders API & save draft in MongoDB
+      // 1. Direct Full Cash on Delivery (no Razorpay required)
+      if (paymentMethod === 'full_cod') {
+        const confirmedData = {
+          orderId: placedOrderId,
+          razorpayPaymentId: null,
+          razorpayOrderId: null,
+          razorpaySignature: null,
+          items: [...cartItems],
+          totalAmount: totalOrderAmount,
+          address: { ...address },
+          paymentMethod: 'full_cod',
+          advancePaid: 0,
+          balanceDue: totalOrderAmount,
+          paymentStatus: 'PENDING_COD',
+          placedAt: new Date().toISOString(),
+          estimatedDelivery: checkoutSettings.deliveryTimelineText || '3-5 business days',
+        };
+
+        const res = await fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(confirmedData),
+        });
+
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.error || 'Failed to place COD order');
+        }
+
+        try {
+          const pastOrders = JSON.parse(localStorage.getItem('sonu_orders') || '[]');
+          pastOrders.unshift(confirmedData);
+          localStorage.setItem('sonu_orders', JSON.stringify(pastOrders));
+        } catch (err) {
+          // ignore
+        }
+
+        setConfirmedOrder(confirmedData);
+        clearCart();
+        setIsPlacingOrder(false);
+        setCheckoutStep('confirmation');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        router.push(`/order/${placedOrderId}`);
+        return;
+      }
+
+      // 2. Online Payment / Partial COD via Razorpay
+      const isScriptLoaded = await loadRazorpayScript();
+      if (!isScriptLoaded) {
+        alert('Could not load payment gateway. Please check your internet connection.');
+        setIsPlacingOrder(false);
+        return;
+      }
+
+      const isPartialCod = paymentMethod === 'partial_cod';
+      const amountToPay = isPartialCod ? advanceDepositAmount : totalOrderAmount;
+
+      // Create order on backend via Razorpay Orders API & save draft in MongoDB
       const res = await fetch('/api/razorpay/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -460,8 +560,8 @@ export default function CheckoutPage() {
             contact: displayContact,
             address: `${address.houseNo || ''}, ${address.street || ''}, ${address.city || ''} - ${address.pincode || ''}`,
             method: paymentMethod,
-            totalOrderAmount: String(subtotal),
-            advanceDeposit: isPartialCod ? '200' : '0',
+            totalOrderAmount: String(totalOrderAmount),
+            advanceDeposit: isPartialCod ? String(advanceDepositAmount) : '0',
           },
         }),
       });
@@ -481,14 +581,14 @@ export default function CheckoutPage() {
       };
       const activeSequence = sequenceMap[paymentMethod] || sequenceMap.upi;
 
-      // 2. Configure and open Razorpay modal with full options
+      // Configure and open Razorpay modal with full options
       const options = {
         key: orderData.keyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_ToeynJ0XXfrtyp',
         amount: orderData.amount,
         currency: orderData.currency || 'INR',
         name: 'Sonu shoe',
         description: isPartialCod
-          ? 'Partial COD Advance Deposit (₹200)'
+          ? `Partial COD Advance Deposit (₹${advanceDepositAmount})`
           : `Order Payment (${totalQuantity} ${totalQuantity === 1 ? 'item' : 'items'})`,
         image: '/images/brand/logo.svg',
         order_id: orderData.orderId,
@@ -551,14 +651,14 @@ export default function CheckoutPage() {
             razorpayOrderId: response.razorpay_order_id,
             razorpaySignature: response.razorpay_signature,
             items: [...cartItems],
-            totalAmount: subtotal,
+            totalAmount: totalOrderAmount,
             address: { ...address },
             paymentMethod,
-            advancePaid: isPartial ? 200 : subtotal,
-            balanceDue: isPartial ? Math.max(0, subtotal - 200) : 0,
+            advancePaid: isPartial ? advanceDepositAmount : totalOrderAmount,
+            balanceDue: isPartial ? Math.max(0, totalOrderAmount - advanceDepositAmount) : 0,
             paymentStatus: isPartial ? 'PARTIALLY_PAID' : 'PAID',
             placedAt: new Date().toISOString(),
-            estimatedDelivery: '3-5 business days',
+            estimatedDelivery: checkoutSettings.deliveryTimelineText || '3-5 business days',
           };
 
           // 1. Save confirmed order directly into MongoDB
@@ -924,8 +1024,14 @@ export default function CheckoutPage() {
                         </svg>
                       </span>
                       <span className="flex items-center gap-1.5">
-                        <span className="line-through text-[#8d8d8d]">₹99</span>
-                        <span className="text-[#008a00] font-medium">Free</span>
+                        {isFreeShipping ? (
+                          <>
+                            <span className="line-through text-[#8d8d8d]">₹{checkoutSettings.standardDeliveryFee || 99}</span>
+                            <span className="text-[#008a00] font-medium">Free</span>
+                          </>
+                        ) : (
+                          <span className="text-[#111111] font-medium">₹{shippingCharge}</span>
+                        )}
                       </span>
                     </div>
                     <div className="border-b border-[#f0f0f0] my-2" />
@@ -1546,92 +1652,193 @@ export default function CheckoutPage() {
           </div>
 
           {/* Option 5: Partial Cash on Delivery */}
-          <div className="border border-[#e5e5e5] rounded-[16px] p-4 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.02)] transition-all">
-            <div
-              onClick={() => {
-                setPaymentMethod('partial_cod');
-                setSelectedPaymentAccordion(
-                  selectedPaymentAccordion === 'partial_cod' ? '' : 'partial_cod'
-                );
-              }}
-              className="flex items-center justify-between cursor-pointer select-none"
-            >
-              <div className="flex items-center gap-3.5">
-                <span className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0">
-                  <img
-                    src="/images/payments/cod.svg"
-                    alt="Partial COD"
-                    className="w-6 h-6 object-contain"
-                    loading="eager"
-                    fetchPriority="high"
-                    decoding="async"
-                  />
-                </span>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <p
-                      className="text-[16px] font-bold text-[#111111] leading-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
-                      style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
-                    >
-                      Partial Cash on Delivery
+          {checkoutSettings.enablePartialCod && (
+            <div className="border border-[#e5e5e5] rounded-[16px] p-4 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.02)] transition-all">
+              <div
+                onClick={() => {
+                  setPaymentMethod('partial_cod');
+                  setSelectedPaymentAccordion(
+                    selectedPaymentAccordion === 'partial_cod' ? '' : 'partial_cod'
+                  );
+                }}
+                className="flex items-center justify-between cursor-pointer select-none"
+              >
+                <div className="flex items-center gap-3.5">
+                  <span className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0">
+                    <img
+                      src="/images/payments/cod.svg"
+                      alt="Partial COD"
+                      className="w-6 h-6 object-contain"
+                      loading="eager"
+                      fetchPriority="high"
+                      decoding="async"
+                    />
+                  </span>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p
+                        className="text-[16px] font-bold text-[#111111] leading-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
+                        style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                      >
+                        Partial Cash on Delivery
+                      </p>
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-neutral-100 text-neutral-800 border border-neutral-300">
+                        Deposit
+                      </span>
+                    </div>
+                    <p className="text-[13px] text-[#707072] mt-0.5">
+                      Pay ₹{advanceDepositAmount} now &bull; ₹{Math.max(0, totalOrderAmount - advanceDepositAmount).toLocaleString('en-IN')} on delivery
                     </p>
-                   
                   </div>
-                  <p className="text-[13px] text-[#707072] mt-0.5">
-                    Pay ₹200 now &bull; ₹{Math.max(0, subtotal - 200).toLocaleString('en-IN')} on delivery
-                  </p>
                 </div>
+                <img
+                  src={
+                    selectedPaymentAccordion === 'partial_cod'
+                      ? '/images/payments/caret-up.svg'
+                      : '/images/payments/caret-down.svg'
+                  }
+                  alt=""
+                  className="w-5 h-5 shrink-0"
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
+                />
               </div>
-              <img
-                src={
-                  selectedPaymentAccordion === 'partial_cod'
-                    ? '/images/payments/caret-up.svg'
-                    : '/images/payments/caret-down.svg'
-                }
-                alt=""
-                className="w-5 h-5 shrink-0"
-                loading="eager"
-                fetchPriority="high"
-                decoding="async"
-              />
-            </div>
 
-            {selectedPaymentAccordion === 'partial_cod' && (
-              <div className="mt-4 pt-3.5 border-t border-[#f0f0f0] space-y-4">
-                <div className="text-[13px] text-neutral-700 space-y-2">
-                  <div className="flex items-center justify-between font-medium">
-                    <span>Advance Booking Deposit</span>
-                    <span className="text-[#111111] font-bold">₹200</span>
+              {selectedPaymentAccordion === 'partial_cod' && (
+                <div className="mt-4 pt-3.5 border-t border-[#f0f0f0] space-y-4">
+                  <div className="text-[13px] text-neutral-700 space-y-2">
+                    <div className="flex items-center justify-between font-medium">
+                      <span>Advance Booking Deposit</span>
+                      <span className="text-[#111111] font-bold">₹{advanceDepositAmount}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-[#707072]">
+                      <span>Due on Delivery</span>
+                      <span className="text-[#111111] font-semibold">
+                        ₹{Math.max(0, totalOrderAmount - advanceDepositAmount).toLocaleString('en-IN')}
+                      </span>
+                    </div>
+                    <p className="text-[12px] text-[#707072] pt-1.5 border-t border-neutral-200/60 leading-relaxed">
+                      {checkoutSettings.partialCodNote || `Pay a flat ₹${advanceDepositAmount} advance deposit online to confirm your shipment. The remaining balance is paid to the courier upon delivery.`}
+                    </p>
                   </div>
-                  <div className="flex items-center justify-between text-[#707072]">
-                    <span>Due on Delivery</span>
-                    <span className="text-[#111111] font-semibold">
-                      ₹{Math.max(0, subtotal - 200).toLocaleString('en-IN')}
-                    </span>
-                  </div>
-                  <p className="text-[12px] text-[#707072] pt-1.5 border-t border-neutral-200/60 leading-relaxed">
-                    Pay a flat ₹200 advance deposit online to confirm your shipment. The remaining balance of ₹{Math.max(0, subtotal - 200).toLocaleString('en-IN')} is paid to the courier upon delivery.
-                  </p>
+                  <button
+                    type="button"
+                    disabled={isPlacingOrder}
+                    onClick={handlePlaceOrder}
+                    className="w-full py-4 rounded-full bg-[#111111] hover:bg-black active:scale-[0.99] text-white text-[16px] font-medium transition-all shadow-sm cursor-pointer disabled:opacity-75 flex items-center justify-center gap-2 font-['Helvetica_Now_Text_Medium',sans-serif]"
+                    style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                  >
+                    {isPlacingOrder ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span>Processing Advance Deposit...</span>
+                      </>
+                    ) : (
+                      `Pay ₹${advanceDepositAmount} to Confirm Order`
+                    )}
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  disabled={isPlacingOrder}
-                  onClick={handlePlaceOrder}
-                  className="w-full py-4 rounded-full bg-[#111111] hover:bg-black active:scale-[0.99] text-white text-[16px] font-medium transition-all shadow-sm cursor-pointer disabled:opacity-75 flex items-center justify-center gap-2 font-['Helvetica_Now_Text_Medium',sans-serif]"
-                  style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
-                >
-                  {isPlacingOrder ? (
-                    <>
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>Processing Advance Deposit...</span>
-                    </>
-                  ) : (
-                    'Pay ₹200 to Confirm Order'
-                  )}
-                </button>
+              )}
+            </div>
+          )}
+
+          {/* Option 6: Full Cash on Delivery (100% COD) */}
+          {checkoutSettings.enableFullCod && (
+            <div className="border border-[#e5e5e5] rounded-[16px] p-4 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.02)] transition-all">
+              <div
+                onClick={() => {
+                  setPaymentMethod('full_cod');
+                  setSelectedPaymentAccordion(
+                    selectedPaymentAccordion === 'full_cod' ? '' : 'full_cod'
+                  );
+                }}
+                className="flex items-center justify-between cursor-pointer select-none"
+              >
+                <div className="flex items-center gap-3.5">
+                  <span className="w-8 h-8 rounded-lg bg-neutral-100 flex items-center justify-center shrink-0 text-[#111111]">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+                      <rect x="2" y="6" width="20" height="12" rx="2" />
+                      <circle cx="12" cy="12" r="2" />
+                      <path d="M6 12h.01M18 12h.01" />
+                    </svg>
+                  </span>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p
+                        className="text-[16px] font-bold text-[#111111] leading-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
+                        style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                      >
+                        Cash on Delivery (Full COD)
+                      </p>
+                      {Number(checkoutSettings.fullCodFee || 0) > 0 && (
+                        <span className="px-1.5 py-0.5 rounded text-[10.5px] font-semibold bg-neutral-100 text-neutral-800 border border-neutral-300">
+                          +₹{checkoutSettings.fullCodFee} Fee
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[13px] text-[#707072] mt-0.5">
+                      Pay full ₹{totalOrderAmount.toLocaleString('en-IN')} in cash or UPI at delivery
+                    </p>
+                  </div>
+                </div>
+                <img
+                  src={
+                    selectedPaymentAccordion === 'full_cod'
+                      ? '/images/payments/caret-up.svg'
+                      : '/images/payments/caret-down.svg'
+                  }
+                  alt=""
+                  className="w-5 h-5 shrink-0"
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
+                />
               </div>
-            )}
-          </div>
+
+              {selectedPaymentAccordion === 'full_cod' && (
+                <div className="mt-4 pt-3.5 border-t border-[#f0f0f0] space-y-4">
+                  <div className="text-[13px] text-neutral-700 space-y-2">
+                    <div className="flex items-center justify-between text-[#707072]">
+                      <span>Order Subtotal</span>
+                      <span className="text-[#111111] font-medium">₹{subtotal.toLocaleString('en-IN')}</span>
+                    </div>
+                    {Number(checkoutSettings.fullCodFee || 0) > 0 && (
+                      <div className="flex items-center justify-between text-neutral-700 font-medium">
+                        <span>COD Handling Fee</span>
+                        <span className="text-[#111111] font-semibold">+₹{checkoutSettings.fullCodFee}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between font-bold pt-1 border-t border-neutral-200/60">
+                      <span>Total Due on Delivery</span>
+                      <span className="text-[#111111] text-[15px]">
+                        ₹{totalOrderAmount.toLocaleString('en-IN')}
+                      </span>
+                    </div>
+                    <p className="text-[12px] text-[#707072] pt-1.5 leading-relaxed">
+                      {checkoutSettings.fullCodNote || 'Pay in full with cash or UPI directly to the delivery courier upon doorstep arrival.'}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={isPlacingOrder}
+                    onClick={handlePlaceOrder}
+                    className="w-full py-4 rounded-full bg-[#111111] hover:bg-black active:scale-[0.99] text-white text-[16px] font-medium transition-all shadow-sm cursor-pointer disabled:opacity-75 flex items-center justify-center gap-2 font-['Helvetica_Now_Text_Medium',sans-serif]"
+                    style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                  >
+                    {isPlacingOrder ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span>Confirming COD Order...</span>
+                      </>
+                    ) : (
+                      `Confirm Order (₹${totalOrderAmount.toLocaleString('en-IN')} on Delivery)`
+                    )}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* ORDER INFORMATION (EXACT SCREENSHOT MATCH) */}
           <div className="pt-5 space-y-3.5">
@@ -1745,20 +1952,47 @@ export default function CheckoutPage() {
                       </span>
                     </span>
                     <div className="flex items-center gap-1.5 font-medium">
-                      <span className="line-through text-[#8d8d8d] text-[13px]">₹99</span>
-                      <span className="text-[#059669]">Free</span>
+                      {isFreeShipping ? (
+                        <>
+                          <span className="line-through text-[#8d8d8d] text-[13px]">
+                            ₹{checkoutSettings.standardDeliveryFee || 99}
+                          </span>
+                          <span className="text-[#059669]">Free</span>
+                        </>
+                      ) : (
+                        <span className="text-[#111111]">
+                          ₹{shippingCharge}
+                        </span>
+                      )}
                     </div>
                   </div>
+
+                  {/* Optional Full COD Fee */}
+                  {paymentMethod === 'full_cod' && fullCodExtraFee > 0 && (
+                    <div className="flex items-center justify-between text-[14px] text-[#707072]">
+                      <span>COD Handling Fee</span>
+                      <span className="text-[#111111] font-medium">+₹{fullCodExtraFee}</span>
+                    </div>
+                  )}
+
+                  {/* Optional Prepaid Discount */}
+                  {isPrepaidSelected && prepaidDiscountAmount > 0 && (
+                    <div className="flex items-center justify-between text-[14px] text-[#059669] font-medium">
+                      <span>Prepaid Instant Discount ({prepaidDiscountPercent}%)</span>
+                      <span>-₹{prepaidDiscountAmount.toLocaleString('en-IN')}</span>
+                    </div>
+                  )}
+
                   {paymentMethod === 'partial_cod' ? (
                     <>
                       <div className="flex items-center justify-between text-[14px] text-[#707072]">
                         <span>Advance Paid Online</span>
-                        <span className="text-[#111111] font-medium">₹200</span>
+                        <span className="text-[#111111] font-medium">₹{advanceDepositAmount}</span>
                       </div>
                       <div className="flex items-center justify-between text-[14px] text-[#707072]">
                         <span>Due on Delivery</span>
                         <span className="text-[#111111] font-medium">
-                          ₹{Math.max(0, subtotal - 200).toLocaleString('en-IN')}
+                          ₹{Math.max(0, totalOrderAmount - advanceDepositAmount).toLocaleString('en-IN')}
                         </span>
                       </div>
                       <div className="pt-3 border-t border-[#f0f0f0] flex items-center justify-between">
@@ -1772,7 +2006,34 @@ export default function CheckoutPage() {
                           className="text-[15px] sm:text-[16px] font-bold text-[#111111] font-['Helvetica_Now_Text_Medium',sans-serif]"
                           style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
                         >
-                          ₹200
+                          ₹{advanceDepositAmount}
+                        </span>
+                      </div>
+                    </>
+                  ) : paymentMethod === 'full_cod' ? (
+                    <>
+                      <div className="flex items-center justify-between text-[14px] text-[#707072]">
+                        <span>Advance Paid</span>
+                        <span className="text-[#111111] font-medium">₹0</span>
+                      </div>
+                      <div className="flex items-center justify-between text-[14px] text-[#707072]">
+                        <span>Due on Delivery</span>
+                        <span className="text-[#111111] font-medium">
+                          ₹{totalOrderAmount.toLocaleString('en-IN')}
+                        </span>
+                      </div>
+                      <div className="pt-3 border-t border-[#f0f0f0] flex items-center justify-between">
+                        <span
+                          className="text-[15px] sm:text-[16px] font-bold text-[#111111] font-['Helvetica_Now_Text_Medium',sans-serif]"
+                          style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                        >
+                          Due on Doorstep
+                        </span>
+                        <span
+                          className="text-[15px] sm:text-[16px] font-bold text-[#111111] font-['Helvetica_Now_Text_Medium',sans-serif]"
+                          style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                        >
+                          ₹{totalOrderAmount.toLocaleString('en-IN')}
                         </span>
                       </div>
                     </>
@@ -1788,7 +2049,7 @@ export default function CheckoutPage() {
                         className="text-[15px] sm:text-[16px] font-bold text-[#111111] font-['Helvetica_Now_Text_Medium',sans-serif]"
                         style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
                       >
-                        ₹{subtotal.toLocaleString('en-IN')}
+                        ₹{totalOrderAmount.toLocaleString('en-IN')}
                       </span>
                     </div>
                   )}
@@ -2084,7 +2345,11 @@ export default function CheckoutPage() {
 
             <div className="flex items-center justify-between text-[#707072]">
               <span>Shipping Charges</span>
-              <span className="text-[#0d8240] font-normal">Free</span>
+              {isFreeShipping ? (
+                <span className="text-[#0d8240] font-normal">Free</span>
+              ) : (
+                <span className="text-[#111111] font-medium">₹ {shippingCharge}</span>
+              )}
             </div>
 
             {appliedPromo && (

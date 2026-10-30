@@ -22,15 +22,21 @@ export async function getDb() {
   return connectedClient.db(dbName);
 }
 
+let indexesInitialized = false;
+
 export async function initDb() {
-  try {
-    const db = await getDb();
-    await db.collection('orders').createIndex({ orderId: 1 }, { unique: true });
-    await db.collection('products').createIndex({ slug: 1 }, { unique: true });
-    await db.collection('users').createIndex({ email: 1 }, { unique: true, sparse: true });
-    return db;
-  } catch (err) {
-    console.error('[Admin MongoDB] Init error:', err);
-    throw err;
+  const db = await getDb();
+  if (!indexesInitialized) {
+    try {
+      Promise.all([
+        db.collection('orders').createIndex({ orderId: 1 }, { unique: true }),
+        db.collection('products').createIndex({ slug: 1 }, { unique: true }),
+        db.collection('users').createIndex({ email: 1 }, { unique: true, sparse: true }),
+      ]).catch((err) => console.warn('[Admin MongoDB] Index creation warning:', err.message));
+      indexesInitialized = true;
+    } catch (err) {
+      console.warn('[Admin MongoDB] Init error:', err.message);
+    }
   }
+  return db;
 }

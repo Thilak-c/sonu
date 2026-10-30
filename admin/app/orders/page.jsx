@@ -315,15 +315,15 @@ function OrdersContent() {
   const [newProductQty, setNewProductQty] = useState(1);
   const [sellerSettings, setSellerSettings] = useState({
     companyName: 'Sonu Shoe',
-    addressLine1: '34, Rd Number 2, Nehru Nagar',
-    addressLine2: 'Patliputra Colony',
+    addressLine1: 'First and Second floor, Patna One Plaza Mall, New Dak Bunglow Rd',
+    addressLine2: 'opp. Bharat Petrol Pump, Bander Bagicha, Fraser Road Area',
     city: 'Patna',
     state: 'Bihar',
-    pincode: '800013',
+    pincode: '800001',
     stateCode: '10',
     country: 'India',
-    phone: '8008439762',
-    email: 'yashodanandkumar15@gmail.com',
+    phone: '9122913620',
+    email: 'support@sonushoe.in',
     gstin: '',
     signatureTitle: 'Authorized Signature for Sonu Shoe',
     reverseCharge: 'No',
@@ -527,7 +527,8 @@ function OrdersContent() {
       const cust = selectedOrder.customer || {};
       const addr = cust.address || selectedOrder.address || {};
       const rawItems = Array.isArray(selectedOrder.items) ? selectedOrder.items : [];
-      const rawPaymentMethod = selectedOrder.payment?.method || selectedOrder.paymentMethod || 'partial_cod';
+      let rawPaymentMethod = selectedOrder.payment?.method || selectedOrder.paymentMethod || 'partial_cod';
+      if (rawPaymentMethod === 'cod') rawPaymentMethod = 'full_cod';
       let rawPaymentStatus = selectedOrder.payment?.status || 'PENDING';
       if (rawPaymentMethod === 'partial_cod' && (rawPaymentStatus === 'PAID' || !selectedOrder.payment?.status)) {
         rawPaymentStatus = 'PARTIALLY_PAID';
@@ -568,7 +569,10 @@ function OrdersContent() {
       if (!nextAdvance || Number(nextAdvance) === 0 || Number(nextAdvance) === editForm.totalAmount) {
         nextAdvance = 200;
       }
-    } else if (newMethod === 'cod') {
+    } else if (newMethod === 'cod' || newMethod === 'full_cod') {
+      nextStatus = 'PENDING';
+      nextAdvance = 0;
+    } else if (newMethod === 'prepaid') {
       nextStatus = 'PENDING';
       nextAdvance = 0;
     } else if (newMethod === 'prepaid') {
@@ -1349,6 +1353,7 @@ function OrdersContent() {
         : `✓ Order ${ord.orderId} restored to Ready to Process`
     );
   };
+  const handleMoveToHold = handleMoveToOnHold;
 
   const handleAddOrderTag = (ord) => {
     const tag = window.prompt('Enter tag to add (e.g. VIP, Urgent, Address Checked):');
@@ -1556,11 +1561,10 @@ function OrdersContent() {
         </div>
       )}
 
-      <div className="w-full flex-1 flex flex-col min-h-[calc(100vh-48px)] text-[#111111]" style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}>
+      <div className="w-full flex-1 flex flex-col p-5 sm:p-7 lg:p-8 text-[#111111]" style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}>
 
-        {/* 1. TOP HEADER BAR */}
-        <div className="bg-white border-b border-neutral-200 -mt-4 sm:-mt-6 -mx-4 sm:-mx-6 px-6 py-4 mb-6 shadow-2xs">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        {/* 1. TOP HEADER ROW */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
 
             {/* Left: Orders Title & Status Badge */}
             <div className="flex items-center gap-3">
@@ -1629,7 +1633,6 @@ function OrdersContent() {
             </div>
 
           </div>
-        </div>
 
         {/* 2. PRIMARY NAVIGATION TABS */}
         <div className="flex items-center gap-8 border-b border-neutral-200 overflow-x-auto scrollbar-none mb-4">
@@ -1884,15 +1887,22 @@ function OrdersContent() {
                       </div>
 
                       {/* 5. Package Details */}
-                      <div className="text-[12px] text-neutral-600 space-y-0.5">
-                        <p><span className="text-neutral-500">Weight:</span> 0.9 Kg</p>
-                        <p className="text-neutral-500">30 x 20 x 12 cm</p>
-                        {ord.shiprocket?.courierName && (
-                          <p className="text-[11px] text-[#111111] font-medium truncate" title={ord.shiprocket.courierName}>
-                            {ord.shiprocket.courierName}
-                          </p>
-                        )}
-                      </div>
+                      {(() => {
+                        const totalUnits = (ord.items || []).reduce((s, it) => s + (Number(it.quantity) || 1), 0) || 1;
+                        const pkgWeight = totalUnits === 1 ? '0.9 Kg' : totalUnits === 2 ? '1.8 Kg' : `${(0.9 * totalUnits).toFixed(1)} Kg`;
+                        const pkgDim = totalUnits === 1 ? '30 x 20 x 12 cm' : totalUnits === 2 ? '35 x 28 x 24 cm' : `35 x 28 x ${24 + (totalUnits - 2) * 12} cm`;
+                        return (
+                          <div className="text-[12px] text-neutral-600 space-y-0.5">
+                            <p><span className="text-neutral-500">Weight:</span> {pkgWeight}</p>
+                            <p className="text-neutral-500">{pkgDim}</p>
+                            {ord.shiprocket?.courierName && (
+                              <p className="text-[11px] text-[#111111] font-medium truncate" title={ord.shiprocket.courierName}>
+                                {ord.shiprocket.courierName}
+                              </p>
+                            )}
+                          </div>
+                        );
+                      })()}
 
                       {/* 6. Payment */}
                       <div>
@@ -1900,7 +1910,11 @@ function OrdersContent() {
                           ₹ {amount.toLocaleString('en-IN')}
                         </p>
                         <div className="mt-1">
-                          {isCod ? (
+                          {ord.payment?.method === 'full_cod' || ord.payment?.method === 'cod' ? (
+                            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-900 border border-amber-300">
+                              Full COD
+                            </span>
+                          ) : ord.payment?.method === 'partial_cod' ? (
                             <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-neutral-100 text-neutral-800 border border-neutral-300">
                               Partial COD
                             </span>
@@ -1920,12 +1934,14 @@ function OrdersContent() {
                           </span>
 
                           {/* Speech Bubble Tooltip */}
-                          <div className="invisible group-hover/pickup:visible opacity-0 group-hover/pickup:opacity-100 transition-all duration-150 absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 z-50 w-72 p-4 bg-white rounded-2xl shadow-2xl border border-neutral-200/90 pointer-events-none text-left">
+                          <div className="invisible group-hover/pickup:visible opacity-0 group-hover/pickup:opacity-100 transition-all duration-150 absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 z-50 w-80 p-4 bg-white rounded-2xl shadow-2xl border border-neutral-200/90 pointer-events-none text-left">
                             <div className="text-[13px] font-semibold text-[#111111] leading-relaxed space-y-0.5">
-                              <p>34 Rd Number 2, Nehru Nagar,</p>
-                              <p>Patliputra Colony, Patna, Bihar</p>
-                              <p>Patna, Bihar</p>
-                              <p>800013, India</p>
+                              <p className="font-bold text-[#111111]">Patna One Plaza Hub</p>
+                              <p>First & Second floor, Patna One Plaza Mall,</p>
+                              <p>New Dak Bunglow Rd, opp. Bharat Petrol Pump,</p>
+                              <p>Bander Bagicha, Fraser Road Area,</p>
+                              <p>Patna, Bihar - 800001, India</p>
+                              <p className="text-[11.5px] text-neutral-500 pt-1">Contact: Mohammad Shamshad (9122913620)</p>
                             </div>
                             <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-r border-b border-neutral-200/90 rotate-45" />
                           </div>
@@ -2009,7 +2025,7 @@ function OrdersContent() {
                             disabled={actionLoading === ord.orderId}
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleMoveToHold(ord);
+                              handleMoveToOnHold(ord);
                             }}
                             className="px-3 py-1.5 rounded-lg bg-white border border-neutral-300 hover:border-[#111111] text-[#111111] text-[12px] font-semibold transition-all shadow-xs flex items-center justify-center min-w-[76px] cursor-pointer"
                           >
@@ -2779,7 +2795,7 @@ function OrdersContent() {
                     value={editForm.paymentMethod}
                     options={[
                       { value: 'partial_cod', label: 'Partial COD' },
-                      { value: 'cod', label: 'COD (Full Cash on Delivery)' },
+                      { value: 'full_cod', label: 'Full COD (100% Cash on Delivery)' },
                       { value: 'prepaid', label: 'Prepaid (Razorpay / Online)' },
                     ]}
                     onSelect={(val) => handlePaymentMethodChange(val)}

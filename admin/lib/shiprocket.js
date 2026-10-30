@@ -1,6 +1,8 @@
 // Shiprocket API Client & Real-time Serviceability Engine for Sonu Shoe
 // Supports mock/simulation mode for reliable testing and staging
 
+import { getDb } from './mongodb';
+
 const IS_MOCK = process.env.MOCK_SHIPROCKET === 'true';
 
 let cachedToken = null;
@@ -9,8 +11,22 @@ let tokenExpiry = null;
 export async function getShiprocketToken() {
   if (IS_MOCK) return 'mock_shiprocket_token_xyz';
 
+  // 1. Fast in-memory check
   if (cachedToken && tokenExpiry && Date.now() < tokenExpiry) {
     return cachedToken;
+  }
+
+  // 2. Persistent token lookup across serverless workers in MongoDB
+  try {
+    const db = await getDb();
+    const tokenDoc = await db.collection('settings').findOne({ _id: 'shiprocket_auth_token' });
+    if (tokenDoc?.token && tokenDoc?.expiry && Date.now() < tokenDoc.expiry) {
+      cachedToken = tokenDoc.token;
+      tokenExpiry = tokenDoc.expiry;
+      return cachedToken;
+    }
+  } catch (dbErr) {
+    // Continue to API login if DB read fails
   }
 
   const base = process.env.SHIPROCKET_BASE_URL || 'https://apiv2.shiprocket.in/v1/external';
@@ -31,6 +47,17 @@ export async function getShiprocketToken() {
 
     cachedToken = data.token;
     tokenExpiry = Date.now() + 23 * 60 * 60 * 1000;
+
+    // Persist to MongoDB for other instances
+    try {
+      const db = await getDb();
+      await db.collection('settings').updateOne(
+        { _id: 'shiprocket_auth_token' },
+        { $set: { token: cachedToken, expiry: tokenExpiry, updatedAt: new Date() } },
+        { upsert: true }
+      );
+    } catch (saveErr) {}
+
     return cachedToken;
   } catch (err) {
     console.warn('[Shiprocket Auth Fallback to Mock]:', err.message);
@@ -72,7 +99,7 @@ export async function checkShiprocketServiceability(deliveryPincode, pickupPinco
     };
   }
 
-  const pickup = pickupPincode || process.env.SHIPROCKET_PICKUP_PINCODE || '800013';
+  const pickup = pickupPincode || process.env.SHIPROCKET_PICKUP_PINCODE || '800001';
   const base = process.env.SHIPROCKET_BASE_URL || 'https://apiv2.shiprocket.in/v1/external';
 
   let shiprocketData = null;
@@ -193,9 +220,11 @@ export async function createShiprocketOrder(order) {
     hsn: 640411,
   }));
 
-  const billingAddress1 = [addr.houseNo, addr.street].filter(Boolean).join(', ') || '34 Rd Number 2, Nehru Nagar';
+  const billingAddress1 = [addr.houseNo, addr.street].filter(Boolean).join(', ') || 'First & Second floor, Patna One Plaza Mall, New Dak Bunglow Rd';
   const billingAddress2 = addr.landmark || '';
-  const isPartialCod = order.payment?.method === 'partial_cod' || order.payment?.method === 'cod';
+  const isPartialCod = order.payment?.method === 'partial_cod';
+  const isFullCod = order.payment?.method === 'full_cod' || order.payment?.method === 'cod';
+  const isCod = isPartialCod || isFullCod;
   const totalAmount = Number(order.totalAmount || 13995);
   const advancePaid = isPartialCod ? Number(order.payment?.advancePaid ?? 200) : 0;
 
@@ -206,7 +235,9 @@ export async function createShiprocketOrder(order) {
     channel_id: '',
     comment: isPartialCod
       ? `Partial COD: Advance ₹${advancePaid} paid online. Collect balance ₹${Math.max(0, totalAmount - advancePaid)} on delivery.`
-      : 'Sonu shoe Order',
+      : isFullCod
+      ? `Full COD: Collect full ₹${totalAmount} upon delivery.`
+      : 'Sonu shoe Prepaid Order',
     billing_customer_name: firstName,
     billing_last_name: lastName,
     billing_address: billingAddress1,
@@ -219,7 +250,7 @@ export async function createShiprocketOrder(order) {
     billing_phone: customer.mobile || '9182390192',
     shipping_is_billing: true,
     order_items: orderItems,
-    payment_method: isPartialCod ? 'COD' : 'Prepaid',
+    payment_method: isCod ? 'COD' : 'Prepaid',
     shipping_charges: 0,
     giftwrap_charges: 0,
     transaction_charges: 0,

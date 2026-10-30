@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import crypto from 'crypto';
 import { getDb, initDb } from '@/lib/mongodb';
 import { createShiprocketOrder } from '@/lib/shiprocket';
 import { sendOrderConfirmationEmail } from '@/lib/email';
@@ -25,6 +26,31 @@ export async function POST(request) {
       );
     }
 
+    const isPartialCod = paymentMethod === 'partial_cod';
+    const isFullCod = paymentMethod === 'full_cod' || paymentMethod === 'cod';
+
+    // Cryptographic signature check for online payments
+    let isPaymentVerified = false;
+    if (razorpayPaymentId && razorpayOrderId && razorpaySignature) {
+      const keySecret = process.env.RAZORPAY_KEY_SECRET || 'usK3zc5FrVqz83iZSL5YMEiJ';
+      const expectedSignature = crypto
+        .createHmac('sha256', keySecret)
+        .update(`${razorpayOrderId}|${razorpayPaymentId}`)
+        .digest('hex');
+
+      if (expectedSignature === razorpaySignature) {
+        isPaymentVerified = true;
+      } else {
+        console.warn(`[Razorpay Security] Signature mismatch for Order ${orderId}. Expected ${expectedSignature}, received ${razorpaySignature}`);
+        return NextResponse.json(
+          { error: 'Payment signature verification failed. Untrusted payment attempt.' },
+          { status: 400 }
+        );
+      }
+    } else if (!isFullCod) {
+      console.warn(`[Orders API] Online order ${orderId} submitted without payment signature`);
+    }
+
     const db = await initDb();
 
     const fullName =
@@ -32,9 +58,16 @@ export async function POST(request) {
       `${address.firstName || ''} ${address.lastName || ''}`.trim() ||
       'Customer';
 
-    const isPartialCod = paymentMethod === 'partial_cod' || paymentMethod === 'cod';
-    const advancePaid = isPartialCod ? Number(body.advancePaid || 200) : (razorpayPaymentId ? Number(totalAmount) : 0);
-    const balanceDue = isPartialCod ? Math.max(0, Number(totalAmount) - advancePaid) : 0;
+    const advancePaid = isPartialCod
+      ? Number(body.advancePaid || 200)
+      : isPaymentVerified
+      ? Number(totalAmount)
+      : 0;
+    const balanceDue = isPartialCod
+      ? Math.max(0, Number(totalAmount) - advancePaid)
+      : isFullCod
+      ? Number(totalAmount)
+      : 0;
 
     const orderDoc = {
       orderId,
@@ -66,8 +99,16 @@ export async function POST(request) {
         },
       },
       payment: {
-        method: isPartialCod ? 'partial_cod' : paymentMethod,
-        status: isPartialCod ? (razorpayPaymentId ? 'PARTIALLY_PAID' : 'PENDING') : (razorpayPaymentId ? 'PAID' : 'PENDING'),
+        method: isPartialCod ? 'partial_cod' : isFullCod ? 'full_cod' : paymentMethod,
+        status: isPartialCod
+          ? isPaymentVerified
+            ? 'PARTIALLY_PAID'
+            : 'PENDING'
+          : isFullCod
+          ? 'PENDING_COD'
+          : isPaymentVerified
+          ? 'PAID'
+          : 'PENDING',
         advancePaid,
         balanceDue,
         razorpayPaymentId: razorpayPaymentId || null,

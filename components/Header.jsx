@@ -1,18 +1,66 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
 import { getCartItems, preloadCartImages, preloadPaymentImages } from './cart/cartStore';
 import LoginModal from './auth/LoginModal';
+import { FRESH_DROPS } from './home/freshDropsData';
+
+// Helper to highlight matching substrings in bold dark black, keeping other text in gray
+function renderHighlightedText(text, query) {
+  if (!query || !query.trim()) {
+    return <span>{text}</span>;
+  }
+  const terms = query.trim().split(/\s+/).filter(Boolean);
+  if (terms.length === 0) return <span>{text}</span>;
+
+  const escapedTerms = terms.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  const regex = new RegExp(`(${escapedTerms.join('|')})`, 'gi');
+  const parts = text.split(regex);
+
+  return (
+    <>
+      {parts.map((part, index) => {
+        const isMatch = terms.some((term) => term.toLowerCase() === part.toLowerCase());
+        if (isMatch) {
+          return (
+            <span key={index} className="text-[#111111] font-semibold">
+              {part}
+            </span>
+          );
+        }
+        return <span key={index}>{part}</span>;
+      })}
+    </>
+  );
+}
+
+// Built-in curated suggestions matching the exact Nike design reference and footwear collection
+const CURATED_SUGGESTIONS = [
+  { id: 'cs-1', title: "Jordan Flight Fleece Women's Pullover", slug: 'drop-aeroflex-violet', category: 'Fleece' },
+  { id: 'cs-2', title: "Nike Sportswear Women's Oversized Fleece Top", slug: 'drop-hybrid-women', category: 'Fleece' },
+  { id: 'cs-3', title: "Nike Club Men's French Terry Crew", slug: 'drop-hybrid-men', category: 'French Terry' },
+  { id: 'cs-4', title: "Nike Sportswear Club Men's Fleece Crew", slug: 'drop-hybrid-men', category: 'Fleece' },
+  { id: 'cs-5', title: "Nike Club Fleece Older Kids' Pullover Hoodie", slug: 'drop-hybrid-women', category: 'Fleece' },
+  { id: 'cs-6', title: "Nike Studio Fleece Lightweight Warmup Top", slug: 'drop-stride-tempo', category: 'Fleece' },
+  { id: 'cs-7', title: "Nike Miler Men's Dri-FIT French Terry Top", slug: 'drop-offpath-trail', category: 'French Terry' },
+  { id: 'cs-8', title: "Nike Sportswear Chill Terry Relaxed Hoodie", slug: 'drop-hybrid-women', category: 'Chill Terry' },
+  { id: 'cs-9', title: "SONU Hybrid RN Women's Road Running Shoes", slug: 'drop-hybrid-women', category: 'Running' },
+  { id: 'cs-10', title: "SONU Stealth RN Men's Road Running Shoes", slug: 'drop-hybrid-men', category: 'Running' },
+  { id: 'cs-11', title: "SONU Pure Low Minimalist Court Sneakers", slug: 'drop-court-studio', category: 'Sneaker' },
+  { id: 'cs-12', title: "SONU Off-Path Trail Running Shoes", slug: 'drop-offpath-trail', category: 'Trail Running' },
+];
 
 export default function Header() {
+  const router = useRouter();
   const [cartCount, setCartCount] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [dbProducts, setDbProducts] = useState([]);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const searchInputRef = useRef(null);
   const [loginModalStep, setLoginModalStep] = useState('mobile');
@@ -121,12 +169,149 @@ export default function Header() {
     }
   }, [menuOpen, searchOpen]);
 
+  // Load products from DB for real-time search
+  useEffect(() => {
+    let isMounted = true;
+    fetch('/api/products')
+      .then((res) => res.json())
+      .then((data) => {
+        if (isMounted && data?.success && Array.isArray(data.products)) {
+          setDbProducts(data.products);
+        }
+      })
+      .catch((err) => {
+        console.error('Error loading products for search:', err);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Compute all searchable suggestions
+  const allSuggestions = useMemo(() => {
+    const list = [];
+    const seenTitles = new Set();
+
+    // 1. Add DB products
+    if (Array.isArray(dbProducts)) {
+      dbProducts.forEach((p) => {
+        const slug = p.slug || p.itemId || String(p._id || '');
+        let title = (p.name || '').trim();
+        if (!title) return;
+        if (p.brand && !title.toLowerCase().includes(p.brand.toLowerCase()) && title.length < 15) {
+          title = `${p.brand} ${title}`;
+        }
+        if (p.category && !title.toLowerCase().includes(p.category.toLowerCase())) {
+          title = `${title} ${p.category}`;
+        }
+        if (!seenTitles.has(title.toLowerCase())) {
+          seenTitles.add(title.toLowerCase());
+          list.push({
+            id: `db-${slug}`,
+            slug,
+            title,
+            category: p.category || '',
+            sport: p.sport || '',
+            brand: p.brand || '',
+          });
+        }
+      });
+    }
+
+    // 2. Add Curated reference suggestions
+    CURATED_SUGGESTIONS.forEach((item) => {
+      if (!seenTitles.has(item.title.toLowerCase())) {
+        seenTitles.add(item.title.toLowerCase());
+        list.push({
+          id: item.id,
+          slug: item.slug,
+          title: item.title,
+          category: item.category || '',
+          sport: '',
+          brand: 'Nike',
+        });
+      }
+    });
+
+    // 3. Add Fresh Drops showcase items
+    if (Array.isArray(FRESH_DROPS)) {
+      FRESH_DROPS.forEach((p) => {
+        const title = `${p.name} ${p.category || ''}`.trim();
+        if (!seenTitles.has(title.toLowerCase())) {
+          seenTitles.add(title.toLowerCase());
+          list.push({
+            id: `fd-${p.slug}`,
+            slug: p.slug,
+            title,
+            category: p.category || '',
+            sport: '',
+            brand: 'SONU',
+          });
+        }
+      });
+    }
+
+    return list;
+  }, [dbProducts]);
+
+  // Dynamically filter suggestions against search query
+  const filteredSuggestions = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) {
+      return allSuggestions.slice(0, 8);
+    }
+
+    const words = q.split(/\s+/).filter(Boolean);
+
+    const matches = allSuggestions.filter((item) => {
+      const titleLower = item.title.toLowerCase();
+      const catLower = (item.category || '').toLowerCase();
+      const sportLower = (item.sport || '').toLowerCase();
+      const brandLower = (item.brand || '').toLowerCase();
+
+      return words.every(
+        (word) =>
+          titleLower.includes(word) ||
+          catLower.includes(word) ||
+          sportLower.includes(word) ||
+          brandLower.includes(word)
+      );
+    });
+
+    // Score & sort: items with direct title match come first
+    matches.sort((a, b) => {
+      const aTitleMatch = a.title.toLowerCase().includes(q);
+      const bTitleMatch = b.title.toLowerCase().includes(q);
+      if (aTitleMatch && !bTitleMatch) return -1;
+      if (!aTitleMatch && bTitleMatch) return 1;
+      return 0;
+    });
+
+    return matches.slice(0, 10);
+  }, [allSuggestions, searchQuery]);
+
+  function handleSuggestionClick(item) {
+    if (item.slug) {
+      router.push(`/product/${item.slug}`);
+    } else {
+      router.push(`/#shop?q=${encodeURIComponent(item.title)}`);
+    }
+    setSearchOpen(false);
+    setSearchQuery('');
+  }
+
   function handleSearchSubmit(e) {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/#shop?q=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchOpen(false);
+    const query = searchQuery.trim();
+    if (!query) return;
+
+    if (filteredSuggestions.length > 0 && filteredSuggestions[0].slug) {
+      router.push(`/product/${filteredSuggestions[0].slug}`);
+    } else {
+      router.push(`/#shop?q=${encodeURIComponent(query)}`);
     }
+    setSearchOpen(false);
+    setSearchQuery('');
   }
 
   const primaryMenuItems = [
@@ -472,10 +657,10 @@ export default function Header() {
 
       {/* Full-screen Search Window sliding in from the right with opacity transition */}
       <div
-        className={`fixed inset-0 z-50 bg-white flex flex-col transition-all duration-300 ease-out font-['Helvetica_Now_Text_Medium',sans-serif] ${
+        className={`fixed inset-0 z-50 bg-white flex flex-col transition-all duration-300 ease-out font-['Helvetica_Now_Text',sans-serif] ${
           searchOpen ? 'translate-x-0 opacity-100 pointer-events-auto' : 'translate-x-full opacity-0 pointer-events-none'
         }`}
-        style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+        style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
         role="dialog"
         aria-modal="true"
         aria-label="Search shoes"
@@ -506,11 +691,12 @@ export default function Header() {
             <input
               ref={searchInputRef}
               autoFocus
-              type="search"
+              type="text"
+              inputMode="search"
               placeholder="Search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-transparent text-[16px] text-[#111111] placeholder-[#757575] outline-none font-normal"
+              className="w-full bg-transparent text-[16px] text-[#111111] placeholder-[#757575] outline-none font-normal [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none [&::-webkit-search-cancel-button]:hidden"
               autoComplete="off"
               autoCorrect="off"
               spellCheck="false"
@@ -522,10 +708,23 @@ export default function Header() {
                   setSearchQuery('');
                   searchInputRef.current?.focus();
                 }}
-                className="text-[#707072] hover:text-[#111111] p-0.5 text-xs shrink-0"
+                className="w-5 h-5 flex items-center justify-center shrink-0 transition-colors"
                 aria-label="Clear search input"
               >
-                ✕
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="16px"
+                  height="16px"
+                  fill="none"
+                  stroke="#111111"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
               </button>
             )}
           </form>
@@ -543,8 +742,36 @@ export default function Header() {
           </button>
         </div>
 
-        {/* Full white canvas body */}
-        <div className="flex-1 w-full overflow-y-auto" />
+        {/* Suggestions Canvas Body strictly matching user design */}
+        <div className="flex-1 w-full overflow-y-auto px-6 sm:px-8 pt-4 sm:pt-6 pb-12 select-none">
+          <div className="w-full max-w-2xl">
+            {/* Header: Top Suggestions */}
+            <h3 className="text-[13px] sm:text-[14px] text-[#707072] font-normal mb-2 sm:mb-3">
+              Top Suggestions
+            </h3>
+
+            {/* Suggestions List */}
+            <ul className="flex flex-col w-full divide-y-0">
+              {filteredSuggestions.map((item) => (
+                <li key={item.id} className="w-full">
+                  <button
+                    type="button"
+                    onClick={() => handleSuggestionClick(item)}
+                    className="w-full text-left py-2.5 sm:py-3 text-[17px] sm:text-[18px] text-[#707072] hover:text-[#111111] transition-colors truncate block focus:outline-none focus:text-[#111111]"
+                    title={item.title}
+                  >
+                    {renderHighlightedText(item.title, searchQuery)}
+                  </button>
+                </li>
+              ))}
+              {filteredSuggestions.length === 0 && (
+                <li className="py-4 text-[#707072] text-[15px] sm:text-[16px]">
+                  No suggestions found for &ldquo;{searchQuery}&rdquo;
+                </li>
+              )}
+            </ul>
+          </div>
+        </div>
       </div>
 
       {/* Global Login Modal */}
