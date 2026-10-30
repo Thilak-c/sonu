@@ -7,7 +7,7 @@ const nextConfig = {
   allowedDevOrigins: ['*.trycloudflare.com'],
   experimental: {
     serverActions: {
-      allowedOrigins: ['*.trycloudflare.com'],
+      allowedOrigins: ['*.trycloudflare.com','187.127.188.196'],
     },
   },
   async headers() {
