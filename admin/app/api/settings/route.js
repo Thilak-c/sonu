@@ -62,7 +62,7 @@ const DEFAULT_SHIPROCKET = {
 
   // Courier
   courierPreference: 'Delhivery Surface Express',
-  isMockMode: true,
+  isMockMode: false,
 };
 
 const DEFAULT_CHECKOUT = {
@@ -230,7 +230,7 @@ export async function POST(request) {
         additionalHeightPerUnit: Number(body.shiprocket.additionalHeightPerUnit) || 12,
 
         courierPreference: (body.shiprocket.courierPreference || DEFAULT_SHIPROCKET.courierPreference).trim(),
-        isMockMode: body.shiprocket.isMockMode !== false,
+        isMockMode: false,
         updatedAt: new Date(),
       };
 

@@ -86,7 +86,7 @@ const DEFAULT_SHIPROCKET = {
   additionalHeightPerUnit: 12,
 
   courierPreference: 'Delhivery Surface Express',
-  isMockMode: true,
+  isMockMode: false,
 };
 
 const DEFAULT_CHECKOUT = {
@@ -1500,22 +1500,20 @@ export default function SettingsPage() {
                     />
 
                     <div className="flex flex-col justify-center">
-                      <label className="flex items-center justify-between p-3 h-[46px] rounded-[8px] border border-[#8d8d8d] bg-white cursor-pointer">
+                      <div className="flex items-center justify-between p-3 h-[46px] rounded-[8px] border border-[#8d8d8d] bg-neutral-50/80">
                         <div>
                           <p className="text-[12.5px] font-semibold text-[#111111]">
-                            Shiprocket Simulation Mode
+                            Shiprocket Production Environment
                           </p>
-                          <p className="text-[10.5px] text-neutral-400">
-                            Instant realistic mock AWB generation
+                          <p className="text-[10.5px] text-neutral-500">
+                            Direct live API booking & real courier dispatch
                           </p>
                         </div>
-                        <input
-                          type="checkbox"
-                          checked={shiprocket.isMockMode}
-                          onChange={(e) => handleShiprocketChange('isMockMode', e.target.checked)}
-                          className="w-4 h-4 accent-[#111111] cursor-pointer"
-                        />
-                      </label>
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          Live Production
+                        </span>
+                      </div>
                     </div>
                   </div>
 

@@ -27,7 +27,7 @@ export async function POST(request, context) {
       shipmentId = Math.floor(1000000 + Math.random() * 9000000);
     }
 
-    // Call Shiprocket to assign courier & generate AWB (Mocked or Live)
+    // Call Shiprocket Production to assign courier & generate real AWB
     const awbResult = await assignShiprocketAWB(shipmentId);
 
     // Trigger Mock WhatsApp notification
@@ -64,7 +64,7 @@ export async function POST(request, context) {
       'shiprocket.courierCompanyId': awbResult.courierCompanyId,
       'shiprocket.routingCode': awbResult.routingCode,
       'shiprocket.awbAssignedAt': new Date(),
-      'shiprocket.isSimulated': !!awbResult.isSimulated,
+      'shiprocket.isSimulated': false,
       updatedAt: new Date(),
     };
 

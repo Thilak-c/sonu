@@ -46,27 +46,18 @@ export default function Narzo50ProPage() {
       style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
     >
       {/* Modal Card */}
-      <div className="w-full max-w-md p-6 sm:p-8 rounded-3xl bg-white border border-neutral-200 shadow-2xl text-center space-y-6">
-        <div className="w-12 h-12 rounded-full bg-neutral-100 flex items-center justify-center mx-auto text-[#111111]">
-          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-            <path d="M7 11V7a5 5 0 0110 0v4" />
-          </svg>
-        </div>
+      <div className="w-full max-w-md  text-center space-y-6">
+     
 
         <div>
-          <span className="text-[11px] uppercase tracking-[0.2em] font-semibold text-neutral-400 block mb-1">
-            VIP Gateway Access
-          </span>
+      
           <h1
             className="text-[22px] sm:text-[24px] font-bold text-[#111111] tracking-tight font-['Helvetica_Now_Text_Medium',sans-serif]"
             style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
           >
-            Enter 10-Digit Access PIN
+            Enter 10-Digit PIN
           </h1>
-          <p className="text-[13px] text-neutral-500 mt-1">
-            Provide the authorized unlock PIN to bypass the Launching Soon restriction and access the entire store.
-          </p>
+       
         </div>
 
         {isUnlocked ? (
@@ -106,3 +97,4 @@ export default function Narzo50ProPage() {
     </div>
   );
 }
+

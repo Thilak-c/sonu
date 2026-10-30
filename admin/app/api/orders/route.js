@@ -107,14 +107,14 @@ export async function POST(request) {
       updatedAt: new Date(),
     };
 
-    // Auto-create mock Shiprocket shipment
+    // Register shipment on Shiprocket Production
     const srData = await createShiprocketOrder(testOrder);
     testOrder.shiprocket = {
       orderId: srData.order_id,
       shipmentId: srData.shipment_id,
       status: 'NEW',
       channelId: '8506269',
-      isSimulated: true,
+      isSimulated: false,
       createdAt: new Date(),
     };
 

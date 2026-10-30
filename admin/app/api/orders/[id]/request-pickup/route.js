@@ -27,10 +27,10 @@ export async function POST(request, context) {
       shipmentId = Math.floor(1000000 + Math.random() * 9000000);
     }
 
-    // 1. Request pickup from Shiprocket (Mock or Live)
+    // 1. Request pickup from Shiprocket Production
     const pickupResult = await requestShiprocketPickup(shipmentId);
 
-    // 2. Generate shipping label PDF link
+    // 2. Generate shipping label PDF link from Shiprocket Production
     const labelResult = await generateShiprocketLabel(shipmentId);
 
     // 3. Trigger Mock WhatsApp Notification

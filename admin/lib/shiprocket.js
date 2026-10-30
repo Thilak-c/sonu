@@ -1,16 +1,10 @@
-// Shiprocket API Client & Real-time Serviceability Engine for Sonu Shoe
-// Supports mock/simulation mode for reliable testing and staging
-
+// Shiprocket Production API Client & Real-time Serviceability Engine for Sonu Shoe
 import { getDb } from './mongodb';
-
-const IS_MOCK = process.env.MOCK_SHIPROCKET === 'true';
 
 let cachedToken = null;
 let tokenExpiry = null;
 
 export async function getShiprocketToken() {
-  if (IS_MOCK) return 'mock_shiprocket_token_xyz';
-
   // 1. Fast in-memory check
   if (cachedToken && tokenExpiry && Date.now() < tokenExpiry) {
     return cachedToken;
@@ -33,36 +27,31 @@ export async function getShiprocketToken() {
   const email = process.env.SHIPROCKET_EMAIL || 'flowify.sonushoe@gmail.com';
   const password = process.env.SHIPROCKET_PASSWORD || 'BkA4ZyxjCowt&&udq*O1Yklg^rpg%X&s';
 
-  try {
-    const res = await fetch(`${base}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
+  const res = await fetch(`${base}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  });
 
-    const data = await res.json();
-    if (!res.ok || !data.token) {
-      throw new Error(data.message || 'Failed to authenticate with Shiprocket');
-    }
-
-    cachedToken = data.token;
-    tokenExpiry = Date.now() + 23 * 60 * 60 * 1000;
-
-    // Persist to MongoDB for other instances
-    try {
-      const db = await getDb();
-      await db.collection('settings').updateOne(
-        { _id: 'shiprocket_auth_token' },
-        { $set: { token: cachedToken, expiry: tokenExpiry, updatedAt: new Date() } },
-        { upsert: true }
-      );
-    } catch (saveErr) {}
-
-    return cachedToken;
-  } catch (err) {
-    console.warn('[Shiprocket Auth Fallback to Mock]:', err.message);
-    return 'mock_shiprocket_token_xyz';
+  const data = await res.json();
+  if (!res.ok || !data.token) {
+    throw new Error(data.message || 'Failed to authenticate with Shiprocket Production API');
   }
+
+  cachedToken = data.token;
+  tokenExpiry = Date.now() + 23 * 60 * 60 * 1000;
+
+  // Persist to MongoDB for other instances
+  try {
+    const db = await getDb();
+    await db.collection('settings').updateOne(
+      { _id: 'shiprocket_auth_token' },
+      { $set: { token: cachedToken, expiry: tokenExpiry, updatedAt: new Date() } },
+      { upsert: true }
+    );
+  } catch (saveErr) {}
+
+  return cachedToken;
 }
 
 export async function checkShiprocketServiceability(deliveryPincode, pickupPincode = null, weight = '0.9') {
@@ -83,22 +72,6 @@ export async function checkShiprocketServiceability(deliveryPincode, pickupPinco
     console.error('[Postal Pincode Lookup Error]:', postErr.message);
   }
 
-  if (IS_MOCK) {
-    return {
-      deliverable: true,
-      pincode: deliveryPincode,
-      city: postCity || 'Patna',
-      state: postState || 'Bihar',
-      etd: 'In 2-3 business days',
-      estimatedDays: '2-3',
-      courierName: 'Delhivery Surface Express',
-      codAvailable: true,
-      courierCount: 3,
-      message: 'Delivery available via Delhivery Surface Express',
-      isSimulated: true,
-    };
-  }
-
   const pickup = pickupPincode || process.env.SHIPROCKET_PICKUP_PINCODE || '800001';
   const base = process.env.SHIPROCKET_BASE_URL || 'https://apiv2.shiprocket.in/v1/external';
 
@@ -107,10 +80,6 @@ export async function checkShiprocketServiceability(deliveryPincode, pickupPinco
 
   try {
     const token = await getShiprocketToken();
-    if (!token || token === 'mock_shiprocket_token_xyz') {
-      throw new Error('Failed to obtain authenticated token from Shiprocket');
-    }
-
     const query = new URLSearchParams({
       pickup_postcode: pickup,
       delivery_postcode: deliveryPincode,
@@ -174,26 +143,11 @@ export async function checkShiprocketServiceability(deliveryPincode, pickupPinco
 }
 
 /**
- * Creates/registers an order on Shiprocket
+ * Creates/registers an order on Shiprocket Production
  */
 export async function createShiprocketOrder(order) {
-  if (IS_MOCK) {
-    const randomShipmentId = Math.floor(1000000 + Math.random() * 9000000);
-    const randomOrderId = Math.floor(10000000 + Math.random() * 90000000);
-    return {
-      order_id: randomOrderId,
-      shipment_id: randomShipmentId,
-      status: 'NEW',
-      status_code: 1,
-      awb_code: null,
-      courier_company_id: null,
-      courier_name: null,
-      isSimulated: true,
-    };
-  }
-
   const base = process.env.SHIPROCKET_BASE_URL || 'https://apiv2.shiprocket.in/v1/external';
-  const pickupLocation = process.env.SHIPROCKET_PICKUP_LOCATION || 'Home';
+  const pickupLocation = process.env.SHIPROCKET_PICKUP_LOCATION || 'Patna One Plaza Hub';
   const token = await getShiprocketToken();
 
   const customer = order.customer || {};
@@ -262,87 +216,61 @@ export async function createShiprocketOrder(order) {
     weight: 0.9,
   };
 
-  try {
-    const res = await fetch(`${base}/orders/create/adhoc`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(payload),
-    });
+  const res = await fetch(`${base}/orders/create/adhoc`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || 'Failed to create Shiprocket order');
-    return data;
-  } catch (err) {
-    console.warn('[Shiprocket Order Fallback to Mock]:', err.message);
-    return {
-      order_id: Math.floor(10000000 + Math.random() * 90000000),
-      shipment_id: Math.floor(1000000 + Math.random() * 9000000),
-      status: 'NEW',
-      status_code: 1,
-      isSimulated: true,
-    };
-  }
-}
-
-/**
- * Assigns AWB and courier partner to a shipment
- */
-export async function assignShiprocketAWB(shipmentId, courierId = null) {
-  const simulatedAwb = `DEL${Math.floor(100000000 + Math.random() * 900000000)}`;
-
-  if (IS_MOCK) {
-    return {
-      success: true,
-      awbCode: simulatedAwb,
-      courierName: 'Delhivery Surface Express',
-      courierCompanyId: 10,
-      routingCode: 'PAT-DEL-800013',
-      isSimulated: true,
-    };
-  }
-
-  const base = process.env.SHIPROCKET_BASE_URL || 'https://apiv2.shiprocket.in/v1/external';
-  try {
-    const token = await getShiprocketToken();
-    const res = await fetch(`${base}/courier/assign/awb`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        shipment_id: Number(shipmentId),
-        ...(courierId ? { courier_id: Number(courierId) } : {}),
-      }),
-    });
-
-    const data = await res.json();
-    if (res.ok && data.response?.data?.awb_code) {
-      const respData = data.response.data;
-      return {
-        success: true,
-        awbCode: respData.awb_code,
-        courierName: respData.courier_name || 'Delhivery Surface Express',
-        courierCompanyId: respData.courier_company_id,
-        routingCode: respData.routing_code,
-        isSimulated: false,
-      };
-    }
-  } catch (err) {
-    console.warn('[Shiprocket AWB Fallback to Mock]:', err.message);
+  const data = await res.json();
+  if (!res.ok) {
+    console.error('[Shiprocket Order Creation Error]:', data);
+    throw new Error(data.message || 'Failed to create Shiprocket production order');
   }
 
   return {
-    success: true,
-    awbCode: simulatedAwb,
-    courierName: 'Delhivery Surface Express',
-    courierCompanyId: 10,
-    routingCode: 'PAT-DEL-800013',
-    isSimulated: true,
+    ...data,
+    isSimulated: false,
   };
+}
+
+/**
+ * Assigns AWB and courier partner to a shipment in Production
+ */
+export async function assignShiprocketAWB(shipmentId, courierId = null) {
+  const base = process.env.SHIPROCKET_BASE_URL || 'https://apiv2.shiprocket.in/v1/external';
+  const token = await getShiprocketToken();
+
+  const res = await fetch(`${base}/courier/assign/awb`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      shipment_id: Number(shipmentId),
+      ...(courierId ? { courier_id: Number(courierId) } : {}),
+    }),
+  });
+
+  const data = await res.json();
+  if (res.ok && data.response?.data?.awb_code) {
+    const respData = data.response.data;
+    return {
+      success: true,
+      awbCode: respData.awb_code,
+      courierName: respData.courier_name || 'Delhivery Surface Express',
+      courierCompanyId: respData.courier_company_id,
+      routingCode: respData.routing_code,
+      isSimulated: false,
+    };
+  }
+
+  const errMsg = data.message || data.response?.data?.awb_assign_error || 'Failed to assign AWB via Shiprocket Production';
+  throw new Error(errMsg);
 }
 
 /**
@@ -350,22 +278,43 @@ export async function assignShiprocketAWB(shipmentId, courierId = null) {
  */
 export async function requestShiprocketPickup(shipmentId, pickupDate = null) {
   const formattedDate = pickupDate || new Date().toISOString().split('T')[0];
-  const simulatedToken = `PKP-${Date.now().toString().slice(-6)}`;
+  const base = process.env.SHIPROCKET_BASE_URL || 'https://apiv2.shiprocket.in/v1/external';
+  const token = await getShiprocketToken();
 
-  if (IS_MOCK) {
+  const res = await fetch(`${base}/orders/take-pickup`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      shipment_id: [Number(shipmentId)],
+      pickup_date: [formattedDate],
+    }),
+  });
+
+  const data = await res.json();
+  if (res.ok) {
     return {
       success: true,
       pickupStatus: 'SCHEDULED',
-      pickupToken: simulatedToken,
+      pickupToken: data.response?.data?.pickup_token_number || data.pickup_token_number || 'SCHEDULED',
       pickupScheduledDate: formattedDate,
-      isSimulated: true,
+      isSimulated: false,
     };
   }
 
+  throw new Error(data.message || 'Failed to schedule courier pickup with Shiprocket Production');
+}
+
+/**
+ * Generates shipping label PDF link from Shiprocket Production
+ */
+export async function generateShiprocketLabel(shipmentId) {
   const base = process.env.SHIPROCKET_BASE_URL || 'https://apiv2.shiprocket.in/v1/external';
   try {
     const token = await getShiprocketToken();
-    const res = await fetch(`${base}/orders/take-pickup`, {
+    const res = await fetch(`${base}/courier/generate/label`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -373,46 +322,30 @@ export async function requestShiprocketPickup(shipmentId, pickupDate = null) {
       },
       body: JSON.stringify({
         shipment_id: [Number(shipmentId)],
-        pickup_date: [formattedDate],
       }),
     });
 
     const data = await res.json();
-    if (res.ok) {
-      return {
-        success: true,
-        pickupStatus: 'SCHEDULED',
-        pickupToken: data.response?.data?.pickup_token_number || simulatedToken,
-        pickupScheduledDate: formattedDate,
-        isSimulated: false,
-      };
-    }
+    const labelUrl = data.label_url || data.response?.label_url || null;
+    return {
+      success: !!labelUrl,
+      labelUrl,
+      message: labelUrl ? undefined : (data.message || data.response || 'No label URL generated'),
+      isSimulated: false,
+    };
   } catch (err) {
-    console.warn('[Shiprocket Pickup Fallback to Mock]:', err.message);
+    console.error('[Shiprocket Label Generation Error]:', err.message);
+    return {
+      success: false,
+      labelUrl: null,
+      error: err.message,
+      isSimulated: false,
+    };
   }
-
-  return {
-    success: true,
-    pickupStatus: 'SCHEDULED',
-    pickupToken: simulatedToken,
-    pickupScheduledDate: formattedDate,
-    isSimulated: true,
-  };
 }
 
 /**
- * Generates shipping label PDF link
- */
-export async function generateShiprocketLabel(shipmentId) {
-  return {
-    success: true,
-    labelUrl: `https://apiv2.shiprocket.in/generate/label/sample_${shipmentId}.pdf`,
-    isSimulated: true,
-  };
-}
-
-/**
- * Tracks shipment
+ * Tracks shipment using live Shiprocket AWB tracking
  */
 export async function trackShiprocketOrder({ orderId, shipmentId, awbCode }) {
   if (!awbCode) {
@@ -434,9 +367,31 @@ export async function trackShiprocketOrder({ orderId, shipmentId, awbCode }) {
         shipment_track_activities: [
           { date: new Date().toISOString(), activity: 'Order placed & preparing for dispatch', location: 'Sonu Studio, Patna' },
         ],
-        isSimulated: true,
+        isSimulated: false,
       },
     };
+  }
+
+  const base = process.env.SHIPROCKET_BASE_URL || 'https://apiv2.shiprocket.in/v1/external';
+  try {
+    const token = await getShiprocketToken();
+    const res = await fetch(`${base}/courier/track/awb/${encodeURIComponent(awbCode)}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await res.json();
+    if (res.ok && data.tracking_data) {
+      return {
+        ...data,
+        isSimulated: false,
+      };
+    }
+  } catch (err) {
+    console.error('[Shiprocket Tracking Error]:', err.message);
   }
 
   return {
@@ -450,24 +405,43 @@ export async function trackShiprocketOrder({ orderId, shipmentId, awbCode }) {
           status: 'SHIPPED',
           origin: 'Patna Hub',
           destination: 'Customer City',
-          courier_name: 'Delhivery Surface Express',
+          courier_name: 'Courier Partner',
           awb_code: awbCode,
         },
       ],
       shipment_track_activities: [
         { date: new Date().toISOString(), activity: 'In Transit - Forward Journey', location: 'Patna Hub' },
-        { date: new Date(Date.now() - 3600000).toISOString(), activity: 'Package Picked Up from Sonu Studio', location: 'Patna' },
-        { date: new Date(Date.now() - 7200000).toISOString(), activity: 'AWB Assigned & Label Printed', location: 'Patna' },
       ],
-      isSimulated: true,
+      isSimulated: false,
     },
   };
 }
 
 export async function cancelShiprocketOrder(shiprocketOrderId) {
-  return {
-    success: true,
-    message: 'Shiprocket order cancelled (Mock)',
-    isSimulated: true,
-  };
+  const base = process.env.SHIPROCKET_BASE_URL || 'https://apiv2.shiprocket.in/v1/external';
+  try {
+    const token = await getShiprocketToken();
+    const res = await fetch(`${base}/orders/cancel`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ ids: [Number(shiprocketOrderId)] }),
+    });
+
+    const data = await res.json();
+    return {
+      success: res.ok,
+      message: data.message || (res.ok ? 'Order cancelled in Shiprocket Production' : 'Cancellation failed'),
+      isSimulated: false,
+    };
+  } catch (err) {
+    console.error('[Shiprocket Cancel Error]:', err.message);
+    return {
+      success: false,
+      message: err.message,
+      isSimulated: false,
+    };
+  }
 }
