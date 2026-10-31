@@ -64,9 +64,6 @@ export default function ShopBySportSection() {
                   />
                 ) : (
                   <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center">
-                    <span className="text-[12px] uppercase tracking-[0.2em] font-medium text-[#707072] mb-2 font-['Helvetica_Now_Text_Medium',sans-serif]">
-                      Coming Soon
-                    </span>
                     <p
                       className="text-[20px] sm:text-[22px] font-medium text-[#111111] leading-snug font-['Helvetica_Now_Text_Medium',sans-serif]"
                       style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}

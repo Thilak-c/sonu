@@ -57,7 +57,7 @@ const CURATED_SUGGESTIONS = [
 export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
-  const isLaunchingSoon = pathname === '/launching-soon';
+  const isLaunchingSoon = false;
   const [cartCount, setCartCount] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);

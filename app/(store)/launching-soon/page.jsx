@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export function OdometerNumber({ value, className = '' }) {
   const digits = value.toString().split('');
@@ -111,10 +112,15 @@ function getTimeUntilMidnight() {
 }
 
 export default function LaunchingSoonPage() {
+  const router = useRouter();
   const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0, isLive: false });
   const [mounted, setMounted] = useState(false);
   const canvasRef = useRef(null);
   const confettiFiredRef = useRef(false);
+
+  useEffect(() => {
+    router.replace('/');
+  }, [router]);
 
   useEffect(() => {
     setMounted(true);
