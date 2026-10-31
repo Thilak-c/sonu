@@ -177,7 +177,7 @@ function FloatingInput({
     if (autoSelectOnFocus || type === 'number') {
       try {
         e.target.select();
-      } catch (err) {}
+      } catch (err) { }
     }
     if (onFocus) onFocus(e);
   };
@@ -186,7 +186,7 @@ function FloatingInput({
     if (autoSelectOnFocus || type === 'number') {
       try {
         e.target.select();
-      } catch (err) {}
+      } catch (err) { }
     }
     if (onClick) onClick(e);
   };
@@ -195,22 +195,17 @@ function FloatingInput({
     <div className={`w-full ${className}`}>
       <div
         onClick={() => !disabled && inputRef.current?.focus()}
-        className={`relative w-full ${
-          compact ? 'h-[44px] px-3 rounded-[6px]' : 'h-[52px] sm:h-[54px] px-4 rounded-[8px]'
-        } border transition-colors cursor-text bg-white flex items-center ${
-          isFocused ? 'border-[#111111]' : 'border-[#8d8d8d]'
-        } ${disabled ? 'bg-neutral-50/70 cursor-not-allowed opacity-75' : ''}`}
+        className={`relative w-full ${compact ? 'h-[44px] px-3 rounded-[6px]' : 'h-[52px] sm:h-[54px] px-4 rounded-[8px]'
+          } border transition-colors cursor-text bg-white flex items-center ${isFocused ? 'border-[#111111]' : 'border-[#8d8d8d]'
+          } ${disabled ? 'bg-neutral-50/70 cursor-not-allowed opacity-75' : ''}`}
       >
         <span
-          className={`absolute transition-all duration-200 ease-out pointer-events-none select-none truncate max-w-[calc(100%-14px)] ${
-            isFloating
-              ? `-top-2 left-2.5 px-1 bg-white leading-none z-10 ${
-                  compact ? 'text-[10.5px] text-[#111111] font-medium' : 'text-[12px] text-[#111111] font-normal'
-                }`
-              : `top-1/2 -translate-y-1/2 left-3 ${
-                  compact ? 'text-[12.5px] text-[#707072]' : 'text-[14px] sm:text-[15px] text-[#707072]'
-                }`
-          }`}
+          className={`absolute transition-all duration-200 ease-out pointer-events-none select-none truncate max-w-[calc(100%-14px)] ${isFloating
+              ? `-top-2 left-2.5 px-1 bg-white leading-none z-10 ${compact ? 'text-[10.5px] text-[#111111] font-medium' : 'text-[12px] text-[#111111] font-normal'
+              }`
+              : `top-1/2 -translate-y-1/2 left-3 ${compact ? 'text-[12.5px] text-[#707072]' : 'text-[14px] sm:text-[15px] text-[#707072]'
+              }`
+            }`}
           style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
         >
           {label}
@@ -220,9 +215,8 @@ function FloatingInput({
         <div className="flex items-center w-full min-w-0">
           {prefix && isFloating && (
             <span
-              className={`${
-                compact ? 'text-[13px]' : 'text-[14px] sm:text-[15px]'
-              } text-[#111111] font-normal select-none pr-1 shrink-0`}
+              className={`${compact ? 'text-[13px]' : 'text-[14px] sm:text-[15px]'
+                } text-[#111111] font-normal select-none pr-1 shrink-0`}
               style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
             >
               {prefix}
@@ -243,9 +237,8 @@ function FloatingInput({
             onFocus={handleFocus}
             onClick={handleClick}
             onBlur={() => setIsFocused(false)}
-            className={`w-full bg-transparent ${
-              compact ? 'text-[13px]' : 'text-[14px] sm:text-[15px]'
-            } text-[#111111] font-normal outline-none p-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
+            className={`w-full bg-transparent ${compact ? 'text-[13px]' : 'text-[14px] sm:text-[15px]'
+              } text-[#111111] font-normal outline-none p-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
             style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
           />
         </div>
@@ -316,16 +309,14 @@ function FloatingSelect({
     <div ref={containerRef} className={`relative w-full ${className}`}>
       <div
         onClick={() => setIsOpen((prev) => !prev)}
-        className={`relative w-full h-[52px] sm:h-[54px] px-4 rounded-[8px] border transition-colors cursor-pointer bg-white flex items-center justify-between ${
-          isOpen ? 'border-[#111111]' : 'border-[#8d8d8d]'
-        }`}
+        className={`relative w-full h-[52px] sm:h-[54px] px-4 rounded-[8px] border transition-colors cursor-pointer bg-white flex items-center justify-between ${isOpen ? 'border-[#111111]' : 'border-[#8d8d8d]'
+          }`}
       >
         <span
-          className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${
-            isFloating
+          className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${isFloating
               ? '-top-2.5 left-3 px-1.5 bg-white text-[12px] text-[#111111] font-normal leading-none z-10'
               : 'top-1/2 -translate-y-1/2 left-4 text-[14px] sm:text-[15px] text-[#707072]'
-          }`}
+            }`}
           style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
         >
           {label}
@@ -333,18 +324,16 @@ function FloatingSelect({
         </span>
 
         <span
-          className={`text-[14px] sm:text-[15px] text-[#111111] font-normal truncate mr-2 ${
-            value ? 'opacity-100' : 'opacity-0'
-          }`}
+          className={`text-[14px] sm:text-[15px] text-[#111111] font-normal truncate mr-2 ${value ? 'opacity-100' : 'opacity-0'
+            }`}
           style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
         >
           {value || 'Select'}
         </span>
 
         <svg
-          className={`w-3.5 h-3.5 text-[#111111] transition-transform duration-200 shrink-0 ${
-            isOpen ? 'rotate-180' : ''
-          }`}
+          className={`w-3.5 h-3.5 text-[#111111] transition-transform duration-200 shrink-0 ${isOpen ? 'rotate-180' : ''
+            }`}
           viewBox="0 0 24 24"
           fill="currentColor"
         >
@@ -366,11 +355,10 @@ function FloatingSelect({
                     onSelect(optVal);
                     setIsOpen(false);
                   }}
-                  className={`group w-full flex items-center justify-between px-4 py-2.5 text-[14px] sm:text-[15px] transition-colors cursor-pointer select-none ${
-                    isSelected
-                      ? 'bg-[#f5f5f5] text-[#111111] font-medium'
+                  className={`group w-full flex items-center justify-between px-4 py-2.5 text-[14px] sm:text-[15px] transition-colors cursor-pointer select-none ${isSelected
+                      ? '  text-[#111111] font-medium'
                       : 'text-[#222222] hover:bg-[#fafafa]'
-                  }`}
+                    }`}
                   style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
                 >
                   <span className="truncate flex-1 mr-2">{optVal}</span>
@@ -486,16 +474,14 @@ function FloatingTextarea({
     <div className={`w-full ${className}`}>
       <div
         onClick={() => textareaRef.current?.focus()}
-        className={`relative w-full rounded-[8px] border p-3.5 pt-3.5 transition-colors cursor-text bg-white ${
-          isFocused ? 'border-[#111111]' : 'border-[#8d8d8d]'
-        }`}
+        className={`relative w-full rounded-[8px] border p-3.5 pt-3.5 transition-colors cursor-text bg-white ${isFocused ? 'border-[#111111]' : 'border-[#8d8d8d]'
+          }`}
       >
         <span
-          className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${
-            isFloating
+          className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${isFloating
               ? '-top-2.5 left-3 px-1.5 bg-white text-[12px] text-[#111111] font-normal leading-none z-10'
               : 'top-3.5 left-4 text-[14px] sm:text-[15px] text-[#707072]'
-          }`}
+            }`}
           style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
         >
           {label}
@@ -533,11 +519,10 @@ function LoginStyleCheckbox({ checked, onChange, title, subtitle }) {
       className="flex items-start gap-3 cursor-pointer group select-none py-1"
     >
       <div
-        className={`w-5 h-5 rounded-[4px] flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
-          checked
+        className={`w-5 h-5 rounded-[4px] flex items-center justify-center shrink-0 mt-0.5 transition-colors ${checked
             ? 'bg-[#111111] text-white border border-[#111111]'
             : 'bg-white border-2 border-[#8d8d8d] group-hover:border-[#111111]'
-        }`}
+          }`}
       >
         {checked && (
           <svg
@@ -1688,7 +1673,7 @@ function ProductsContent() {
           </div>
 
           <div className="flex items-center gap-2.5 flex-wrap">
-        
+
 
             <button
               type="button"
@@ -1874,11 +1859,10 @@ function ProductsContent() {
                         <button
                           type="button"
                           onClick={toggleSelectAll}
-                          className={`w-5 h-5 rounded-[5px] flex items-center justify-center shrink-0 cursor-pointer transition-colors ${
-                            selectedSlugs.length > 0
+                          className={`w-5 h-5 rounded-[5px] flex items-center justify-center shrink-0 cursor-pointer transition-colors ${selectedSlugs.length > 0
                               ? 'bg-[#111111] border border-[#111111] text-white'
                               : 'border border-neutral-300 bg-white hover:border-neutral-400'
-                          }`}
+                            }`}
                           title={selectedSlugs.length === filteredAndSortedProducts.length ? 'Deselect all' : 'Select all'}
                         >
                           {selectedSlugs.length === filteredAndSortedProducts.length && filteredAndSortedProducts.length > 0 ? (
@@ -2003,9 +1987,8 @@ function ProductsContent() {
                     return (
                       <tr
                         key={slug}
-                        className={`hover:bg-neutral-50/70 transition-colors ${
-                          isSelected ? 'bg-neutral-50/90' : isHidden ? 'bg-neutral-50/30 opacity-75' : ''
-                        }`}
+                        className={`hover:bg-neutral-50/70 transition-colors ${isSelected ? 'bg-neutral-50/90' : isHidden ? 'bg-neutral-50/30 opacity-75' : ''
+                          }`}
                       >
                         {/* SKU */}
                         <td className="py-3.5 px-4 border-r border-neutral-200 whitespace-nowrap">
@@ -2013,11 +1996,10 @@ function ProductsContent() {
                             <button
                               type="button"
                               onClick={(e) => toggleSelectRow(slug, e)}
-                              className={`w-5 h-5 rounded-[5px] flex items-center justify-center shrink-0 cursor-pointer transition-colors ${
-                                isSelected
+                              className={`w-5 h-5 rounded-[5px] flex items-center justify-center shrink-0 cursor-pointer transition-colors ${isSelected
                                   ? 'bg-[#111111] border border-[#111111] text-white'
                                   : 'border border-neutral-300 bg-white hover:border-neutral-400'
-                              }`}
+                                }`}
                             >
                               {isSelected && <Check className="w-3.5 h-3.5 stroke-[2.5]" />}
                             </button>
@@ -2061,13 +2043,12 @@ function ProductsContent() {
                         {/* Type / Role */}
                         <td className="py-3.5 px-4 border-r border-neutral-200 whitespace-nowrap">
                           <span
-                            className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11.5px] font-medium capitalize ${
-                              prod.role === 'bundle'
+                            className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11.5px] font-medium capitalize ${prod.role === 'bundle'
                                 ? 'bg-purple-50 text-purple-700 border border-purple-200'
                                 : prod.role === 'accessory'
-                                ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                                : 'bg-neutral-100 text-neutral-700'
-                            }`}
+                                  ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                                  : 'bg-neutral-100 text-neutral-700'
+                              }`}
                           >
                             {prod.role === 'bundle' ? 'Bundle' : prod.role === 'accessory' ? 'Accessory' : 'Standard'}
                           </span>
@@ -2095,9 +2076,8 @@ function ProductsContent() {
                                     </span>
                                     <span className="text-neutral-400 font-normal">:</span>
                                     <span
-                                      className={`font-semibold ${
-                                        item.stock === 0 ? 'text-rose-500' : 'text-neutral-900'
-                                      }`}
+                                      className={`font-semibold ${item.stock === 0 ? 'text-rose-500' : 'text-neutral-900'
+                                        }`}
                                     >
                                       {item.stock}
                                     </span>
@@ -2159,15 +2139,13 @@ function ProductsContent() {
                               role="switch"
                               aria-checked={!isHidden}
                               onClick={() => handleToggleHide(slug, isHidden)}
-                              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors cursor-pointer border ${
-                                !isHidden ? 'bg-[#111111] border-neutral-900' : 'bg-neutral-200 border-neutral-300'
-                              }`}
+                              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors cursor-pointer border ${!isHidden ? 'bg-[#111111] border-neutral-900' : 'bg-neutral-200 border-neutral-300'
+                                }`}
                               title={!isHidden ? 'Deactivate product' : 'Activate product'}
                             >
                               <span
-                                className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${
-                                  !isHidden ? 'translate-x-4.5' : 'translate-x-0.5'
-                                }`}
+                                className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${!isHidden ? 'translate-x-4.5' : 'translate-x-0.5'
+                                  }`}
                               />
                             </button>
 
@@ -2211,8 +2189,8 @@ function ProductsContent() {
           </div>
         ) : products.length === 0 ? (
           <div className="py-20 text-center min-h-[70vh] bg-white  p-8">
-          
-        
+
+
             <button
               type="button"
               onClick={openCreateModal}
@@ -2247,7 +2225,7 @@ function ProductsContent() {
             {/* Drawer Header */}
             <div className="px-4 sm:px-6 py-3.5 sm:py-4.5 border-b border-[#e5e5e5] bg-white flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-                <div className="w-9 h-9 rounded-full bg-[#f5f5f5] flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 rounded-full   flex items-center justify-center shrink-0">
                   <Sliders className="w-4 h-4 text-[#111111]" />
                 </div>
                 <div className="min-w-0">
@@ -2259,13 +2237,12 @@ function ProductsContent() {
                       {modalMode === 'create' ? 'Add Product' : 'Edit Product'}
                     </h3>
                     <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium capitalize ${
-                        formData.role === 'bundle'
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium capitalize ${formData.role === 'bundle'
                           ? 'bg-purple-50 text-purple-700 border border-purple-200'
                           : formData.role === 'accessory'
-                          ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                          : 'bg-[#f5f5f5] text-[#111111]'
-                      }`}
+                            ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                            : '  text-[#111111]'
+                        }`}
                     >
                       {formData.role === 'bundle' ? 'Bundle' : formData.role === 'accessory' ? 'Accessory' : 'Standard'}
                     </span>
@@ -2309,11 +2286,10 @@ function ProductsContent() {
                     key={tab.id}
                     type="button"
                     onClick={() => setActiveDrawerTab(tab.id)}
-                    className={`flex items-center gap-2 px-3.5 py-3 text-[13px] font-medium whitespace-nowrap border-b-2 transition-colors cursor-pointer ${
-                      isActive
+                    className={`flex items-center gap-2 px-3.5 py-3 text-[13px] font-medium whitespace-nowrap border-b-2 transition-colors cursor-pointer ${isActive
                         ? 'border-[#111111] text-[#111111] font-semibold'
                         : 'border-transparent text-[#707072] hover:text-[#111111]'
-                    }`}
+                      }`}
                     style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
                   >
                     <span>{tab.label}</span>
@@ -2350,11 +2326,10 @@ function ProductsContent() {
                               key={role.id}
                               type="button"
                               onClick={() => setFormData({ ...formData, role: role.id })}
-                              className={`p-3.5 rounded-[10px] border text-left cursor-pointer transition-all ${
-                                isSelected
+                              className={`p-3.5 rounded-[10px] border text-left cursor-pointer transition-all ${isSelected
                                   ? 'border-[#111111] bg-white shadow-sm ring-1 ring-[#111111]'
                                   : 'border-[#8d8d8d] bg-white hover:border-[#111111]'
-                              }`}
+                                }`}
                             >
                               <div className="flex items-center justify-between mb-1">
                                 <span
@@ -2484,11 +2459,10 @@ function ProductsContent() {
                             key={g.id}
                             type="button"
                             onClick={() => setFormData({ ...formData, gender: g.id })}
-                            className={`px-5 py-2 rounded-full text-[13px] transition-all cursor-pointer ${
-                              formData.gender === g.id
+                            className={`px-5 py-2 rounded-full text-[13px] transition-all cursor-pointer ${formData.gender === g.id
                                 ? 'bg-[#111111] text-white font-medium shadow-sm'
-                                : 'bg-[#f5f5f5] text-[#707072] hover:text-[#111111] hover:bg-[#ebebeb]'
-                            }`}
+                                : '  text-[#707072] hover:text-[#111111] hover:bg-[#ebebeb]'
+                              }`}
                             style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
                           >
                             {g.label}
@@ -2504,7 +2478,7 @@ function ProductsContent() {
                           {formData.tags.map((tag) => (
                             <span
                               key={tag}
-                              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] bg-[#f5f5f5] text-[#111111] border border-[#e5e5e5]"
+                              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px]   text-[#111111] border border-[#e5e5e5]"
                               style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
                             >
                               #{tag}
@@ -2574,11 +2548,10 @@ function ProductsContent() {
                         onDragLeave={handleDragLeave}
                         onDrop={handleDrop}
                         onClick={() => !isUploading && fileInputRef.current?.click()}
-                        className={`relative border-2 border-dashed rounded-[12px] p-6 text-center cursor-pointer transition-all duration-200 ${
-                          isDragging
+                        className={`relative border-2 border-dashed rounded-[12px] p-6 text-center cursor-pointer transition-all duration-200 ${isDragging
                             ? 'border-[#111111] bg-neutral-100 scale-[1.005]'
-                            : 'border-[#d4d4d4] hover:border-[#111111] bg-[#fafafa] hover:bg-[#f5f5f5]'
-                        }`}
+                            : 'border-[#d4d4d4] hover:border-[#111111] bg-[#fafafa] hover: '
+                          }`}
                       >
                         <input
                           ref={fileInputRef}
@@ -2679,7 +2652,7 @@ function ProductsContent() {
                           </span>
                         </div>
                         {formData.color && (
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-medium bg-[#f5f5f5] text-[#111111] border border-[#e5e5e5]">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-medium   text-[#111111] border border-[#e5e5e5]">
                             <span
                               className="w-3.5 h-3.5 rounded-full shrink-0 border border-black/10"
                               style={{ backgroundColor: formData.colorHex || '#111111' }}
@@ -2708,25 +2681,21 @@ function ProductsContent() {
                                 }));
                               }}
                               title={c.name}
-                              className={`group relative flex items-center justify-center cursor-pointer transition-all duration-150 ${
-                                isSelected ? 'scale-110' : 'hover:scale-105'
-                              }`}
+                              className={`group relative flex items-center justify-center cursor-pointer transition-all duration-150 ${isSelected ? 'scale-110' : 'hover:scale-105'
+                                }`}
                             >
                               <div
-                                className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full transition-all flex items-center justify-center shadow-xs ${
-                                  c.border ? 'border border-[#d4d4d4]' : ''
-                                } ${
-                                  isSelected
+                                className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full transition-all flex items-center justify-center shadow-xs ${c.border ? 'border border-[#d4d4d4]' : ''
+                                  } ${isSelected
                                     ? 'ring-2 ring-offset-2 ring-[#111111]'
                                     : 'hover:ring-2 hover:ring-offset-1 hover:ring-neutral-300'
-                                }`}
+                                  }`}
                                 style={{ backgroundColor: c.hex }}
                               >
                                 {isSelected && (
                                   <svg
-                                    className={`w-3.5 h-3.5 ${
-                                      c.hex === '#ffffff' || c.hex === '#e8dec8' ? 'text-[#111111]' : 'text-white'
-                                    }`}
+                                    className={`w-3.5 h-3.5 ${c.hex === '#ffffff' || c.hex === '#e8dec8' ? 'text-[#111111]' : 'text-white'
+                                      }`}
                                     viewBox="0 0 24 24"
                                     fill="none"
                                     stroke="currentColor"
@@ -2745,18 +2714,16 @@ function ProductsContent() {
                         {/* Custom Color Dot Picker */}
                         <label
                           title="Custom Color"
-                          className={`group relative flex items-center justify-center cursor-pointer transition-all ${
-                            formData.colorHex && !PRESET_COLORS.some((p) => p.hex.toLowerCase() === formData.colorHex.toLowerCase())
+                          className={`group relative flex items-center justify-center cursor-pointer transition-all ${formData.colorHex && !PRESET_COLORS.some((p) => p.hex.toLowerCase() === formData.colorHex.toLowerCase())
                               ? 'scale-110'
                               : 'hover:scale-105'
-                          }`}
+                            }`}
                         >
                           <div
-                            className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-dashed border-[#8d8d8d] hover:border-[#111111] bg-[#fafafa] flex items-center justify-center transition-all ${
-                              formData.colorHex && !PRESET_COLORS.some((p) => p.hex.toLowerCase() === formData.colorHex.toLowerCase())
+                            className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-dashed border-[#8d8d8d] hover:border-[#111111] bg-[#fafafa] flex items-center justify-center transition-all ${formData.colorHex && !PRESET_COLORS.some((p) => p.hex.toLowerCase() === formData.colorHex.toLowerCase())
                                 ? 'ring-2 ring-offset-2 ring-[#111111]'
                                 : ''
-                            }`}
+                              }`}
                             style={
                               formData.colorHex && !PRESET_COLORS.some((p) => p.hex.toLowerCase() === formData.colorHex.toLowerCase())
                                 ? { backgroundColor: formData.colorHex, borderStyle: 'solid' }
@@ -2839,9 +2806,8 @@ function ProductsContent() {
                             return (
                               <div
                                 key={`${url}-${idx}`}
-                                className={`relative rounded-[12px] border p-2 flex flex-col items-center bg-white ${
-                                  isCover ? 'border-[#111111] ring-1 ring-[#111111]' : 'border-[#e5e5e5]'
-                                }`}
+                                className={`relative rounded-[12px] border p-2 flex flex-col items-center bg-white ${isCover ? 'border-[#111111] ring-1 ring-[#111111]' : 'border-[#e5e5e5]'
+                                  }`}
                               >
                                 <div className="w-full h-28 rounded-[8px] bg-[#fafafa] flex items-center justify-center overflow-hidden mb-2">
                                   <img
@@ -2864,7 +2830,7 @@ function ProductsContent() {
                                       disabled={idx === 0}
                                       onClick={() => moveGalleryImage(idx, -1)}
                                       title="Move Left"
-                                      className="p-1 rounded hover:bg-[#f5f5f5] text-[#111111] disabled:opacity-30 cursor-pointer"
+                                      className="p-1 rounded hover:  text-[#111111] disabled:opacity-30 cursor-pointer"
                                     >
                                       <ArrowLeft className="w-3.5 h-3.5" />
                                     </button>
@@ -2873,7 +2839,7 @@ function ProductsContent() {
                                       disabled={idx === formData.gallery.length - 1}
                                       onClick={() => moveGalleryImage(idx, 1)}
                                       title="Move Right"
-                                      className="p-1 rounded hover:bg-[#f5f5f5] text-[#111111] disabled:opacity-30 cursor-pointer"
+                                      className="p-1 rounded hover:  text-[#111111] disabled:opacity-30 cursor-pointer"
                                     >
                                       <ArrowRight className="w-3.5 h-3.5" />
                                     </button>
@@ -2884,7 +2850,7 @@ function ProductsContent() {
                                       <button
                                         type="button"
                                         onClick={() => setCoverImage(url)}
-                                        className="text-[11.5px] font-medium text-[#111111] px-2 py-0.5 rounded hover:bg-[#f5f5f5] cursor-pointer"
+                                        className="text-[11.5px] font-medium text-[#111111] px-2 py-0.5 rounded hover:  cursor-pointer"
                                       >
                                         Set Cover
                                       </button>
@@ -2925,11 +2891,10 @@ function ProductsContent() {
                           type="button"
                           onClick={() => addGalleryImage(customImageUrl)}
                           disabled={!customImageUrl.trim()}
-                          className={`h-[52px] sm:h-[54px] px-6 rounded-[8px] text-[14px] font-medium transition-all shrink-0 cursor-pointer ${
-                            customImageUrl.trim()
+                          className={`h-[52px] sm:h-[54px] px-6 rounded-[8px] text-[14px] font-medium transition-all shrink-0 cursor-pointer ${customImageUrl.trim()
                               ? 'bg-[#111111] hover:bg-black text-white active:scale-[0.99]'
                               : 'bg-[#e5e5e5] text-[#707072] cursor-not-allowed'
-                          }`}
+                            }`}
                           style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
                         >
                           Add URL
@@ -2975,11 +2940,10 @@ function ProductsContent() {
                               Gross Profit
                             </span>
                             <span
-                              className={`text-[18px] font-bold ${
-                                cost > 0 && profit < 0
+                              className={`text-[18px] font-bold ${cost > 0 && profit < 0
                                   ? 'text-rose-600'
                                   : 'text-emerald-700'
-                              }`}
+                                }`}
                             >
                               {cost > 0 ? `₹${profit.toLocaleString('en-IN')}` : '—'}
                             </span>
@@ -2991,13 +2955,12 @@ function ProductsContent() {
                             </span>
                             {marginPercent !== null ? (
                               <span
-                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[13px] font-bold ${
-                                  marginPercent >= 45
+                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[13px] font-bold ${marginPercent >= 45
                                     ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                                     : marginPercent >= 20
-                                    ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                                    : 'bg-rose-50 text-rose-700 border border-rose-200'
-                                }`}
+                                      ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                                      : 'bg-rose-50 text-rose-700 border border-rose-200'
+                                  }`}
                               >
                                 {marginPercent}%
                               </span>
@@ -3156,7 +3119,7 @@ function ProductsContent() {
                         </div>
                       </div>
 
-              
+
                     </div>
 
                     {/* Size Variants Table */}
@@ -3192,9 +3155,8 @@ function ProductsContent() {
                             return (
                               <tr
                                 key={`${v.size}-${idx}`}
-                                className={`transition-colors ${
-                                  !isActive ? 'bg-[#fafafa]/80 opacity-60' : 'hover:bg-[#fafafa]/50'
-                                }`}
+                                className={`transition-colors ${!isActive ? 'bg-[#fafafa]/80 opacity-60' : 'hover:bg-[#fafafa]/50'
+                                  }`}
                               >
                                 <td className="py-3.5 px-1 text-center align-top pt-3.5 w-[44px]">
                                   <div
@@ -3202,11 +3164,10 @@ function ProductsContent() {
                                     className="flex justify-center cursor-pointer"
                                   >
                                     <div
-                                      className={`w-5 h-5 rounded-[4px] flex items-center justify-center transition-colors ${
-                                        isActive
+                                      className={`w-5 h-5 rounded-[4px] flex items-center justify-center transition-colors ${isActive
                                           ? 'bg-[#111111] text-white border border-[#111111]'
                                           : 'bg-white border-2 border-[#8d8d8d] hover:border-[#111111]'
-                                      }`}
+                                        }`}
                                     >
                                       {isActive && (
                                         <svg
@@ -3391,8 +3352,8 @@ function ProductsContent() {
                                     >
                                       {secondProduct
                                         ? (formData.comboItems.length > 1
-                                            ? `${formData.comboItems.length} Products Added`
-                                            : secondProduct.name)
+                                          ? `${formData.comboItems.length} Products Added`
+                                          : secondProduct.name)
                                         : 'No item added yet'}
                                     </span>
                                     <span
@@ -3638,7 +3599,7 @@ function ProductsContent() {
                                         <button
                                           type="button"
                                           onClick={() => updateComboQuantity(ci.slug, -1)}
-                                          className="px-2.5 py-1 text-[#111111] hover:bg-[#f5f5f5] text-[13px] font-bold cursor-pointer"
+                                          className="px-2.5 py-1 text-[#111111] hover:  text-[13px] font-bold cursor-pointer"
                                         >
                                           -
                                         </button>
@@ -3648,7 +3609,7 @@ function ProductsContent() {
                                         <button
                                           type="button"
                                           onClick={() => updateComboQuantity(ci.slug, 1)}
-                                          className="px-2.5 py-1 text-[#111111] hover:bg-[#f5f5f5] text-[13px] font-bold cursor-pointer"
+                                          className="px-2.5 py-1 text-[#111111] hover:  text-[13px] font-bold cursor-pointer"
                                         >
                                           +
                                         </button>
@@ -3736,11 +3697,10 @@ function ProductsContent() {
                                     type="button"
                                     disabled={isAdded}
                                     onClick={() => addComboComponent(p)}
-                                    className={`flex items-stretch rounded-[10px] border text-left cursor-pointer transition-colors overflow-hidden ${
-                                      isAdded
-                                        ? 'bg-[#f5f5f5] border-[#e5e5e5] opacity-50 cursor-not-allowed'
+                                    className={`flex items-stretch rounded-[10px] border text-left cursor-pointer transition-colors overflow-hidden ${isAdded
+                                        ? '  border-[#e5e5e5] opacity-50 cursor-not-allowed'
                                         : 'bg-white border-[#e5e5e5] hover:border-[#111111]'
-                                    }`}
+                                      }`}
                                   >
                                     <div className="w-16 self-stretch shrink-0 bg-[#fafafa] border-r border-[#e5e5e5] flex items-center justify-center overflow-hidden">
                                       {(p.image || (p.gallery && p.gallery[0])) ? (
@@ -3775,9 +3735,8 @@ function ProductsContent() {
                                         </div>
                                       </div>
                                       <span
-                                        className={`text-[11px] font-medium shrink-0 ${
-                                          isAdded ? 'text-[#8d8d8d]' : 'text-[#111111]'
-                                        }`}
+                                        className={`text-[11px] font-medium shrink-0 ${isAdded ? 'text-[#8d8d8d]' : 'text-[#111111]'
+                                          }`}
                                       >
                                         {isAdded ? 'Added' : '+ Add'}
                                       </span>
@@ -3856,11 +3815,10 @@ function ProductsContent() {
                                     key={slug}
                                     type="button"
                                     onClick={() => toggleColorway(slug)}
-                                    className={`flex items-stretch rounded-[10px] border text-left cursor-pointer transition-colors overflow-hidden ${
-                                      isLinked
+                                    className={`flex items-stretch rounded-[10px] border text-left cursor-pointer transition-colors overflow-hidden ${isLinked
                                         ? 'bg-[#111111] text-white border-[#111111]'
                                         : 'bg-white text-[#111111] border-[#e5e5e5] hover:border-[#111111]'
-                                    }`}
+                                      }`}
                                   >
                                     <div className="w-16 self-stretch shrink-0 bg-[#fafafa] border-r border-[#e5e5e5] flex items-center justify-center overflow-hidden">
                                       {(p.image || (p.gallery && p.gallery[0])) ? (
@@ -4118,7 +4076,7 @@ function ProductsContent() {
                             {(formData.seo?.keywords?.length > 0 ? formData.seo.keywords : formData.tags).map((kw) => (
                               <span
                                 key={kw}
-                                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] bg-[#f5f5f5] text-[#111111] border border-[#e5e5e5]"
+                                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px]   text-[#111111] border border-[#e5e5e5]"
                                 style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
                               >
                                 #{kw}
@@ -4231,7 +4189,7 @@ function ProductsContent() {
                             <button
                               type="button"
                               onClick={() => setActiveDrawerTab(DRAWER_TABS[currentIdx + 1].id)}
-                              className="h-[42px] sm:h-[44px] px-3 sm:px-5 rounded-full border border-[#111111] text-[#111111] hover:bg-[#f5f5f5] text-[12.5px] sm:text-[13px] font-medium whitespace-nowrap shrink-0 transition-colors cursor-pointer bg-white"
+                              className="h-[42px] sm:h-[44px] px-3 sm:px-5 rounded-full border border-[#111111] text-[#111111] hover:  text-[12.5px] sm:text-[13px] font-medium whitespace-nowrap shrink-0 transition-colors cursor-pointer bg-white"
                               style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
                               title="Next tab"
                             >
@@ -4251,11 +4209,10 @@ function ProductsContent() {
                           ? `Cannot save: Please fill required fields: ${requiredIssues.map((i) => i.label).join(', ')}`
                           : ''
                       }
-                      className={`h-[42px] sm:h-[44px] px-4 sm:px-7 rounded-full text-[13px] sm:text-[14px] font-medium whitespace-nowrap shrink-0 transition-all flex items-center justify-center gap-2 shadow-sm ${
-                        isFormValid && !saving
+                      className={`h-[42px] sm:h-[44px] px-4 sm:px-7 rounded-full text-[13px] sm:text-[14px] font-medium whitespace-nowrap shrink-0 transition-all flex items-center justify-center gap-2 shadow-sm ${isFormValid && !saving
                           ? 'bg-[#111111] hover:bg-black text-white cursor-pointer active:scale-[0.99]'
                           : 'bg-[#f0f0f0] text-[#a0a0a0] border border-[#e0e0e0] cursor-not-allowed opacity-80'
-                      }`}
+                        }`}
                       style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
                     >
                       {saving ? 'Saving...' : 'Save Product'}

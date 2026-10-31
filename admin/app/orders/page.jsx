@@ -68,18 +68,15 @@ function FloatingInput({
     <div className={`w-full ${className}`}>
       <div
         onClick={() => !disabled && inputRef.current?.focus()}
-        className={`relative w-full ${
-          compact ? 'h-[46px] px-3.5 rounded-[8px]' : 'h-[52px] px-4 rounded-[8px]'
-        } border transition-all duration-200 cursor-text bg-white flex items-center ${
-          isFocused ? 'border-[#111111] ring-1 ring-[#111111]/10' : 'border-[#8d8d8d]'
-        } ${disabled ? 'bg-neutral-50/70 cursor-not-allowed opacity-75' : ''}`}
+        className={`relative w-full ${compact ? 'h-[46px] px-3.5 rounded-[8px]' : 'h-[52px] px-4 rounded-[8px]'
+          } border transition-all duration-200 cursor-text bg-white flex items-center ${isFocused ? 'border-[#111111] ring-1 ring-[#111111]/10' : 'border-[#8d8d8d]'
+          } ${disabled ? 'bg-neutral-50/70 cursor-not-allowed opacity-75' : ''}`}
       >
         <span
-          className={`absolute transition-all duration-200 ease-out pointer-events-none select-none truncate max-w-[calc(100%-14px)] ${
-            isFloating
+          className={`absolute transition-all duration-200 ease-out pointer-events-none select-none truncate max-w-[calc(100%-14px)] ${isFloating
               ? `-top-2 left-2.5 px-1.5 bg-white leading-none z-10 text-[11px] text-[#111111] font-medium`
               : `top-1/2 -translate-y-1/2 left-3.5 text-[13px] text-[#707072]`
-          }`}
+            }`}
           style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
         >
           {label}
@@ -89,9 +86,8 @@ function FloatingInput({
         <div className="flex items-center w-full min-w-0">
           {prefix && (
             <span
-              className={`text-[13px] text-neutral-500 font-semibold select-none pr-1 shrink-0 ${
-                isFloating ? 'opacity-100' : 'opacity-0'
-              } transition-opacity duration-150`}
+              className={`text-[13px] text-neutral-500 font-semibold select-none pr-1 shrink-0 ${isFloating ? 'opacity-100' : 'opacity-0'
+                } transition-opacity duration-150`}
               style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
             >
               {prefix}
@@ -161,18 +157,15 @@ function FloatingSelect({
     <div ref={containerRef} className={`relative w-full ${className}`}>
       <div
         onClick={() => setIsOpen((prev) => !prev)}
-        className={`relative w-full ${
-          compact ? 'h-[46px] px-3.5 rounded-[8px]' : 'h-[52px] px-4 rounded-[8px]'
-        } border transition-all duration-200 cursor-pointer bg-white flex items-center justify-between ${
-          isOpen ? 'border-[#111111] ring-1 ring-[#111111]/10' : 'border-[#8d8d8d]'
-        }`}
+        className={`relative w-full ${compact ? 'h-[46px] px-3.5 rounded-[8px]' : 'h-[52px] px-4 rounded-[8px]'
+          } border transition-all duration-200 cursor-pointer bg-white flex items-center justify-between ${isOpen ? 'border-[#111111] ring-1 ring-[#111111]/10' : 'border-[#8d8d8d]'
+          }`}
       >
         <span
-          className={`absolute transition-all duration-200 ease-out pointer-events-none select-none truncate max-w-[calc(100%-24px)] ${
-            isFloating
+          className={`absolute transition-all duration-200 ease-out pointer-events-none select-none truncate max-w-[calc(100%-24px)] ${isFloating
               ? `-top-2 left-2.5 px-1.5 bg-white leading-none z-10 text-[11px] text-[#111111] font-medium`
               : `top-1/2 -translate-y-1/2 left-3.5 text-[13px] text-[#707072]`
-          }`}
+            }`}
           style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
         >
           {label}
@@ -180,18 +173,16 @@ function FloatingSelect({
         </span>
 
         <span
-          className={`text-[13.5px] text-[#111111] font-medium truncate mr-2 ${
-            value ? 'opacity-100' : 'opacity-0'
-          }`}
+          className={`text-[13.5px] text-[#111111] font-medium truncate mr-2 ${value ? 'opacity-100' : 'opacity-0'
+            }`}
           style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
         >
           {displayLabel || 'Select'}
         </span>
 
         <svg
-          className={`w-3.5 h-3.5 text-[#111111] transition-transform duration-200 shrink-0 ${
-            isOpen ? 'rotate-180' : ''
-          }`}
+          className={`w-3.5 h-3.5 text-[#111111] transition-transform duration-200 shrink-0 ${isOpen ? 'rotate-180' : ''
+            }`}
           viewBox="0 0 24 24"
           fill="currentColor"
         >
@@ -206,8 +197,8 @@ function FloatingSelect({
               typeof opt === 'string'
                 ? opt
                 : opt.value !== undefined
-                ? opt.value
-                : opt.id || opt.name;
+                  ? opt.value
+                  : opt.id || opt.name;
             const optLabel =
               typeof opt === 'string'
                 ? opt
@@ -220,11 +211,10 @@ function FloatingSelect({
                   onSelect(optVal);
                   setIsOpen(false);
                 }}
-                className={`w-full flex items-center justify-between px-3.5 py-2 text-[13px] transition-colors cursor-pointer select-none ${
-                  isSelected
-                    ? 'bg-[#f5f5f5] text-[#111111] font-semibold'
+                className={`w-full flex items-center justify-between px-3.5 py-2 text-[13px] transition-colors cursor-pointer select-none ${isSelected
+                    ? '  text-[#111111] font-semibold'
                     : 'text-[#222222] hover:bg-[#fafafa]'
-                }`}
+                  }`}
                 style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
               >
                 <span className="truncate flex-1 mr-2">{optLabel}</span>
@@ -256,16 +246,14 @@ function FloatingTextarea({
     <div className={`w-full ${className}`}>
       <div
         onClick={() => textareaRef.current?.focus()}
-        className={`relative w-full rounded-[8px] border p-3 pt-3.5 transition-all duration-200 cursor-text bg-white ${
-          isFocused ? 'border-[#111111] ring-1 ring-[#111111]/10' : 'border-[#8d8d8d]'
-        }`}
+        className={`relative w-full rounded-[8px] border p-3 pt-3.5 transition-all duration-200 cursor-text bg-white ${isFocused ? 'border-[#111111] ring-1 ring-[#111111]/10' : 'border-[#8d8d8d]'
+          }`}
       >
         <span
-          className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${
-            isFloating
+          className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${isFloating
               ? '-top-2 left-2.5 px-1.5 bg-white text-[11px] text-[#111111] font-medium leading-none z-10'
               : 'top-3.5 left-3.5 text-[13px] text-[#707072]'
-          }`}
+            }`}
           style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
         >
           {label}
@@ -1566,73 +1554,73 @@ function OrdersContent() {
         {/* 1. TOP HEADER ROW */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
 
-            {/* Left: Orders Title & Status Badge */}
-            <div className="flex items-center gap-3">
-              <h1 className="text-[22px] font-bold text-[#111111] tracking-tight">
-                Orders
-              </h1>
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-neutral-200 bg-neutral-100 text-[11.5px] font-medium text-neutral-800">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#111111]" />
-                <span>Shiprocket Mock</span>
-              </div>
+          {/* Left: Orders Title & Status Badge */}
+          <div className="flex items-center gap-3">
+            <h1 className="text-[22px] font-bold text-[#111111] tracking-tight">
+              Orders
+            </h1>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-neutral-200 bg-neutral-100 text-[11.5px] font-medium text-neutral-800">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#111111]" />
+              <span>Shiprocket Mock</span>
             </div>
-
-            {/* Center: Search Group */}
-            <div className="flex-1 max-w-[500px]">
-              <form onSubmit={handleSearchSubmit} className="flex items-center border border-neutral-300 rounded-lg bg-white overflow-hidden shadow-2xs focus-within:border-[#111111] transition-all">
-                <div className="flex items-center gap-2 px-3 flex-1">
-                  <Search className="w-4 h-4 text-neutral-400 shrink-0" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search by Order ID, Buyer, Email, Phone..."
-                    className="w-full py-2 text-[13px] outline-none text-[#111111] placeholder:text-neutral-400 bg-transparent"
-                  />
-                </div>
-                {searchQuery && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSearchQuery('');
-                      fetchOrders();
-                    }}
-                    className="px-2 text-neutral-400 hover:text-black text-xs cursor-pointer"
-                  >
-                    Clear
-                  </button>
-                )}
-              </form>
-            </div>
-
-            {/* Right: + Create Test Order & Refresh */}
-            <div className="flex items-center gap-2.5 shrink-0">
-              <button
-                type="button"
-                disabled={actionLoading === 'create_test'}
-                onClick={handleCreateTestOrder}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#111111] hover:bg-black text-white text-[13px] font-medium transition-all shadow-xs cursor-pointer active:scale-[0.98] disabled:opacity-50"
-              >
-                {actionLoading === 'create_test' ? (
-                  <RefreshCw className="w-3.5 h-3.5 animate-spin text-white" />
-                ) : (
-                  <Plus className="w-3.5 h-3.5" />
-                )}
-                <span>Create Test Order</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={fetchOrders}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-neutral-300 bg-white hover:bg-neutral-100 text-[13px] font-medium text-[#111111] shadow-2xs transition-colors cursor-pointer"
-                title="Refresh"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 text-neutral-700 ${loading ? 'animate-spin' : ''}`} />
-                <span>Refresh</span>
-              </button>
-            </div>
-
           </div>
+
+          {/* Center: Search Group */}
+          <div className="flex-1 max-w-[500px]">
+            <form onSubmit={handleSearchSubmit} className="flex items-center border border-neutral-300 rounded-lg bg-white overflow-hidden shadow-2xs focus-within:border-[#111111] transition-all">
+              <div className="flex items-center gap-2 px-3 flex-1">
+                <Search className="w-4 h-4 text-neutral-400 shrink-0" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search by Order ID, Buyer, Email, Phone..."
+                  className="w-full py-2 text-[13px] outline-none text-[#111111] placeholder:text-neutral-400 bg-transparent"
+                />
+              </div>
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery('');
+                    fetchOrders();
+                  }}
+                  className="px-2 text-neutral-400 hover:text-black text-xs cursor-pointer"
+                >
+                  Clear
+                </button>
+              )}
+            </form>
+          </div>
+
+          {/* Right: + Create Test Order & Refresh */}
+          <div className="flex items-center gap-2.5 shrink-0">
+            <button
+              type="button"
+              disabled={actionLoading === 'create_test'}
+              onClick={handleCreateTestOrder}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#111111] hover:bg-black text-white text-[13px] font-medium transition-all shadow-xs cursor-pointer active:scale-[0.98] disabled:opacity-50"
+            >
+              {actionLoading === 'create_test' ? (
+                <RefreshCw className="w-3.5 h-3.5 animate-spin text-white" />
+              ) : (
+                <Plus className="w-3.5 h-3.5" />
+              )}
+              <span>Create Test Order</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={fetchOrders}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-neutral-300 bg-white hover:bg-neutral-100 text-[13px] font-medium text-[#111111] shadow-2xs transition-colors cursor-pointer"
+              title="Refresh"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 text-neutral-700 ${loading ? 'animate-spin' : ''}`} />
+              <span>Refresh</span>
+            </button>
+          </div>
+
+        </div>
 
         {/* 2. PRIMARY NAVIGATION TABS */}
         <div className="flex items-center gap-8 border-b border-neutral-200 overflow-x-auto scrollbar-none mb-4">
@@ -1648,8 +1636,8 @@ function OrdersContent() {
                   setCurrentPage(1);
                 }}
                 className={`pb-3 text-[13.5px] font-medium transition-all cursor-pointer whitespace-nowrap relative ${isActive
-                    ? 'text-[#111111] border-b-2 border-[#111111] font-bold'
-                    : 'text-neutral-500 hover:text-[#111111] border-b-2 border-transparent'
+                  ? 'text-[#111111] border-b-2 border-[#111111] font-bold'
+                  : 'text-neutral-500 hover:text-[#111111] border-b-2 border-transparent'
                   }`}
               >
                 <span>{tab.label}</span>
@@ -1774,8 +1762,8 @@ function OrdersContent() {
                       key={ord.orderId}
                       onClick={() => setSelectedOrder(ord)}
                       className={`grid grid-cols-[36px_180px_220px_190px_150px_110px_110px_125px_120px] gap-3 px-4 py-3.5 bg-white rounded-lg border transition-all cursor-pointer items-start text-[13px] ${isSelected
-                          ? 'border-[#111111] shadow-[0_0_0_1px_#111111] bg-neutral-50/60'
-                          : 'border-neutral-200 hover:border-neutral-400 hover:shadow-2xs'
+                        ? 'border-[#111111] shadow-[0_0_0_1px_#111111] bg-neutral-50/60'
+                        : 'border-neutral-200 hover:border-neutral-400 hover:shadow-2xs'
                         }`}
                     >
 
@@ -2501,192 +2489,186 @@ function OrdersContent() {
 
                 {/* Animated Product Selector Sliding Container (Smooth Open & Close) */}
                 <div
-                  className={`grid-collapse transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                    showAddProductModal ? 'grid-collapse-open' : 'grid-collapse-closed'
-                  }`}
+                  className={`grid-collapse transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${showAddProductModal ? 'grid-collapse-open' : 'grid-collapse-closed'
+                    }`}
                 >
                   <div className="grid-collapse-inner">
                     <div
-                      className={`pt-1 pb-2 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                        showAddProductModal ? 'translate-y-0 opacity-100' : '-translate-y-3 opacity-0'
-                      }`}
+                      className={`pt-1 pb-2 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${showAddProductModal ? 'translate-y-0 opacity-100' : '-translate-y-3 opacity-0'
+                        }`}
                     >
                       <div className="p-3 bg-white border border-[#e5e5e5] rounded-[12px] shadow-sm space-y-3">
                         {/* Search Bar */}
-                    <div className="relative">
-                      <Search className="w-3.5 h-3.5 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                      <input
-                        type="text"
-                        value={productPickerSearch}
-                        onChange={(e) => setProductPickerSearch(e.target.value)}
-                        placeholder="Search by name, SKU, price, category..."
-                        className="w-full h-8.5 pl-8.5 pr-8 rounded-[8px] border border-[#e5e5e5] bg-white text-[12px] text-[#111111] placeholder:text-[#8d8d8d] outline-none focus:border-[#111111] transition-colors"
-                      />
-                      {productPickerSearch && (
-                        <button
-                          type="button"
-                          onClick={() => setProductPickerSearch('')}
-                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 text-[14px] leading-none cursor-pointer"
-                        >
-                          ×
-                        </button>
-                      )}
-                    </div>
-
-                    {/* Products Grid (Matching media_1793165801671_7f054558) */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[290px] overflow-y-auto pr-0.5">
-                      {(() => {
-                        const q = productPickerSearch.trim().toLowerCase();
-                        const filtered = catalogProducts.filter((p) => {
-                          if (!q) return true;
-                          return (
-                            (p.name || p.title || '').toLowerCase().includes(q) ||
-                            (p.sku || '').toLowerCase().includes(q) ||
-                            (p.category || '').toLowerCase().includes(q) ||
-                            (p.color || '').toLowerCase().includes(q) ||
-                            String(p.priceNumber || '').includes(q)
-                          );
-                        });
-
-                        if (filtered.length === 0) {
-                          return (
-                            <div className="col-span-full py-6 text-center text-[12px] text-neutral-400">
-                              No products match &quot;{productPickerSearch}&quot;
-                            </div>
-                          );
-                        }
-
-                        return filtered.map((p) => {
-                          const pId = p.id || p._id || p.slug;
-                          const isSelected =
-                            selectedCatalogProduct &&
-                            (selectedCatalogProduct.id === pId ||
-                              selectedCatalogProduct._id === pId ||
-                              selectedCatalogProduct.slug === pId);
-
-                          const imgSrc = p.image || (p.gallery && p.gallery[0]);
-
-                          return (
-                            <button
-                              key={pId}
-                              type="button"
-                              onClick={() => setSelectedCatalogProduct(p)}
-                              className={`flex items-stretch rounded-[10px] text-left cursor-pointer transition-colors overflow-hidden ${
-                                isSelected
-                                  ? 'bg-[#ebebeb] text-white border-[#111111]'
-                                  : 'bg-white text-[#111111] border-[#e5e5e5] hover:border-[#111111]'
-                              }`}
-                            >
-                              <div className="w-16 self-stretch shrink-0  flex items-center justify-center overflow-hidden">
-                                {imgSrc ? (
-                                  <img
-                                    src={imgSrc}
-                                    alt={p.name || p.title}
-                                    className="w-full h-full object-cover block"
-                                  />
-                                ) : (
-                                  <Package className="w-4 h-4 text-neutral-400" />
-                                )}
-                              </div>
-                              <div className="min-w-0 flex-1 px-2  flex items-center justify-between gap-">
-                                <div className="min-w-0 flex-1">
-                                  <span
-                                    className={`text-[12.5px] font-medium truncate block ${
-                                      isSelected ? 'text-black' : 'text-[#000000]'
-                                    }`}
-                                  >
-                                    {p.name || p.title}
-                                  </span>
-                                  <div
-                                    className={`flex items-center gap-1.5 text-[11px] mt-0.5 flex-wrap ${
-                                      isSelected ? 'text-[#707072]' : 'text-[#707072]'
-                                    }`}
-                                  >
-                                    <span>₹{(p.priceNumber || 13995).toLocaleString('en-IN')}</span>
-                                    {(p.sku || p.id) && (
-                                      <>
-                                        <span>•</span>
-                                        <span className={isSelected ? 'text-black font-medium' : 'text-neutral-700 font-medium'}>
-                                          {p.sku || p.id}
-                                        </span>
-                                      </>
-                                    )}
-                                    {p.category && (
-                                      <>
-                                        <span>•</span>
-                                        <span className={`capitalize ${isSelected ? 'text-neutral-700' : 'text-neutral-500'}`}>
-                                          {p.category}
-                                        </span>
-                                      </>
-                                    )}
-                                  </div>
-                                </div>
-                                {isSelected ? (
-                                  <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center shrink-0">
-                                    <Check className="w-3 h-3 text-black stroke-[3.5]" />
-                                  </div>
-                                ) : (
-                                  <span className="text-[11px] font-medium text-[#707072] shrink-0">
-                                    Select
-                                  </span>
-                                )}
-                              </div>
-                            </button>
-                          );
-                        });
-                      })()}
-                    </div>
-
-                    {/* Bottom Action Bar: Shoe Size, Quantity & Add to Order */}
-                    <div className="pt-2.5 border-t border-[#e5e5e5] flex flex-wrap items-center justify-between gap-2.5">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className="text-[11px] text-[#707072] shrink-0 font-medium">Selected:</span>
-                        <span className="text-[12px] font-bold text-[#111111] truncate max-w-[140px] sm:max-w-[200px]">
-                          {selectedCatalogProduct ? (selectedCatalogProduct.name || selectedCatalogProduct.title) : 'Click product to select'}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-2 shrink-0">
-                        <div className="flex items-center gap-1">
-                          <span className="text-[11px] font-medium text-[#707072]">Size:</span>
-                          <select
-                            value={newProductSize}
-                            onChange={(e) => setNewProductSize(e.target.value)}
-                            className="h-7 px-1.5 rounded-md border border-[#e5e5e5] bg-white text-[11.5px] font-semibold text-[#111111] focus:border-[#111111] outline-none cursor-pointer"
-                          >
-                            {['UK 3', 'UK 4', 'UK 4.5', 'UK 5', 'UK 5.5', 'UK 6', 'UK 6.5', 'UK 7', 'UK 7.5', 'UK 8', 'UK 8.5', 'UK 9', 'UK 9.5', 'UK 10', 'UK 10.5', 'UK 11', 'UK 12'].map((sz) => (
-                              <option key={sz} value={sz}>{sz}</option>
-                            ))}
-                          </select>
-                        </div>
-
-                        <div className="flex items-center gap-1">
-                          <span className="text-[11px] font-medium text-[#707072]">Qty:</span>
+                        <div className="relative">
+                          <Search className="w-3.5 h-3.5 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                           <input
-                            type="number"
-                            min="1"
-                            max="10"
-                            value={newProductQty}
-                            onChange={(e) => setNewProductQty(Math.max(1, parseInt(e.target.value, 10) || 1))}
-                            className="w-10 h-7 text-center rounded-md border border-[#e5e5e5] bg-white text-[11.5px] font-semibold text-[#111111] focus:border-[#111111] outline-none"
+                            type="text"
+                            value={productPickerSearch}
+                            onChange={(e) => setProductPickerSearch(e.target.value)}
+                            placeholder="Search by name, SKU, price, category..."
+                            className="w-full h-8.5 pl-8.5 pr-8 rounded-[8px] border border-[#e5e5e5] bg-white text-[12px] text-[#111111] placeholder:text-[#8d8d8d] outline-none focus:border-[#111111] transition-colors"
                           />
+                          {productPickerSearch && (
+                            <button
+                              type="button"
+                              onClick={() => setProductPickerSearch('')}
+                              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 text-[14px] leading-none cursor-pointer"
+                            >
+                              ×
+                            </button>
+                          )}
                         </div>
 
-                        <button
-                          type="button"
-                          disabled={!selectedCatalogProduct}
-                          onClick={handleAddProductToOrder}
-                          className={`h-7 px-3 rounded-md text-[11.5px] font-bold cursor-pointer transition-all inline-flex items-center gap-1 ${
-                            selectedCatalogProduct
-                              ? 'bg-[#111111] hover:bg-black text-white shadow-xs'
-                              : 'bg-neutral-200 text-neutral-400 cursor-not-allowed'
-                          }`}
-                        >
-                          <Plus className="w-3 h-3" />
-                          <span>Add to Order</span>
-                        </button>
-                      </div>
-                    </div>
+                        {/* Products Grid (Matching media_1793165801671_7f054558) */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[290px] overflow-y-auto pr-0.5">
+                          {(() => {
+                            const q = productPickerSearch.trim().toLowerCase();
+                            const filtered = catalogProducts.filter((p) => {
+                              if (!q) return true;
+                              return (
+                                (p.name || p.title || '').toLowerCase().includes(q) ||
+                                (p.sku || '').toLowerCase().includes(q) ||
+                                (p.category || '').toLowerCase().includes(q) ||
+                                (p.color || '').toLowerCase().includes(q) ||
+                                String(p.priceNumber || '').includes(q)
+                              );
+                            });
+
+                            if (filtered.length === 0) {
+                              return (
+                                <div className="col-span-full py-6 text-center text-[12px] text-neutral-400">
+                                  No products match &quot;{productPickerSearch}&quot;
+                                </div>
+                              );
+                            }
+
+                            return filtered.map((p) => {
+                              const pId = p.id || p._id || p.slug;
+                              const isSelected =
+                                selectedCatalogProduct &&
+                                (selectedCatalogProduct.id === pId ||
+                                  selectedCatalogProduct._id === pId ||
+                                  selectedCatalogProduct.slug === pId);
+
+                              const imgSrc = p.image || (p.gallery && p.gallery[0]);
+
+                              return (
+                                <button
+                                  key={pId}
+                                  type="button"
+                                  onClick={() => setSelectedCatalogProduct(p)}
+                                  className={`flex items-stretch rounded-[10px] text-left cursor-pointer transition-colors overflow-hidden ${isSelected
+                                      ? 'bg-[#ebebeb] text-white border-[#111111]'
+                                      : 'bg-white text-[#111111] border-[#e5e5e5] hover:border-[#111111]'
+                                    }`}
+                                >
+                                  <div className="w-16 self-stretch shrink-0  flex items-center justify-center overflow-hidden">
+                                    {imgSrc ? (
+                                      <img
+                                        src={imgSrc}
+                                        alt={p.name || p.title}
+                                        className="w-full h-full object-cover block"
+                                      />
+                                    ) : (
+                                      <Package className="w-4 h-4 text-neutral-400" />
+                                    )}
+                                  </div>
+                                  <div className="min-w-0 flex-1 px-2  flex items-center justify-between gap-">
+                                    <div className="min-w-0 flex-1">
+                                      <span
+                                        className={`text-[12.5px] font-medium truncate block ${isSelected ? 'text-black' : 'text-[#000000]'
+                                          }`}
+                                      >
+                                        {p.name || p.title}
+                                      </span>
+                                      <div
+                                        className={`flex items-center gap-1.5 text-[11px] mt-0.5 flex-wrap ${isSelected ? 'text-[#707072]' : 'text-[#707072]'
+                                          }`}
+                                      >
+                                        <span>₹{(p.priceNumber || 13995).toLocaleString('en-IN')}</span>
+                                        {(p.sku || p.id) && (
+                                          <>
+                                            <span>•</span>
+                                            <span className={isSelected ? 'text-black font-medium' : 'text-neutral-700 font-medium'}>
+                                              {p.sku || p.id}
+                                            </span>
+                                          </>
+                                        )}
+                                        {p.category && (
+                                          <>
+                                            <span>•</span>
+                                            <span className={`capitalize ${isSelected ? 'text-neutral-700' : 'text-neutral-500'}`}>
+                                              {p.category}
+                                            </span>
+                                          </>
+                                        )}
+                                      </div>
+                                    </div>
+                                    {isSelected ? (
+                                      <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center shrink-0">
+                                        <Check className="w-3 h-3 text-black stroke-[3.5]" />
+                                      </div>
+                                    ) : (
+                                      <span className="text-[11px] font-medium text-[#707072] shrink-0">
+                                        Select
+                                      </span>
+                                    )}
+                                  </div>
+                                </button>
+                              );
+                            });
+                          })()}
+                        </div>
+
+                        {/* Bottom Action Bar: Shoe Size, Quantity & Add to Order */}
+                        <div className="pt-2.5 border-t border-[#e5e5e5] flex flex-wrap items-center justify-between gap-2.5">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="text-[11px] text-[#707072] shrink-0 font-medium">Selected:</span>
+                            <span className="text-[12px] font-bold text-[#111111] truncate max-w-[140px] sm:max-w-[200px]">
+                              {selectedCatalogProduct ? (selectedCatalogProduct.name || selectedCatalogProduct.title) : 'Click product to select'}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0">
+                            <div className="flex items-center gap-1">
+                              <span className="text-[11px] font-medium text-[#707072]">Size:</span>
+                              <select
+                                value={newProductSize}
+                                onChange={(e) => setNewProductSize(e.target.value)}
+                                className="h-7 px-1.5 rounded-md border border-[#e5e5e5] bg-white text-[11.5px] font-semibold text-[#111111] focus:border-[#111111] outline-none cursor-pointer"
+                              >
+                                {['UK 3', 'UK 4', 'UK 4.5', 'UK 5', 'UK 5.5', 'UK 6', 'UK 6.5', 'UK 7', 'UK 7.5', 'UK 8', 'UK 8.5', 'UK 9', 'UK 9.5', 'UK 10', 'UK 10.5', 'UK 11', 'UK 12'].map((sz) => (
+                                  <option key={sz} value={sz}>{sz}</option>
+                                ))}
+                              </select>
+                            </div>
+
+                            <div className="flex items-center gap-1">
+                              <span className="text-[11px] font-medium text-[#707072]">Qty:</span>
+                              <input
+                                type="number"
+                                min="1"
+                                max="10"
+                                value={newProductQty}
+                                onChange={(e) => setNewProductQty(Math.max(1, parseInt(e.target.value, 10) || 1))}
+                                className="w-10 h-7 text-center rounded-md border border-[#e5e5e5] bg-white text-[11.5px] font-semibold text-[#111111] focus:border-[#111111] outline-none"
+                              />
+                            </div>
+
+                            <button
+                              type="button"
+                              disabled={!selectedCatalogProduct}
+                              onClick={handleAddProductToOrder}
+                              className={`h-7 px-3 rounded-md text-[11.5px] font-bold cursor-pointer transition-all inline-flex items-center gap-1 ${selectedCatalogProduct
+                                  ? 'bg-[#111111] hover:bg-black text-white shadow-xs'
+                                  : 'bg-neutral-200 text-neutral-400 cursor-not-allowed'
+                                }`}
+                            >
+                              <Plus className="w-3 h-3" />
+                              <span>Add to Order</span>
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>

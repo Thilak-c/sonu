@@ -99,7 +99,7 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
           setFirstName(parts[0] || '');
           setLastName(parts.slice(1).join(' ') || '');
         }
-      } catch (e) {}
+      } catch (e) { }
 
       const applyStep = () => {
         if (initialStep === 'delivery-address') {
@@ -586,7 +586,7 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(userProfile),
         }).catch((e) => console.error('[MongoDB] User profile sync error:', e));
-      } catch (err) {}
+      } catch (err) { }
 
       // Transition smoothly and directly to Delivery Address
       handleTransitionToDeliveryAddress(100);
@@ -842,7 +842,7 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
       let storedProfile = {};
       try {
         storedProfile = JSON.parse(localStorage.getItem('sonu_user_profile') || '{}');
-      } catch (e) {}
+      } catch (e) { }
 
       fetch('/api/user/sync', {
         method: 'POST',
@@ -880,18 +880,16 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center select-none font-['Helvetica_Now_Text',sans-serif]">
       {/* Dark Overlay Backdrop */}
       <div
-        className={`fixed inset-0 bg-black/60 transition-opacity duration-300 ${
-          isVisible ? 'opacity-100' : 'opacity-0'
-        }`}
+        className={`fixed inset-0 bg-black/60 transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0'
+          }`}
         onClick={onClose}
         aria-hidden="true"
       />
 
       {/* 1. INITIAL MODAL BOX (STEP 1: Mobile & STEP 2: Phone OTP) */}
       <div
-        className={`relative w-full max-w-[440px] max-h-[92vh] overflow-x-hidden overflow-y-auto bg-white rounded-t-[28px] sm:rounded-[24px] px-6 sm:px-8 pt-7 pb-8 shadow-2xl z-10 transform transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-          isVisible ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-full sm:translate-y-8 opacity-0 sm:scale-95'
-        }`}
+        className={`relative w-full max-w-[440px] max-h-[92vh] overflow-x-hidden overflow-y-auto bg-white rounded-t-[28px] sm:rounded-[24px] px-6 sm:px-8 pt-7 pb-8 shadow-2xl z-10 transform transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isVisible ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-full sm:translate-y-8 opacity-0 sm:scale-95'
+          }`}
         role="dialog"
         aria-modal="true"
         aria-label="Account verification and profile"
@@ -955,17 +953,15 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
               {/* Rounded Rectangle Input Field with Notched Outline Floating Label */}
               <div
                 onClick={() => mobileInputRef.current?.focus()}
-                className={`relative w-full h-[54px] sm:h-[56px] px-4 rounded-[8px] border transition-colors cursor-text bg-white flex items-center ${
-                  isMobileFloating ? 'border-[#111111]' : 'border-[#8d8d8d]'
-                }`}
+                className={`relative w-full h-[54px] sm:h-[56px] px-4 rounded-[8px] border transition-colors cursor-text bg-white flex items-center ${isMobileFloating ? 'border-[#111111]' : 'border-[#8d8d8d]'
+                  }`}
               >
                 {/* Floating Notched Label */}
                 <span
-                  className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${
-                    isMobileFloating
+                  className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${isMobileFloating
                       ? '-top-2.5 left-3 px-1.5 bg-white text-[12px] text-[#111111] font-normal leading-none z-10'
                       : 'top-1/2 -translate-y-1/2 left-4 text-[15px] sm:text-[16px] text-[#707072]'
-                  }`}
+                    }`}
                   style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
                 >
                   Enter 10-digit mobile no.
@@ -973,9 +969,8 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
 
                 {/* Input row containing +91 and Enter mobile no. placeholder */}
                 <div
-                  className={`flex items-center w-full transition-opacity duration-150 ${
-                    isMobileFloating ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                  }`}
+                  className={`flex items-center w-full transition-opacity duration-150 ${isMobileFloating ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                    }`}
                 >
                   <span
                     className="text-[15px] sm:text-[16px] text-[#111111] font-normal select-none pr-2 shrink-0"
@@ -1005,11 +1000,10 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
               <button
                 type="submit"
                 disabled={!isMobileValid || isCheckingUser}
-                className={`w-full py-3.5 sm:py-4 rounded-full mt-5 text-[15px] sm:text-[16px] font-medium transition-all flex items-center justify-center gap-2 ${
-                  isMobileValid && !isCheckingUser
+                className={`w-full py-3.5 sm:py-4 rounded-full mt-5 text-[15px] sm:text-[16px] font-medium transition-all flex items-center justify-center gap-2 ${isMobileValid && !isCheckingUser
                     ? 'bg-[#111111] hover:bg-black text-white cursor-pointer active:scale-[0.99] shadow-sm'
                     : 'bg-[#e5e5e5] text-[#707072] cursor-not-allowed'
-                }`}
+                  }`}
                 style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
               >
                 {isCheckingUser ? (
@@ -1045,7 +1039,7 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
             </form>
 
             {/* Disclaimer & Policy Links */}
-            <p 
+            <p
               className="text-center text-[13px] sm:text-[14px] text-[#707072] mt-6 leading-relaxed max-w-[340px] mx-auto font-['Helvetica_Now_Text',sans-serif]"
               style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
             >
@@ -1136,13 +1130,12 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
               <button
                 type="submit"
                 disabled={!isOtpValid || otpVerifyState !== 'idle'}
-                className={`w-full py-3.5 sm:py-4 rounded-full mt-6 text-[15px] sm:text-[16px] font-medium transition-all duration-300 flex items-center justify-center gap-2 shadow-sm ${
-                  otpVerifyState === 'verified'
+                className={`w-full py-3.5 sm:py-4 rounded-full mt-6 text-[15px] sm:text-[16px] font-medium transition-all duration-300 flex items-center justify-center gap-2 shadow-sm ${otpVerifyState === 'verified'
                     ? 'bg-[#008a00] text-white scale-[1.01]'
                     : isOtpValid
-                    ? 'bg-[#111111] hover:bg-black text-white cursor-pointer active:scale-[0.99]'
-                    : 'bg-[#e5e5e5] text-[#707072] cursor-not-allowed'
-                }`}
+                      ? 'bg-[#111111] hover:bg-black text-white cursor-pointer active:scale-[0.99]'
+                      : 'bg-[#e5e5e5] text-[#707072] cursor-not-allowed'
+                  }`}
                 style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
               >
                 {otpVerifyState === 'verified' ? (
@@ -1188,9 +1181,8 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
       {/* 2. 100% VH FULL-SCREEN OVERLAY FOR ONBOARDING (Almost There, Email OTP, Welcome, Delivery Address) */}
       {isOnboardingFullScreen && (
         <div
-          className={`fixed inset-0 z-50 w-full h-[100dvh] bg-white overflow-y-auto px-6 sm:px-8 py-8 flex flex-col justify-start sm:justify-center transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform ${
-            detailsSlideIn ? 'translate-y-0' : 'translate-y-full'
-          }`}
+          className={`fixed inset-0 z-50 w-full h-[100dvh] bg-white overflow-y-auto px-6 sm:px-8 py-8 flex flex-col justify-start sm:justify-center transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform ${detailsSlideIn ? 'translate-y-0' : 'translate-y-full'
+            }`}
           role="dialog"
           aria-modal="true"
         >
@@ -1253,16 +1245,14 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
                 <form onSubmit={handleSaveDetails} className="mt-6 space-y-3.5 sm:space-y-4">
                   {/* 1. First Name* */}
                   <div
-                    className={`relative w-full h-[52px] sm:h-[54px] px-4 rounded-[8px] border transition-colors cursor-text bg-white flex items-center ${
-                      focusedField === 'firstName' ? 'border-[#111111]' : 'border-[#8d8d8d]'
-                    }`}
+                    className={`relative w-full h-[52px] sm:h-[54px] px-4 rounded-[8px] border transition-colors cursor-text bg-white flex items-center ${focusedField === 'firstName' ? 'border-[#111111]' : 'border-[#8d8d8d]'
+                      }`}
                   >
                     <span
-                      className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${
-                        focusedField === 'firstName' || firstName.length > 0
+                      className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${focusedField === 'firstName' || firstName.length > 0
                           ? '-top-2.5 left-3 px-1.5 bg-white text-[12px] text-[#111111] font-normal leading-none z-10'
                           : 'top-1/2 -translate-y-1/2 left-4 text-[15px] sm:text-[16px] text-[#707072]'
-                      }`}
+                        }`}
                       style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
                     >
                       First Name*
@@ -1282,16 +1272,14 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
 
                   {/* 2. Last Name* */}
                   <div
-                    className={`relative w-full h-[52px] sm:h-[54px] px-4 rounded-[8px] border transition-colors cursor-text bg-white flex items-center ${
-                      focusedField === 'lastName' ? 'border-[#111111]' : 'border-[#8d8d8d]'
-                    }`}
+                    className={`relative w-full h-[52px] sm:h-[54px] px-4 rounded-[8px] border transition-colors cursor-text bg-white flex items-center ${focusedField === 'lastName' ? 'border-[#111111]' : 'border-[#8d8d8d]'
+                      }`}
                   >
                     <span
-                      className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${
-                        focusedField === 'lastName' || lastName.length > 0
+                      className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${focusedField === 'lastName' || lastName.length > 0
                           ? '-top-2.5 left-3 px-1.5 bg-white text-[12px] text-[#111111] font-normal leading-none z-10'
                           : 'top-1/2 -translate-y-1/2 left-4 text-[15px] sm:text-[16px] text-[#707072]'
-                      }`}
+                        }`}
                       style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
                     >
                       Last Name*
@@ -1311,16 +1299,14 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
                   <div ref={prefContainerRef} className="relative">
                     <div
                       onClick={() => setIsPrefDropdownOpen((prev) => !prev)}
-                      className={`relative w-full h-[52px] sm:h-[54px] px-4 rounded-[8px] border transition-colors cursor-pointer bg-white flex items-center justify-between ${
-                        isPrefDropdownOpen || focusedField === 'preference' ? 'border-[#111111]' : 'border-[#8d8d8d]'
-                      }`}
+                      className={`relative w-full h-[52px] sm:h-[54px] px-4 rounded-[8px] border transition-colors cursor-pointer bg-white flex items-center justify-between ${isPrefDropdownOpen || focusedField === 'preference' ? 'border-[#111111]' : 'border-[#8d8d8d]'
+                        }`}
                     >
                       <span
-                        className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${
-                          preference.length > 0 || isPrefDropdownOpen
+                        className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${preference.length > 0 || isPrefDropdownOpen
                             ? '-top-2.5 left-3 px-1.5 bg-white text-[12px] text-[#111111] font-normal leading-none z-10'
                             : 'top-1/2 -translate-y-1/2 left-4 text-[15px] sm:text-[16px] text-[#707072]'
-                        }`}
+                          }`}
                         style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
                       >
                         Shopping Preference*
@@ -1328,9 +1314,8 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
 
                       {/* Display selected preference */}
                       <span
-                        className={`text-[15px] sm:text-[16px] text-[#111111] font-normal ${
-                          preference ? 'opacity-100' : 'opacity-0'
-                        }`}
+                        className={`text-[15px] sm:text-[16px] text-[#111111] font-normal ${preference ? 'opacity-100' : 'opacity-0'
+                          }`}
                         style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
                       >
                         {preference}
@@ -1338,9 +1323,8 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
 
                       {/* Solid Caret Arrow strictly matching Nike screenshot */}
                       <svg
-                        className={`w-3.5 h-3.5 text-[#111111] transition-transform duration-200 shrink-0 ${
-                          isPrefDropdownOpen ? 'rotate-180' : ''
-                        }`}
+                        className={`w-3.5 h-3.5 text-[#111111] transition-transform duration-200 shrink-0 ${isPrefDropdownOpen ? 'rotate-180' : ''
+                          }`}
                         viewBox="0 0 24 24"
                         fill="currentColor"
                       >
@@ -1359,11 +1343,10 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
                               setPreference(option);
                               setIsPrefDropdownOpen(false);
                             }}
-                            className={`w-full text-left px-4 py-2.5 text-[14px] sm:text-[15px] transition-colors cursor-pointer ${
-                              preference === option
-                                ? 'bg-[#f5f5f5] text-[#111111] font-medium'
+                            className={`w-full text-left px-4 py-2.5 text-[14px] sm:text-[15px] transition-colors cursor-pointer ${preference === option
+                                ? '  text-[#111111] font-medium'
                                 : 'text-[#222222] hover:bg-[#fafafa]'
-                            }`}
+                              }`}
                             style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
                           >
                             {option}
@@ -1375,16 +1358,14 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
 
                   {/* 4. Email Address* */}
                   <div
-                    className={`relative w-full h-[52px] sm:h-[54px] px-4 rounded-[8px] border transition-colors cursor-text bg-white flex items-center ${
-                      focusedField === 'email' ? 'border-[#111111]' : 'border-[#8d8d8d]'
-                    }`}
+                    className={`relative w-full h-[52px] sm:h-[54px] px-4 rounded-[8px] border transition-colors cursor-text bg-white flex items-center ${focusedField === 'email' ? 'border-[#111111]' : 'border-[#8d8d8d]'
+                      }`}
                   >
                     <span
-                      className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${
-                        focusedField === 'email' || email.length > 0
+                      className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${focusedField === 'email' || email.length > 0
                           ? '-top-2.5 left-3 px-1.5 bg-white text-[12px] text-[#111111] font-normal leading-none z-10'
                           : 'top-1/2 -translate-y-1/2 left-4 text-[15px] sm:text-[16px] text-[#707072]'
-                      }`}
+                        }`}
                       style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
                     >
                       Email Address*
@@ -1406,11 +1387,10 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
                     <button
                       type="button"
                       onClick={() => setAgreed((prev) => !prev)}
-                      className={`w-5 h-5 rounded-[4px] flex items-center justify-center shrink-0 mt-0.5 transition-colors cursor-pointer ${
-                        agreed
+                      className={`w-5 h-5 rounded-[4px] flex items-center justify-center shrink-0 mt-0.5 transition-colors cursor-pointer ${agreed
                           ? 'bg-[#111111] text-white border border-[#111111]'
                           : 'bg-white border-2 border-[#8d8d8d]'
-                      }`}
+                        }`}
                       aria-label="Agree to terms and conditions"
                     >
                       {agreed && (
@@ -1462,11 +1442,10 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
                   <button
                     type="submit"
                     disabled={!isDetailsValid || isSendingEmail}
-                    className={`w-full py-3.5 sm:py-4 rounded-full mt-4 text-[15px] sm:text-[16px] font-medium transition-all flex items-center justify-center gap-2 ${
-                      isDetailsValid && !isSendingEmail
+                    className={`w-full py-3.5 sm:py-4 rounded-full mt-4 text-[15px] sm:text-[16px] font-medium transition-all flex items-center justify-center gap-2 ${isDetailsValid && !isSendingEmail
                         ? 'bg-[#111111] hover:bg-black text-white cursor-pointer active:scale-[0.99] shadow-sm'
                         : 'bg-[#e5e5e5] text-[#707072] cursor-not-allowed'
-                    }`}
+                      }`}
                     style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
                   >
                     {isSendingEmail ? (
@@ -1596,11 +1575,10 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
                   <button
                     type="submit"
                     disabled={!isEmailOtpValid}
-                    className={`w-full py-3.5 sm:py-4 rounded-full mt-6 text-[15px] sm:text-[16px] font-medium transition-all ${
-                      isEmailOtpValid
+                    className={`w-full py-3.5 sm:py-4 rounded-full mt-6 text-[15px] sm:text-[16px] font-medium transition-all ${isEmailOtpValid
                         ? 'bg-[#111111] hover:bg-black text-white cursor-pointer shadow-sm active:scale-[0.99]'
                         : 'bg-[#e5e5e5] text-[#707072] cursor-not-allowed'
-                    }`}
+                      }`}
                     style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
                   >
                     Verify & Complete
@@ -1650,9 +1628,8 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
             {/* STEP 5: SUCCESS STATE ("Welcome to Sonu shoe.") */}
             {step === 'success' && (
               <div
-                className={`transition-opacity duration-500 ease-out ${
-                  isWelcomeFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
-                }`}
+                className={`transition-opacity duration-500 ease-out ${isWelcomeFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
+                  }`}
               >
                 {/* Centered Brand Logo at top */}
                 <div className="flex justify-center pt-1 pb-1">
@@ -1700,9 +1677,8 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
       {/* 3. STEP 6: DELIVERY ADDRESS FULL-SCREEN SHEET (Matching User Screenshot Strictly) */}
       {(step === 'delivery-address' || isDeliveryAddressVisible) && (
         <div
-          className={`fixed inset-0 z-[60] w-full h-[100dvh] bg-white overflow-y-auto px-5 sm:px-8 py-6 flex flex-col justify-start transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform ${
-            addressSlideIn ? 'translate-y-0' : 'translate-y-full'
-          }`}
+          className={`fixed inset-0 z-[60] w-full h-[100dvh] bg-white overflow-y-auto px-5 sm:px-8 py-6 flex flex-col justify-start transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform ${addressSlideIn ? 'translate-y-0' : 'translate-y-full'
+            }`}
           role="dialog"
           aria-modal="true"
           aria-label="Add New Address"
@@ -1744,7 +1720,7 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
               </div>
 
               {/* Location Card: Auto-detected or Skeleton Animation */}
-              <div className="bg-[#f5f5f5] rounded-[12px] p-4 mb-4 transition-all">
+              <div className="  rounded-[12px] p-4 mb-4 transition-all">
                 {isPincodeLoading || (isPincodeFocused && addrPincode.length > 0 && addrPincode.length < 6) ? (
                   <div className="animate-pulse space-y-2 py-0.5">
                     <div className="h-5 bg-[#e2e2e5] rounded w-36" />
@@ -1793,20 +1769,18 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
                 {/* 1. Pincode Input */}
                 <div>
                   <div
-                    className={`relative w-full h-[54px] px-4 rounded-[10px] border transition-colors cursor-text bg-white flex items-center ${
-                      addrErrors.pincode
+                    className={`relative w-full h-[54px] px-4 rounded-[10px] border transition-colors cursor-text bg-white flex items-center ${addrErrors.pincode
                         ? 'border-[#e53935]'
                         : addrFocusedField === 'pincode'
-                        ? 'border-[#111111]'
-                        : 'border-[#8d8d8d]'
-                    }`}
+                          ? 'border-[#111111]'
+                          : 'border-[#8d8d8d]'
+                      }`}
                   >
                     <span
-                      className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${
-                        addrFocusedField === 'pincode' || addrPincode.length > 0
+                      className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${addrFocusedField === 'pincode' || addrPincode.length > 0
                           ? '-top-2.5 left-3 px-1.5 bg-white text-[12px] font-normal leading-none z-10 ' + (addrErrors.pincode ? 'text-[#e53935]' : 'text-[#111111]')
                           : 'top-1/2 -translate-y-1/2 left-4 text-[15px] sm:text-[16px] text-[#707072]'
-                      }`}
+                        }`}
                       style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
                     >
                       Pincode
@@ -1869,20 +1843,18 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
                 {/* 2. House/ Flat/ Office No. */}
                 <div>
                   <div
-                    className={`relative w-full h-[54px] px-4 rounded-[10px] border transition-colors cursor-text bg-white flex items-center ${
-                      addrErrors.houseNo
+                    className={`relative w-full h-[54px] px-4 rounded-[10px] border transition-colors cursor-text bg-white flex items-center ${addrErrors.houseNo
                         ? 'border-[#e53935]'
                         : addrFocusedField === 'houseNo'
-                        ? 'border-[#111111]'
-                        : 'border-[#8d8d8d]'
-                    }`}
+                          ? 'border-[#111111]'
+                          : 'border-[#8d8d8d]'
+                      }`}
                   >
                     <span
-                      className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${
-                        addrFocusedField === 'houseNo' || addrHouseNo.length > 0
+                      className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${addrFocusedField === 'houseNo' || addrHouseNo.length > 0
                           ? '-top-2.5 left-3 px-1.5 bg-white text-[12px] font-normal leading-none z-10 ' + (addrErrors.houseNo ? 'text-[#e53935]' : 'text-[#111111]')
                           : 'top-1/2 -translate-y-1/2 left-4 text-[15px] sm:text-[16px] ' + (addrErrors.houseNo ? 'text-[#e53935]' : 'text-[#707072]')
-                      }`}
+                        }`}
                       style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
                     >
                       House/ Flat/ Office No.
@@ -1918,22 +1890,20 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
                 <div>
                   <div
                     onClick={() => roadAreaTextareaRef.current?.focus()}
-                    className={`relative w-full min-h-[150px] p-3.5 rounded-[10px] border transition-colors cursor-text bg-white flex flex-col ${
-                      addrErrors.roadArea
+                    className={`relative w-full min-h-[150px] p-3.5 rounded-[10px] border transition-colors cursor-text bg-white flex flex-col ${addrErrors.roadArea
                         ? 'border-[#e53935]'
                         : addrFocusedField === 'roadArea'
-                        ? 'border-[#111111]'
-                        : 'border-[#8d8d8d]'
-                    }`}
+                          ? 'border-[#111111]'
+                          : 'border-[#8d8d8d]'
+                      }`}
                   >
                     <span
-                      className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${
-                        addrFocusedField === 'roadArea' || addrRoadArea.length > 0
+                      className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${addrFocusedField === 'roadArea' || addrRoadArea.length > 0
                           ? '-top-2.5 left-3 px-1.5 bg-white text-[12px] font-normal leading-none z-10 ' +
-                            (addrErrors.roadArea ? 'text-[#e53935]' : 'text-[#111111]')
+                          (addrErrors.roadArea ? 'text-[#e53935]' : 'text-[#111111]')
                           : 'top-3.5 left-4 text-[15px] sm:text-[16px] ' +
-                            (addrErrors.roadArea ? 'text-[#e53935]' : 'text-[#707072]')
-                      }`}
+                          (addrErrors.roadArea ? 'text-[#e53935]' : 'text-[#707072]')
+                        }`}
                       style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
                     >
                       Road Name/ Area /Colony
@@ -1976,9 +1946,8 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
 
                 {/* 4. Name (Autofilled) */}
                 <div
-                  className={`relative w-full h-[54px] px-4 rounded-[10px] border transition-colors cursor-text bg-white flex items-center ${
-                    addrFocusedField === 'name' ? 'border-[#111111]' : 'border-[#8d8d8d]'
-                  }`}
+                  className={`relative w-full h-[54px] px-4 rounded-[10px] border transition-colors cursor-text bg-white flex items-center ${addrFocusedField === 'name' ? 'border-[#111111]' : 'border-[#8d8d8d]'
+                    }`}
                 >
                   <span
                     className="absolute -top-2.5 left-3 px-1.5 bg-white text-[12px] text-[#111111] font-normal leading-none z-10 select-none"
@@ -2000,16 +1969,14 @@ export default function LoginModal({ isOpen, onClose, initialStep = 'mobile' }) 
 
                 {/* 5. Mobile Number (Autofilled & Fully Editable) */}
                 <div
-                  className={`relative w-full h-[54px] px-4 rounded-[10px] border transition-colors cursor-text bg-white flex items-center ${
-                    addrFocusedField === 'mobile' ? 'border-[#111111]' : 'border-[#8d8d8d]'
-                  }`}
+                  className={`relative w-full h-[54px] px-4 rounded-[10px] border transition-colors cursor-text bg-white flex items-center ${addrFocusedField === 'mobile' ? 'border-[#111111]' : 'border-[#8d8d8d]'
+                    }`}
                 >
                   <span
-                    className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${
-                      addrFocusedField === 'mobile' || (addrMobile && addrMobile.length > 0)
+                    className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${addrFocusedField === 'mobile' || (addrMobile && addrMobile.length > 0)
                         ? '-top-2.5 left-3 px-1.5 bg-white text-[12px] text-[#111111] font-normal leading-none z-10'
                         : 'top-1/2 -translate-y-1/2 left-4 text-[15px] sm:text-[16px] text-[#707072]'
-                    }`}
+                      }`}
                     style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
                   >
                     Mobile Number

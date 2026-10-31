@@ -244,7 +244,7 @@ export default function HelpCenterClient() {
   return (
     <div className="min-h-screen bg-white font-['Helvetica_Now_Text',sans-serif] text-[#111111] pb-24 pt-4 sm:pt-8">
       <div className="max-w-[480px] sm:max-w-[540px] mx-auto px-4 sm:px-6">
-        
+
         {/* Top Navigation Row: Back Button */}
         <div className="pt-1 pb-4">
           <button
@@ -369,17 +369,15 @@ export default function HelpCenterClient() {
       {isTopicMounted && selectedTopic && (
         <div className="fixed inset-0 z-50 overflow-hidden font-['Helvetica_Now_Text',sans-serif]">
           <div
-            className={`fixed inset-0 bg-black/60 transition-opacity duration-300 ease-out cursor-pointer ${
-              isTopicVisible ? 'opacity-100' : 'opacity-0'
-            }`}
+            className={`fixed inset-0 bg-black/60 transition-opacity duration-300 ease-out cursor-pointer ${isTopicVisible ? 'opacity-100' : 'opacity-0'
+              }`}
             onClick={closeTopicModal}
           />
           <div
-            className={`fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 w-full sm:max-w-[520px] bg-white rounded-t-[28px] sm:rounded-[24px] shadow-2xl z-50 p-6 sm:p-7 overflow-y-auto max-h-[85vh] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-              isTopicVisible
+            className={`fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 w-full sm:max-w-[520px] bg-white rounded-t-[28px] sm:rounded-[24px] shadow-2xl z-50 p-6 sm:p-7 overflow-y-auto max-h-[85vh] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isTopicVisible
                 ? 'translate-y-0 opacity-100 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:scale-100'
                 : 'translate-y-full opacity-0 sm:-translate-x-1/2 sm:-translate-y-[45%] sm:scale-95'
-            }`}
+              }`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between pb-3.5 border-b border-[#f0f0f0]">
@@ -395,7 +393,7 @@ export default function HelpCenterClient() {
               <button
                 type="button"
                 onClick={closeTopicModal}
-                className="w-9 h-9 rounded-full bg-[#f5f5f5] hover:bg-[#e8e8e8] flex items-center justify-center text-[#111111] transition-colors cursor-pointer"
+                className="w-9 h-9 rounded-full   hover:bg-[#e8e8e8] flex items-center justify-center text-[#111111] transition-colors cursor-pointer"
                 aria-label="Close"
               >
                 <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2" fill="none">
@@ -444,17 +442,15 @@ export default function HelpCenterClient() {
       {isContactMounted && (
         <div className="fixed inset-0 z-50 overflow-hidden font-['Helvetica_Now_Text',sans-serif]">
           <div
-            className={`fixed inset-0 bg-black/60 transition-opacity duration-300 ease-out cursor-pointer ${
-              isContactVisible ? 'opacity-100' : 'opacity-0'
-            }`}
+            className={`fixed inset-0 bg-black/60 transition-opacity duration-300 ease-out cursor-pointer ${isContactVisible ? 'opacity-100' : 'opacity-0'
+              }`}
             onClick={closeContactModal}
           />
           <div
-            className={`fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 w-full sm:max-w-[520px] bg-white rounded-t-[28px] sm:rounded-[24px] shadow-2xl z-50 p-6 sm:p-7 overflow-y-auto max-h-[85vh] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-              isContactVisible
+            className={`fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 w-full sm:max-w-[520px] bg-white rounded-t-[28px] sm:rounded-[24px] shadow-2xl z-50 p-6 sm:p-7 overflow-y-auto max-h-[85vh] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isContactVisible
                 ? 'translate-y-0 opacity-100 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:scale-100'
                 : 'translate-y-full opacity-0 sm:-translate-x-1/2 sm:-translate-y-[45%] sm:scale-95'
-            }`}
+              }`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between pb-3.5 border-b border-[#f0f0f0]">
@@ -472,7 +468,7 @@ export default function HelpCenterClient() {
               <button
                 type="button"
                 onClick={closeContactModal}
-                className="w-9 h-9 rounded-full bg-[#f5f5f5] hover:bg-[#e8e8e8] flex items-center justify-center text-[#111111] transition-colors cursor-pointer"
+                className="w-9 h-9 rounded-full   hover:bg-[#e8e8e8] flex items-center justify-center text-[#111111] transition-colors cursor-pointer"
                 aria-label="Close"
               >
                 <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2" fill="none">

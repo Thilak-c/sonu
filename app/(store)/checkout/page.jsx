@@ -273,7 +273,7 @@ export default function CheckoutPage() {
               mobile: parsed.mobile || prev.mobile || '',
               email: parsed.email || prev.email || '',
             }));
-          } catch (e) {}
+          } catch (e) { }
         }
       } catch (err) {
         // ignore
@@ -312,7 +312,7 @@ export default function CheckoutPage() {
             mobile: parsed.mobile || prev.mobile || '',
             email: parsed.email || prev.email || '',
           }));
-        } catch (e) {}
+        } catch (e) { }
       }
     };
 
@@ -915,9 +915,8 @@ export default function CheckoutPage() {
                     Delivery Estimate
                   </span>
                   <svg
-                    className={`w-4 h-4 text-[#111111] transition-transform duration-200 ${
-                      isDeliveryEstimateOpen ? 'rotate-180' : ''
-                    }`}
+                    className={`w-4 h-4 text-[#111111] transition-transform duration-200 ${isDeliveryEstimateOpen ? 'rotate-180' : ''
+                      }`}
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -973,9 +972,8 @@ export default function CheckoutPage() {
                     Price Details
                   </span>
                   <svg
-                    className={`w-4 h-4 text-[#111111] transition-transform duration-200 ${
-                      isPriceDetailsOpen ? 'rotate-180' : ''
-                    }`}
+                    className={`w-4 h-4 text-[#111111] transition-transform duration-200 ${isPriceDetailsOpen ? 'rotate-180' : ''
+                      }`}
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -1219,11 +1217,10 @@ export default function CheckoutPage() {
                     className="flex flex-col items-center cursor-pointer select-none group"
                   >
                     <div
-                      className={`w-14 h-14 sm:w-16 sm:h-16 rounded-[14px] bg-white flex items-center justify-center p-2.5 transition-all ${
-                        selectedUpiApp === 'gpay'
+                      className={`w-14 h-14 sm:w-16 sm:h-16 rounded-[14px] bg-white flex items-center justify-center p-2.5 transition-all ${selectedUpiApp === 'gpay'
                           ? 'border-2 border-[#111111] shadow-sm'
                           : 'border border-[#e5e5e5] hover:border-[#8d8d8d]'
-                      }`}
+                        }`}
                     >
                       <img
                         src="/images/payments/googlePay.svg"
@@ -1245,11 +1242,10 @@ export default function CheckoutPage() {
                     className="flex flex-col items-center cursor-pointer select-none group"
                   >
                     <div
-                      className={`w-14 h-14 sm:w-16 sm:h-16 rounded-[14px] bg-white flex items-center justify-center p-2.5 transition-all ${
-                        selectedUpiApp === 'phonepe'
+                      className={`w-14 h-14 sm:w-16 sm:h-16 rounded-[14px] bg-white flex items-center justify-center p-2.5 transition-all ${selectedUpiApp === 'phonepe'
                           ? 'border-2 border-[#111111] shadow-sm'
                           : 'border border-[#e5e5e5] hover:border-[#8d8d8d]'
-                      }`}
+                        }`}
                     >
                       <img
                         src="/images/payments/phonePe.svg"
@@ -1271,11 +1267,10 @@ export default function CheckoutPage() {
                     className="flex flex-col items-center cursor-pointer select-none group"
                   >
                     <div
-                      className={`w-14 h-14 sm:w-16 sm:h-16 rounded-[14px] bg-white flex items-center justify-center p-2.5 transition-all ${
-                        selectedUpiApp === 'paytm'
+                      className={`w-14 h-14 sm:w-16 sm:h-16 rounded-[14px] bg-white flex items-center justify-center p-2.5 transition-all ${selectedUpiApp === 'paytm'
                           ? 'border-2 border-[#111111] shadow-sm'
                           : 'border border-[#e5e5e5] hover:border-[#8d8d8d]'
-                      }`}
+                        }`}
                     >
                       <img
                         src="/images/payments/paytm.svg"
@@ -1297,11 +1292,10 @@ export default function CheckoutPage() {
                     className="flex flex-col items-center cursor-pointer select-none group"
                   >
                     <div
-                      className={`w-14 h-14 sm:w-16 sm:h-16 rounded-[14px] bg-white flex items-center justify-center p-2.5 transition-all ${
-                        selectedUpiApp === 'other'
+                      className={`w-14 h-14 sm:w-16 sm:h-16 rounded-[14px] bg-white flex items-center justify-center p-2.5 transition-all ${selectedUpiApp === 'other'
                           ? 'border-2 border-[#111111] shadow-sm'
                           : 'border border-[#e5e5e5] hover:border-[#8d8d8d]'
-                      }`}
+                        }`}
                     >
                       <img
                         src="/images/payments/otherUpi.svg"
@@ -1527,11 +1521,10 @@ export default function CheckoutPage() {
                     <div
                       key={b.id}
                       onClick={() => setSelectedBank(b.id)}
-                      className={`flex items-center justify-between p-3 rounded-[10px] cursor-pointer transition-colors ${
-                        selectedBank === b.id
+                      className={`flex items-center justify-between p-3 rounded-[10px] cursor-pointer transition-colors ${selectedBank === b.id
                           ? 'bg-[#f7f7f7] border border-[#111111]'
                           : 'hover:bg-[#fafafa] border border-transparent'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center gap-3">
                         <img
@@ -2258,9 +2251,8 @@ export default function CheckoutPage() {
                     <button
                       type="button"
                       onClick={() => toggleWishlist(itemKey)}
-                      className={`w-10 h-10 rounded-full border border-[#e5e5e5] flex items-center justify-center transition-colors cursor-pointer hover:bg-neutral-50 ${
-                        isFavourited ? 'bg-neutral-50 text-red-500' : 'text-[#111111]'
-                      }`}
+                      className={`w-10 h-10 rounded-full border border-[#e5e5e5] flex items-center justify-center transition-colors cursor-pointer hover:bg-neutral-50 ${isFavourited ? 'bg-neutral-50 text-red-500' : 'text-[#111111]'
+                        }`}
                       aria-label={isFavourited ? 'Remove from favourites' : 'Save to favourites'}
                     >
                       <svg
@@ -2328,7 +2320,7 @@ export default function CheckoutPage() {
               >
                 <div className="flex items-center gap-1.5">
                   <span className="capitalize">{combo.title || 'combo offer'}</span>
-              
+
                 </div>
                 <span className="font-bold text-[#228B5A] shrink-0">
                   - ₹ {combo.savings.toLocaleString('en-IN')}
@@ -2405,9 +2397,8 @@ export default function CheckoutPage() {
 
               <svg
                 viewBox="0 0 24 24"
-                className={`w-5 h-5 text-[#111111] transition-transform duration-200 shrink-0 ${
-                  isPromoOpen ? 'rotate-90' : ''
-                }`}
+                className={`w-5 h-5 text-[#111111] transition-transform duration-200 shrink-0 ${isPromoOpen ? 'rotate-90' : ''
+                  }`}
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="1.8"
@@ -2420,7 +2411,7 @@ export default function CheckoutPage() {
             {isPromoOpen && (
               <div className="mt-3 pt-2">
                 {appliedPromo ? (
-                  <div className="flex items-center justify-between bg-[#f5f5f5] px-3.5 py-2.5 rounded-lg text-[14px]">
+                  <div className="flex items-center justify-between   px-3.5 py-2.5 rounded-lg text-[14px]">
                     <span className="font-medium text-[#0d8240]">
                       Code {appliedPromo.code} applied (-10%)
                     </span>
@@ -2604,11 +2595,10 @@ export default function CheckoutPage() {
                       <button
                         type="button"
                         onClick={() => handleMoveToBag(addon)}
-                        className={`mt-2.5 w-full py-1.5 sm:py-2 rounded-full border text-[12px] sm:text-[13px] font-medium transition-all cursor-pointer active:scale-[0.98] ${
-                          isAdded
+                        className={`mt-2.5 w-full py-1.5 sm:py-2 rounded-full border text-[12px] sm:text-[13px] font-medium transition-all cursor-pointer active:scale-[0.98] ${isAdded
                             ? 'bg-[#0d8240] text-white border-[#0d8240]'
                             : 'border-[#111111] text-[#111111] bg-white hover:bg-[#111111] hover:text-white'
-                        }`}
+                          }`}
                       >
                         {isAdded ? 'Added ✓' : 'Move to Bag'}
                       </button>
@@ -2638,19 +2628,17 @@ export default function CheckoutPage() {
         <div className="fixed inset-0 z-50 overflow-hidden font-['Helvetica_Now_Text',sans-serif]">
           {/* Blacked-out backdrop overlay with smooth fade */}
           <div
-            className={`fixed inset-0 bg-black/60 transition-opacity duration-300 ease-out cursor-pointer ${
-              isSizeBackdropVisible ? 'opacity-100' : 'opacity-0'
-            }`}
+            className={`fixed inset-0 bg-black/60 transition-opacity duration-300 ease-out cursor-pointer ${isSizeBackdropVisible ? 'opacity-100' : 'opacity-0'
+              }`}
             onClick={closeSizeModal}
           />
 
           {/* Drawer Sheet / Centered Modal */}
           <div
-            className={`fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 w-full sm:max-w-[480px] bg-white rounded-t-[24px] sm:rounded-[24px] shadow-2xl z-50 px-6 pt-6 pb-8 overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-              isSizeModalVisible
+            className={`fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 w-full sm:max-w-[480px] bg-white rounded-t-[24px] sm:rounded-[24px] shadow-2xl z-50 px-6 pt-6 pb-8 overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isSizeModalVisible
                 ? 'translate-y-0 opacity-100 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:scale-100 sm:opacity-100'
                 : 'translate-y-full opacity-0 sm:-translate-x-1/2 sm:translate-y-[100vh] sm:scale-95 sm:opacity-0'
-            }`}
+              }`}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header: Title, Category, Price on Left; Raw X on Right */}
@@ -2707,11 +2695,10 @@ export default function CheckoutPage() {
                       key={sz}
                       type="button"
                       onClick={() => setTempSelectedSize(sz)}
-                      className={`h-[50px] sm:h-[52px] rounded-[8px] border text-[15px] sm:text-[16px] font-medium flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
-                        isSelected
+                      className={`h-[50px] sm:h-[52px] rounded-[8px] border text-[15px] sm:text-[16px] font-medium flex items-center justify-center transition-all cursor-pointer active:scale-95 ${isSelected
                           ? 'border-[#111111] bg-[#111111] text-white font-semibold'
                           : 'border-[#d1d5db] bg-white text-[#111111] hover:border-[#111111]'
-                      }`}
+                        }`}
                     >
                       {sz}
                     </button>
@@ -2736,11 +2723,10 @@ export default function CheckoutPage() {
                   setCartItems(getCartItems());
                   closeSizeModal();
                 }}
-                className={`w-full py-4 rounded-full text-[16px] font-medium transition-all ${
-                  tempSelectedSize
+                className={`w-full py-4 rounded-full text-[16px] font-medium transition-all ${tempSelectedSize
                     ? 'bg-[#111111] text-white hover:bg-black active:scale-[0.99] cursor-pointer'
                     : 'bg-[#e5e5e5] text-[#8e8e93] cursor-not-allowed'
-                }`}
+                  }`}
               >
                 Add to bag
               </button>
@@ -2754,19 +2740,17 @@ export default function CheckoutPage() {
         <div className="fixed inset-0 z-60 overflow-hidden font-['Helvetica_Now_Text',sans-serif]">
           {/* Backdrop */}
           <div
-            className={`fixed inset-0 bg-black/60 transition-opacity duration-300 ease-out cursor-pointer ${
-              isSizeGuideVisible ? 'opacity-100' : 'opacity-0'
-            }`}
+            className={`fixed inset-0 bg-black/60 transition-opacity duration-300 ease-out cursor-pointer ${isSizeGuideVisible ? 'opacity-100' : 'opacity-0'
+              }`}
             onClick={closeSizeGuide}
           />
 
           {/* Modal Container */}
           <div
-            className={`fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 w-full sm:max-w-[620px] max-h-[92vh] sm:max-h-[88vh] bg-white rounded-t-[26px] sm:rounded-[24px] shadow-2xl z-60 px-6 pt-6 pb-8 overflow-y-auto transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-              isSizeGuideVisible
+            className={`fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 w-full sm:max-w-[620px] max-h-[92vh] sm:max-h-[88vh] bg-white rounded-t-[26px] sm:rounded-[24px] shadow-2xl z-60 px-6 pt-6 pb-8 overflow-y-auto transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isSizeGuideVisible
                 ? 'translate-y-0 opacity-100 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:scale-100'
                 : 'translate-y-full opacity-0 sm:-translate-x-1/2 sm:translate-y-[100vh] sm:scale-95'
-            }`}
+              }`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start justify-between">
@@ -2782,7 +2766,7 @@ export default function CheckoutPage() {
               <button
                 type="button"
                 onClick={closeSizeGuide}
-                className="w-9 h-9 rounded-full bg-[#f5f5f5] hover:bg-[#e8e8e8] flex items-center justify-center text-[#111111] transition-colors cursor-pointer"
+                className="w-9 h-9 rounded-full   hover:bg-[#e8e8e8] flex items-center justify-center text-[#111111] transition-colors cursor-pointer"
                 aria-label="Close Size Guide"
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -2797,27 +2781,24 @@ export default function CheckoutPage() {
 
             {/* in / cm Pill Switcher */}
             <div className="mb-6">
-              <div className="relative inline-flex items-center bg-[#f5f5f5] rounded-full p-1 h-[44px]">
+              <div className="relative inline-flex items-center   rounded-full p-1 h-[44px]">
                 <div
-                  className={`absolute top-1 bottom-1 w-[52px] rounded-full bg-white border border-[#111111] transition-all duration-300 ease-in-out ${
-                    sizeGuideUnit === 'in' ? 'left-1' : 'left-[55px]'
-                  }`}
+                  className={`absolute top-1 bottom-1 w-[52px] rounded-full bg-white border border-[#111111] transition-all duration-300 ease-in-out ${sizeGuideUnit === 'in' ? 'left-1' : 'left-[55px]'
+                    }`}
                 />
                 <button
                   type="button"
                   onClick={() => setSizeGuideUnit('in')}
-                  className={`relative z-10 w-[52px] h-[36px] flex items-center justify-center text-[15px] font-medium transition-colors cursor-pointer ${
-                    sizeGuideUnit === 'in' ? 'text-[#111111]' : 'text-[#707072]'
-                  }`}
+                  className={`relative z-10 w-[52px] h-[36px] flex items-center justify-center text-[15px] font-medium transition-colors cursor-pointer ${sizeGuideUnit === 'in' ? 'text-[#111111]' : 'text-[#707072]'
+                    }`}
                 >
                   in
                 </button>
                 <button
                   type="button"
                   onClick={() => setSizeGuideUnit('cm')}
-                  className={`relative z-10 w-[52px] h-[36px] flex items-center justify-center text-[15px] font-medium transition-colors cursor-pointer ${
-                    sizeGuideUnit === 'cm' ? 'text-[#111111]' : 'text-[#707072]'
-                  }`}
+                  className={`relative z-10 w-[52px] h-[36px] flex items-center justify-center text-[15px] font-medium transition-colors cursor-pointer ${sizeGuideUnit === 'cm' ? 'text-[#111111]' : 'text-[#707072]'
+                    }`}
                 >
                   cm
                 </button>

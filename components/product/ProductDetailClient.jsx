@@ -324,7 +324,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
       try {
         const raw = localStorage.getItem('sonu_wishlist');
         if (raw) setWishlistMap(JSON.parse(raw));
-      } catch {}
+      } catch { }
     };
     window.addEventListener('wishlist-updated', syncWishlist);
 
@@ -579,489 +579,480 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
       <div className="w-full px-5 sm:px-6 lg:px-8 pt-4 sm:pt-6">
         <div className="max-w-[1200px] xl:max-w-[1240px] mx-auto">
 
-        {/* Mobile Header (Hidden on Desktop) */}
-        <div className="flex flex-col text-left mb-5 lg:hidden">
-          <span className="text-[#c83200] text-[15px] sm:text-[16px] font-medium leading-none mb-1.5">
-            Just In
-          </span>
+          {/* Mobile Header (Hidden on Desktop) */}
+          <div className="flex flex-col text-left mb-5 lg:hidden">
+            <span className="text-[#c83200] text-[15px] sm:text-[16px] font-medium leading-none mb-1.5">
+              Just In
+            </span>
 
-          <h1
-            className="text-[26px] sm:text-[28px] font-medium text-[#111111] tracking-[-0.02em] leading-[1.15] font-['Helvetica_Now_Text_Medium',sans-serif]"
-            style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
-          >
-            {product.name}
-          </h1>
+            <h1
+              className="text-[26px] sm:text-[28px] font-medium text-[#111111] tracking-[-0.02em] leading-[1.15] font-['Helvetica_Now_Text_Medium',sans-serif]"
+              style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+            >
+              {product.name}
+            </h1>
 
-          <p className="text-[15.5px] sm:text-[16px] text-[#707072] mt-1 leading-normal font-normal">
-            {product.category || 'Handcrafted Footwear'}
-          </p>
+            <p className="text-[15.5px] sm:text-[16px] text-[#707072] mt-1 leading-normal font-normal">
+              {product.category || 'Handcrafted Footwear'}
+            </p>
 
-          <p
-            className="text-[17px] sm:text-[18px] font-medium text-[#111111] mt-3.5 font-['Helvetica_Now_Text_Medium',sans-serif]"
-            style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
-          >
-            {formattedPrice}
-          </p>
+            <p
+              className="text-[17px] sm:text-[18px] font-medium text-[#111111] mt-3.5 font-['Helvetica_Now_Text_Medium',sans-serif]"
+              style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+            >
+              {formattedPrice}
+            </p>
 
-          <p className="text-[14px] text-[#707072] mt-1">
-            Inclusive of all taxes
-          </p>
-        </div>
-
-        {/* 2-Column Product Layout on Desktop */}
-        <div className="flex flex-col lg:flex-row lg:items-start lg:gap-10 xl:gap-14">
-          
-          {/* Left Column: Vertical Thumbnails & Main Image Gallery */}
-          <div className="w-full lg:flex-1 flex flex-col lg:flex-row gap-3 lg:gap-4 xl:gap-5 lg:sticky lg:top-24">
-            
-            {/* Desktop Vertical Thumbnails */}
-            {productImages.length > 1 && (
-              <div className="hidden lg:flex flex-col gap-2.5 w-[60px] xl:w-[64px] shrink-0 max-h-[520px] overflow-y-auto scrollbar-none py-0.5">
-                {productImages.map((img, idx) => (
-                  <button
-                    key={`desk-thumb-${idx}`}
-                    type="button"
-                    onMouseEnter={() => setCurrentImageIndex(idx)}
-                    onClick={() => setCurrentImageIndex(idx)}
-                    className={`w-full aspect-square rounded-[8px] overflow-hidden flex items-center justify-center cursor-pointer transition-all p-0 ${
-                      currentImageIndex === idx
-                        ? 'border-[1.5px] border-[#111111]'
-                        : 'border border-neutral-200 hover:border-neutral-400 opacity-80 hover:opacity-100'
-                    }`}
-                    aria-label={`View image ${idx + 1}`}
-                  >
-                    <img src={img} alt="" className="w-full h-full object-contain" />
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Desktop Hero Image Area (Desktop ONLY - unchanged) */}
-            <div className="hidden lg:flex flex-1 w-full aspect-square relative overflow-hidden items-center justify-center p-0 m-0 group bg-[#f1f1f1] rounded-[12px]">
-              <FallbackImage
-                src={activeImage}
-                alt={product.name}
-                className="w-full h-full object-contain"
-                logoSize="w-8 h-8"
-              />
-
-              {/* Bottom Right Round Navigation Arrows */}
-              {productImages.length > 1 && (
-                <div className="absolute bottom-3.5 right-3.5 flex items-center gap-2 z-10">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setCurrentImageIndex(
-                        (prev) => (prev - 1 + productImages.length) % productImages.length
-                      )
-                    }
-                    className="w-9 h-9 rounded-full bg-white hover:bg-neutral-100 flex items-center justify-center transition-all cursor-pointer shadow-sm"
-                    aria-label="Previous image"
-                  >
-                    <ChevronLeft className="w-4 h-4 text-[#111111]" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setCurrentImageIndex((prev) => (prev + 1) % productImages.length)
-                    }
-                    className="w-9 h-9 rounded-full bg-white hover:bg-neutral-100 flex items-center justify-center transition-all cursor-pointer shadow-sm"
-                    aria-label="Next image"
-                  >
-                    <ChevronRight className="w-4 h-4 text-[#111111]" />
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Mobile Scrollable Image Row (Mobile ONLY: 100vw edge-to-edge bleed, horizontal snap scroll) */}
-            <div className="block lg:hidden -mx-5 sm:-mx-6 w-screen relative overflow-hidden">
-              <div
-                ref={mobileScrollRef}
-                onScroll={handleMobileScroll}
-                className="flex flex-row overflow-x-auto snap-x snap-mandatory scrollbar-none no-scrollbar w-full touch-pan-y touch-pan-x overscroll-x-contain"
-                style={{
-                  scrollSnapType: 'x mandatory',
-                  WebkitOverflowScrolling: 'touch',
-                  scrollbarWidth: 'none',
-                  msOverflowStyle: 'none',
-                  touchAction: 'pan-x pan-y',
-                }}
-              >
-                {productImages.map((img, idx) => (
-                  <div
-                    key={`mob-slide-${idx}`}
-                    className="w-screen shrink-0 aspect-square snap-center flex items-center justify-center p-0 select-none bg-[#f1f1f1]"
-                  >
-                    <FallbackImage
-                      src={img}
-                      alt={`${product.name} view ${idx + 1}`}
-                      className="w-full h-full object-contain pointer-events-none select-none"
-                      logoSize="w-8 h-8"
-                      draggable={false}
-                    />
-                  </div>
-                ))}
-              </div>
-
-              {/* Mobile Carousel Pagination Dots (Overlaid at bottom of product image) */}
-              {productImages.length > 1 && (
-                <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center z-10 pointer-events-auto">
-                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full">
-                    {productImages.map((_, idx) => (
-                      <button
-                        key={`mob-dot-${idx}`}
-                        type="button"
-                        onClick={() => scrollToSlide(idx)}
-                        className={`transition-all rounded-full cursor-pointer ${
-                          currentImageIndex === idx
-                            ? 'w-5 h-1.5 bg-[#111111]'
-                            : 'w-1.5 h-1.5 bg-[#111111]/30 hover:bg-[#111111]/60'
-                        }`}
-                        aria-label={`Go to slide ${idx + 1}`}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
+            <p className="text-[14px] text-[#707072] mt-1">
+              Inclusive of all taxes
+            </p>
           </div>
 
-          {/* Right Column: Details, Sizes, CTAs, Delivery, Accordions */}
-          <div className="w-full lg:w-[380px] xl:w-[410px] shrink-0 mt-6 lg:mt-0">
-            {/* Desktop Header */}
-            <div className="hidden lg:flex flex-col text-left mb-6">
-              <span className="text-[#c83200] text-[15px] xl:text-[16px] font-medium leading-none mb-1.5">
-                Just In
-              </span>
-              <h1
-                className="text-[26px] xl:text-[28px] font-medium text-[#111111] tracking-[-0.02em] leading-[1.15] font-['Helvetica_Now_Text_Medium',sans-serif]"
-                style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
-              >
-                {product.name}
-              </h1>
-              <p className="text-[15.5px] xl:text-[16px] text-[#707072] mt-1 leading-normal font-normal">
-                {product.category || 'Handcrafted Footwear'}
-              </p>
-              <p
-                className="text-[17px] xl:text-[18px] font-medium text-[#111111] mt-3.5 font-['Helvetica_Now_Text_Medium',sans-serif]"
-                style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
-              >
-                {formattedPrice}
-              </p>
-              <p className="text-[14px] text-[#707072] mt-1">
-                Inclusive of all taxes
-              </p>
+          {/* 2-Column Product Layout on Desktop */}
+          <div className="flex flex-col lg:flex-row lg:items-start lg:gap-10 xl:gap-14">
+
+            {/* Left Column: Vertical Thumbnails & Main Image Gallery */}
+            <div className="w-full lg:flex-1 flex flex-col lg:flex-row gap-3 lg:gap-4 xl:gap-5 lg:sticky lg:top-24">
+
+              {/* Desktop Vertical Thumbnails */}
+              {productImages.length > 1 && (
+                <div className="hidden lg:flex flex-col gap-2.5 w-[60px] xl:w-[64px] shrink-0 max-h-[520px] overflow-y-auto scrollbar-none py-0.5">
+                  {productImages.map((img, idx) => (
+                    <button
+                      key={`desk-thumb-${idx}`}
+                      type="button"
+                      onMouseEnter={() => setCurrentImageIndex(idx)}
+                      onClick={() => setCurrentImageIndex(idx)}
+                      className={`w-full aspect-square rounded-[8px] overflow-hidden flex items-center justify-center cursor-pointer transition-all p-0 ${currentImageIndex === idx
+                          ? 'border-[1.5px] border-[#111111]'
+                          : 'border border-neutral-200 hover:border-neutral-400 opacity-80 hover:opacity-100'
+                        }`}
+                      aria-label={`View image ${idx + 1}`}
+                    >
+                      <img src={img} alt="" className="w-full h-full object-contain" />
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Desktop Hero Image Area (Desktop ONLY - unchanged) */}
+              <div className="hidden lg:flex flex-1 w-full aspect-square relative overflow-hidden items-center justify-center p-0 m-0 group bg-[#f1f1f1] rounded-[12px]">
+                <FallbackImage
+                  src={activeImage}
+                  alt={product.name}
+                  className="w-full h-full object-contain"
+                  logoSize="w-8 h-8"
+                />
+
+                {/* Bottom Right Round Navigation Arrows */}
+                {productImages.length > 1 && (
+                  <div className="absolute bottom-3.5 right-3.5 flex items-center gap-2 z-10">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setCurrentImageIndex(
+                          (prev) => (prev - 1 + productImages.length) % productImages.length
+                        )
+                      }
+                      className="w-9 h-9 rounded-full bg-white hover:bg-neutral-100 flex items-center justify-center transition-all cursor-pointer shadow-sm"
+                      aria-label="Previous image"
+                    >
+                      <ChevronLeft className="w-4 h-4 text-[#111111]" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setCurrentImageIndex((prev) => (prev + 1) % productImages.length)
+                      }
+                      className="w-9 h-9 rounded-full bg-white hover:bg-neutral-100 flex items-center justify-center transition-all cursor-pointer shadow-sm"
+                      aria-label="Next image"
+                    >
+                      <ChevronRight className="w-4 h-4 text-[#111111]" />
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Mobile Scrollable Image Row (Mobile ONLY: 100vw edge-to-edge bleed, horizontal snap scroll) */}
+              <div className="block lg:hidden -mx-5 sm:-mx-6 w-screen relative overflow-hidden">
+                <div
+                  ref={mobileScrollRef}
+                  onScroll={handleMobileScroll}
+                  className="flex flex-row overflow-x-auto snap-x snap-mandatory scrollbar-none no-scrollbar w-full touch-pan-y touch-pan-x overscroll-x-contain"
+                  style={{
+                    scrollSnapType: 'x mandatory',
+                    WebkitOverflowScrolling: 'touch',
+                    scrollbarWidth: 'none',
+                    msOverflowStyle: 'none',
+                    touchAction: 'pan-x pan-y',
+                  }}
+                >
+                  {productImages.map((img, idx) => (
+                    <div
+                      key={`mob-slide-${idx}`}
+                      className="w-screen shrink-0 aspect-square snap-center flex items-center justify-center p-0 select-none bg-[#f1f1f1]"
+                    >
+                      <FallbackImage
+                        src={img}
+                        alt={`${product.name} view ${idx + 1}`}
+                        className="w-full h-full object-contain pointer-events-none select-none"
+                        logoSize="w-8 h-8"
+                        draggable={false}
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                {/* Mobile Carousel Pagination Dots (Overlaid at bottom of product image) */}
+                {productImages.length > 1 && (
+                  <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center z-10 pointer-events-auto">
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full">
+                      {productImages.map((_, idx) => (
+                        <button
+                          key={`mob-dot-${idx}`}
+                          type="button"
+                          onClick={() => scrollToSlide(idx)}
+                          className={`transition-all rounded-full cursor-pointer ${currentImageIndex === idx
+                              ? 'w-5 h-1.5 bg-[#111111]'
+                              : 'w-1.5 h-1.5 bg-[#111111]/30 hover:bg-[#111111]/60'
+                            }`}
+                          aria-label={`Go to slide ${idx + 1}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
             </div>
 
-            {/* Colorway Swatches */}
-            {swatches.length > 1 && (
-              <div className="mb-6">
-                <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-none">
-                  {swatches.map((swatch, sIdx) => {
-                    const isCurrent = (swatch.id || swatch.slug) === (product.id || product.slug);
+            {/* Right Column: Details, Sizes, CTAs, Delivery, Accordions */}
+            <div className="w-full lg:w-[380px] xl:w-[410px] shrink-0 mt-6 lg:mt-0">
+              {/* Desktop Header */}
+              <div className="hidden lg:flex flex-col text-left mb-6">
+                <span className="text-[#c83200] text-[15px] xl:text-[16px] font-medium leading-none mb-1.5">
+                  Just In
+                </span>
+                <h1
+                  className="text-[26px] xl:text-[28px] font-medium text-[#111111] tracking-[-0.02em] leading-[1.15] font-['Helvetica_Now_Text_Medium',sans-serif]"
+                  style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                >
+                  {product.name}
+                </h1>
+                <p className="text-[15.5px] xl:text-[16px] text-[#707072] mt-1 leading-normal font-normal">
+                  {product.category || 'Handcrafted Footwear'}
+                </p>
+                <p
+                  className="text-[17px] xl:text-[18px] font-medium text-[#111111] mt-3.5 font-['Helvetica_Now_Text_Medium',sans-serif]"
+                  style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                >
+                  {formattedPrice}
+                </p>
+                <p className="text-[14px] text-[#707072] mt-1">
+                  Inclusive of all taxes
+                </p>
+              </div>
+
+              {/* Colorway Swatches */}
+              {swatches.length > 1 && (
+                <div className="mb-6">
+                  <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-none">
+                    {swatches.map((swatch, sIdx) => {
+                      const isCurrent = (swatch.id || swatch.slug) === (product.id || product.slug);
+                      return (
+                        <button
+                          key={`swatch-${swatch.id || swatch.slug}-${sIdx}`}
+                          type="button"
+                          onClick={() => {
+                            if (!isCurrent) {
+                              router.push(`/product/${swatch.id || swatch.slug}`);
+                            }
+                          }}
+                          className={`w-[90px] h-[90px] sm:w-[76px] sm:h-[76px] aspect-square rounded-[4px] p-0 transition-all cursor-pointer overflow-hidden flex items-center justify-center shrink-0 ${isCurrent
+                              ? 'border-[1px] border-[#111111]'
+                              : ''
+                            }`}
+                          title={swatch.name}
+                        >
+                          <img
+                            src={swatch.image || swatch.mainImage}
+                            alt={swatch.name}
+                            className="w-full h-full object-contain"
+                          />
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Size Selection Section */}
+              <div className="mt-6 sm:mt-7">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[16px] font-medium text-[#111111]">
+                    Select Size
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={openSizeGuide}
+                    className="flex items-center gap-1.5 text-[15px] font-medium text-[#111111] hover:opacity-70 transition-opacity cursor-pointer"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      focusable="false"
+                      viewBox="0 0 24 24"
+                      role="img"
+                      width="19px"
+                      height="19px"
+                      fill="none"
+                      className="shrink-0"
+                    >
+                      <path
+                        stroke="#111111"
+                        strokeWidth="1.5"
+                        d="M21.75 10.5v6.75a1.5 1.5 0 01-1.5 1.5H3.75a1.5 1.5 0 01-1.5-1.5V10.5m3.308-2.25h12.885"
+                      />
+                      <path
+                        stroke="#111111"
+                        strokeWidth="1.5"
+                        d="M15.79 5.599l2.652 2.65-2.652 2.653M8.21 5.599l-2.652 2.65 2.652 2.653M17.25 19v-2.5M12 19v-2.5M6.75 19v-2.5"
+                      />
+                    </svg>
+                    <span>Size Guide</span>
+                  </button>
+                </div>
+
+                {/* Size Buttons Grid (4 columns) */}
+                <div className="grid grid-cols-4 gap-2 sm:gap-2.5">
+                  {availableSizesList.map((size) => {
+                    const isSelected = selectedSize === size;
                     return (
                       <button
-                        key={`swatch-${swatch.id || swatch.slug}-${sIdx}`}
+                        key={size}
                         type="button"
-                        onClick={() => {
-                          if (!isCurrent) {
-                            router.push(`/product/${swatch.id || swatch.slug}`);
-                          }
-                        }}
-                        className={`w-[90px] h-[90px] sm:w-[76px] sm:h-[76px] aspect-square rounded-[4px] p-0 transition-all cursor-pointer overflow-hidden flex items-center justify-center shrink-0 ${
-                          isCurrent
-                            ? 'border-[1px] border-[#111111]'
-                            : ''
-                        }`}
-                        title={swatch.name}
+                        onClick={() => setSelectedSize(size)}
+                        className={`h-[42px] sm:h-[54px] rounded-[4px] flex items-center justify-center text-[15px] sm:text-[16px] font-medium transition-all cursor-pointer ${isSelected
+                            ? 'border border-[#111111] bg-white text-[#111111] '
+                            : 'border border-[#c4c3c3] bg-white text-[#111111] hover:border-[#111111]'
+                          }`}
                       >
-                        <img
-                          src={swatch.image || swatch.mainImage}
-                          alt={swatch.name}
-                          className="w-full h-full object-contain"
-                        />
+                        {size}
                       </button>
                     );
                   })}
                 </div>
               </div>
-            )}
 
-            {/* Size Selection Section */}
-            <div className="mt-6 sm:mt-7">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-[16px] font-medium text-[#111111]">
-                  Select Size
-                </span>
+              {/* CTA Buttons */}
+              <div className="mt-8 flex flex-col gap-3">
+                <button
+                  type="button"
+                  onClick={handleAddToBag}
+                  className="w-full h-[58px] sm:h-[62px] rounded-full text-white text-[16px] font-medium transition-all  active:scale-[0.99] cursor-pointer bg-[#111111] hover:bg-black font-['Helvetica_Now_Text_Medium',sans-serif] flex items-center justify-center"
+                  style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                >
+                  Add to Bag
+                </button>
 
                 <button
                   type="button"
-                  onClick={openSizeGuide}
-                  className="flex items-center gap-1.5 text-[15px] font-medium text-[#111111] hover:opacity-70 transition-opacity cursor-pointer"
+                  onClick={toggleProductWishlist}
+                  className="w-full h-[58px] sm:h-[62px] rounded-full border border-[#cacacb] hover:border-[#111111] bg-white text-[#111111] text-[16px] font-medium flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer font-['Helvetica_Now_Text_Medium',sans-serif]"
+                  style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
                 >
-                  <svg
-                    aria-hidden="true"
-                    focusable="false"
-                    viewBox="0 0 24 24"
-                    role="img"
-                    width="19px"
-                    height="19px"
-                    fill="none"
-                    className="shrink-0"
-                  >
-                    <path
-                      stroke="#111111"
-                      strokeWidth="1.5"
-                      d="M21.75 10.5v6.75a1.5 1.5 0 01-1.5 1.5H3.75a1.5 1.5 0 01-1.5-1.5V10.5m3.308-2.25h12.885"
-                    />
-                    <path
-                      stroke="#111111"
-                      strokeWidth="1.5"
-                      d="M15.79 5.599l2.652 2.65-2.652 2.653M8.21 5.599l-2.652 2.65 2.652 2.653M17.25 19v-2.5M12 19v-2.5M6.75 19v-2.5"
-                    />
-                  </svg>
-                  <span>Size Guide</span>
-                </button>
-              </div>
-
-              {/* Size Buttons Grid (4 columns) */}
-              <div className="grid grid-cols-4 gap-2 sm:gap-2.5">
-                {availableSizesList.map((size) => {
-                  const isSelected = selectedSize === size;
-                  return (
-                    <button
-                      key={size}
-                      type="button"
-                      onClick={() => setSelectedSize(size)}
-                      className={`h-[42px] sm:h-[54px] rounded-[4px] flex items-center justify-center text-[15px] sm:text-[16px] font-medium transition-all cursor-pointer ${
-                        isSelected
-                          ? 'border border-[#111111] bg-white text-[#111111] '
-                          : 'border border-[#c4c3c3] bg-white text-[#111111] hover:border-[#111111]'
+                  <span>Favourite</span>
+                  <Heart
+                    className={`w-5 h-5 ml-0.5 transition-colors ${isFavourite ? 'fill-rose-500 text-rose-500' : 'text-[#111111]'
                       }`}
-                    >
-                      {size}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* CTA Buttons */}
-            <div className="mt-8 flex flex-col gap-3">
-              <button
-                type="button"
-                onClick={handleAddToBag}
-                className="w-full h-[58px] sm:h-[62px] rounded-full text-white text-[16px] font-medium transition-all  active:scale-[0.99] cursor-pointer bg-[#111111] hover:bg-black font-['Helvetica_Now_Text_Medium',sans-serif] flex items-center justify-center"
-                style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
-              >
-                Add to Bag
-              </button>
-
-              <button
-                type="button"
-                onClick={toggleProductWishlist}
-                className="w-full h-[58px] sm:h-[62px] rounded-full border border-[#cacacb] hover:border-[#111111] bg-white text-[#111111] text-[16px] font-medium flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer font-['Helvetica_Now_Text_Medium',sans-serif]"
-                style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
-              >
-                <span>Favourite</span>
-                <Heart
-                  className={`w-5 h-5 ml-0.5 transition-colors ${
-                    isFavourite ? 'fill-rose-500 text-rose-500' : 'text-[#111111]'
-                  }`}
-                />
-              </button>
-            </div>
-
-            {/* Description & Style Block */}
-            <div className="mt-9 sm:mt-10">
-              <p className="text-[15.5px] sm:text-[16px] leading-[1.65] text-[#111111] font-normal">
-                {product.description ||
-                  'Handcrafted in small runs with ergonomic gum rubber soles, full-grain leather, and anatomical arch support engineered for 15,000+ daily steps with zero fatigue.'}
-              </p>
-
-              <div className="mt-5 space-y-1 text-[14.5px] sm:text-[15px] text-[#111111] leading-relaxed">
-                <p>
-                  • Colour Shown:{' '}
-                  {Array.isArray(product.colorways)
-                    ? product.colorways.join(' / ')
-                    : (product.color || 'Signature Raw Tone')}
-                </p>
-                <p>• Style: {product.id || product.slug || 'SN-01-ARCHIVE'}</p>
-              </div>
-
-              <button
-                type="button"
-                onClick={openProductDetails}
-                className="mt-4 text-[15px] font-medium text-[#111111] underline underline-offset-4 decoration-1 hover:text-[#707072] active:scale-[0.98] transition-transform cursor-pointer inline-block"
-              >
-                View Product Details
-              </button>
-            </div>
-
-            {/* Delivery & Address */}
-            <div className="mt-8 pt-6 border-t border-[#f0f0f0]">
-              <h3
-                className="text-[16px] font-medium text-[#111111] font-['Helvetica_Now_Text_Medium',sans-serif]"
-                style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
-              >
-                Delivery by {deliveryDateFormatted}
-              </h3>
-              <div className="flex items-center justify-between mt-1 text-[14px]">
-                <span className="text-[#707072]">
-                  To {deliveryPincode}, {deliveryCity}
-                </span>
-                <button
-                  type="button"
-                  onClick={openPincodeModal}
-                  className="font-medium text-[#111111] underline hover:text-[#707072] active:scale-[0.98] transition-transform cursor-pointer"
-                >
-                  Change
+                  />
                 </button>
               </div>
 
-              {/* Delivery Perks */}
-              <div className="mt-4 space-y-2.5">
-                <div
-                  onClick={() => openKnowMore('return')}
-                  className="flex items-center justify-between group cursor-pointer py-1.5 -my-0.5 px-2.5 -mx-2.5 rounded-[8px] hover:bg-[#f6f6f6] active:scale-[0.985] transition-all select-none"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-[#f2f2f2] group-hover:bg-white flex items-center justify-center shrink-0 transition-colors">
-                      <RotateCcw className="w-4 h-4 text-[#111111] stroke-[2]" />
-                    </div>
-                    <span className="text-[14px] text-[#111111] font-normal group-hover:text-black">
-                      7-day return and size exchange
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openKnowMore('return');
-                    }}
-                    className="text-[13px] font-medium text-[#111111] underline hover:text-[#707072] cursor-pointer"
-                  >
-                    Know More
-                  </button>
+              {/* Description & Style Block */}
+              <div className="mt-9 sm:mt-10">
+                <p className="text-[15.5px] sm:text-[16px] leading-[1.65] text-[#111111] font-normal">
+                  {product.description ||
+                    'Handcrafted in small runs with ergonomic gum rubber soles, full-grain leather, and anatomical arch support engineered for 15,000+ daily steps with zero fatigue.'}
+                </p>
+
+                <div className="mt-5 space-y-1 text-[14.5px] sm:text-[15px] text-[#111111] leading-relaxed">
+                  <p>
+                    • Colour Shown:{' '}
+                    {Array.isArray(product.colorways)
+                      ? product.colorways.join(' / ')
+                      : (product.color || 'Signature Raw Tone')}
+                  </p>
+                  <p>• Style: {product.id || product.slug || 'SN-01-ARCHIVE'}</p>
                 </div>
 
-                <div
-                  onClick={() => openKnowMore('delivery')}
-                  className="flex items-center justify-between group cursor-pointer py-1.5 -my-0.5 px-2.5 -mx-2.5 rounded-[8px] hover:bg-[#f6f6f6] active:scale-[0.985] transition-all select-none"
+                <button
+                  type="button"
+                  onClick={openProductDetails}
+                  className="mt-4 text-[15px] font-medium text-[#111111] underline underline-offset-4 decoration-1 hover:text-[#707072] active:scale-[0.98] transition-transform cursor-pointer inline-block"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-[#f2f2f2] group-hover:bg-white flex items-center justify-center shrink-0 transition-colors">
-                      <Truck className="w-4 h-4 text-[#111111] stroke-[2]" />
-                    </div>
-                    <span className="text-[14px] text-[#111111] font-normal group-hover:text-black">
-                      Free delivery available
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openKnowMore('delivery');
-                    }}
-                    className="text-[13px] font-medium text-[#111111] underline hover:text-[#707072] cursor-pointer"
-                  >
-                    Know More
-                  </button>
-                </div>
+                  View Product Details
+                </button>
               </div>
-            </div>
 
-            {/* Accordions */}
-            <div className="border-t border-[#e5e5e5] mt-6">
-              <button
-                type="button"
-                onClick={() => setIsVendorDetailsOpen(!isVendorDetailsOpen)}
-                className="w-full py-4 flex items-center justify-between text-left cursor-pointer select-none group"
-                aria-expanded={isVendorDetailsOpen}
-              >
-                <span
+              {/* Delivery & Address */}
+              <div className="mt-8 pt-6 border-t border-[#f0f0f0]">
+                <h3
                   className="text-[16px] font-medium text-[#111111] font-['Helvetica_Now_Text_Medium',sans-serif]"
                   style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
                 >
-                  Vendor Details
-                </span>
-                <ChevronDown
-                  className={`w-4 h-4 text-[#111111] transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                    isVendorDetailsOpen ? 'rotate-180' : ''
-                  }`}
-                />
-              </button>
-              <div
-                className={`grid transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                  isVendorDetailsOpen
-                    ? 'grid-rows-[1fr] opacity-100 pb-4'
-                    : 'grid-rows-[0fr] opacity-0 pb-0'
-                }`}
-              >
-                <div className="overflow-hidden space-y-2.5 text-[13.5px]">
-                  <div>
-                    <p className="text-[12px] text-[rgba(0,19,37,0.64)] leading-tight">Sold By</p>
-                    <p className="text-[14px] font-normal text-[rgba(0,19,37,0.92)] mt-0.5">Sonu shoe</p>
+                  Delivery by {deliveryDateFormatted}
+                </h3>
+                <div className="flex items-center justify-between mt-1 text-[14px]">
+                  <span className="text-[#707072]">
+                    To {deliveryPincode}, {deliveryCity}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={openPincodeModal}
+                    className="font-medium text-[#111111] underline hover:text-[#707072] active:scale-[0.98] transition-transform cursor-pointer"
+                  >
+                    Change
+                  </button>
+                </div>
+
+                {/* Delivery Perks */}
+                <div className="mt-4 space-y-2.5">
+                  <div
+                    onClick={() => openKnowMore('return')}
+                    className="flex items-center justify-between group cursor-pointer py-1.5 -my-0.5 px-2.5 -mx-2.5 rounded-[8px] hover:bg-[#f6f6f6] active:scale-[0.985] transition-all select-none"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-[#f2f2f2] group-hover:bg-white flex items-center justify-center shrink-0 transition-colors">
+                        <RotateCcw className="w-4 h-4 text-[#111111] stroke-[2]" />
+                      </div>
+                      <span className="text-[14px] text-[#111111] font-normal group-hover:text-black">
+                        7-day return and size exchange
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openKnowMore('return');
+                      }}
+                      className="text-[13px] font-medium text-[#111111] underline hover:text-[#707072] cursor-pointer"
+                    >
+                      Know More
+                    </button>
                   </div>
-                  <div>
-                    <p className="text-[12px] text-[rgba(0,19,37,0.64)] leading-tight">Country Of Origin</p>
-                    <p className="text-[14px] font-normal text-[rgba(0,19,37,0.92)] mt-0.5">India</p>
+
+                  <div
+                    onClick={() => openKnowMore('delivery')}
+                    className="flex items-center justify-between group cursor-pointer py-1.5 -my-0.5 px-2.5 -mx-2.5 rounded-[8px] hover:bg-[#f6f6f6] active:scale-[0.985] transition-all select-none"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-[#f2f2f2] group-hover:bg-white flex items-center justify-center shrink-0 transition-colors">
+                        <Truck className="w-4 h-4 text-[#111111] stroke-[2]" />
+                      </div>
+                      <span className="text-[14px] text-[#111111] font-normal group-hover:text-black">
+                        Free delivery available
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openKnowMore('delivery');
+                      }}
+                      className="text-[13px] font-medium text-[#111111] underline hover:text-[#707072] cursor-pointer"
+                    >
+                      Know More
+                    </button>
                   </div>
-                  <div>
-                    <p className="text-[12px] text-[rgba(0,19,37,0.64)] leading-tight">Name Of Manufacturer/ Packer/ Importer</p>
-                    <p className="text-[14px] font-normal text-[rgba(0,19,37,0.92)] mt-0.5">Sonu shoe</p>
+                </div>
+              </div>
+
+              {/* Accordions */}
+              <div className="border-t border-[#e5e5e5] mt-6">
+                <button
+                  type="button"
+                  onClick={() => setIsVendorDetailsOpen(!isVendorDetailsOpen)}
+                  className="w-full py-4 flex items-center justify-between text-left cursor-pointer select-none group"
+                  aria-expanded={isVendorDetailsOpen}
+                >
+                  <span
+                    className="text-[16px] font-medium text-[#111111] font-['Helvetica_Now_Text_Medium',sans-serif]"
+                    style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                  >
+                    Vendor Details
+                  </span>
+                  <ChevronDown
+                    className={`w-4 h-4 text-[#111111] transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isVendorDetailsOpen ? 'rotate-180' : ''
+                      }`}
+                  />
+                </button>
+                <div
+                  className={`grid transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isVendorDetailsOpen
+                      ? 'grid-rows-[1fr] opacity-100 pb-4'
+                      : 'grid-rows-[0fr] opacity-0 pb-0'
+                    }`}
+                >
+                  <div className="overflow-hidden space-y-2.5 text-[13.5px]">
+                    <div>
+                      <p className="text-[12px] text-[rgba(0,19,37,0.64)] leading-tight">Sold By</p>
+                      <p className="text-[14px] font-normal text-[rgba(0,19,37,0.92)] mt-0.5">Sonu shoe</p>
+                    </div>
+                    <div>
+                      <p className="text-[12px] text-[rgba(0,19,37,0.64)] leading-tight">Country Of Origin</p>
+                      <p className="text-[14px] font-normal text-[rgba(0,19,37,0.92)] mt-0.5">India</p>
+                    </div>
+                    <div>
+                      <p className="text-[12px] text-[rgba(0,19,37,0.64)] leading-tight">Name Of Manufacturer/ Packer/ Importer</p>
+                      <p className="text-[14px] font-normal text-[rgba(0,19,37,0.92)] mt-0.5">Sonu shoe</p>
+                    </div>
+                    <div>
+                      <p className="text-[12px] text-[rgba(0,19,37,0.64)] leading-tight">Address Of Manufacturer/ Packer/ Importer</p>
+                      <p className="text-[14px] font-normal text-[rgba(0,19,37,0.92)] mt-0.5 leading-[20px]">
+                        Second floor Patna One Plaza, New Dak Bunglow Rd, opp. Bharat Petrol Pump, Bander Bagicha, Fraser Road Area, Patna, Bihar – 800001
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-[12px] text-[rgba(0,19,37,0.64)] leading-tight">Address Of Manufacturer/ Packer/ Importer</p>
-                    <p className="text-[14px] font-normal text-[rgba(0,19,37,0.92)] mt-0.5 leading-[20px]">
-                      Second floor Patna One Plaza, New Dak Bunglow Rd, opp. Bharat Petrol Pump, Bander Bagicha, Fraser Road Area, Patna, Bihar – 800001
+                </div>
+              </div>
+
+              <div className="border-t border-[#e5e5e5]">
+                <button
+                  type="button"
+                  onClick={() => setIsReturnPolicyOpen(!isReturnPolicyOpen)}
+                  className="w-full py-4 flex items-center justify-between text-left cursor-pointer select-none group"
+                  aria-expanded={isReturnPolicyOpen}
+                >
+                  <span
+                    className="text-[16px] font-medium text-[#111111] font-['Helvetica_Now_Text_Medium',sans-serif]"
+                    style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                  >
+                    Return And Exchange Policy
+                  </span>
+                  <ChevronDown
+                    className={`w-4 h-4 text-[#111111] transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isReturnPolicyOpen ? 'rotate-180' : ''
+                      }`}
+                  />
+                </button>
+                <div
+                  className={`grid transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isReturnPolicyOpen
+                      ? 'grid-rows-[1fr] opacity-100 pb-4'
+                      : 'grid-rows-[0fr] opacity-0 pb-0'
+                    }`}
+                >
+                  <div className="overflow-hidden text-[13.5px] leading-[22px] text-[rgba(0,19,37,0.92)]">
+                    <p>
+                      This product is eligible for hassle-free returns or size exchanges within 7 days of delivery. Kindly ensure the footwear is unworn outdoors, with original packaging, shoe box, and tags intact.
                     </p>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div className="border-t border-[#e5e5e5]">
-              <button
-                type="button"
-                onClick={() => setIsReturnPolicyOpen(!isReturnPolicyOpen)}
-                className="w-full py-4 flex items-center justify-between text-left cursor-pointer select-none group"
-                aria-expanded={isReturnPolicyOpen}
-              >
-                <span
-                  className="text-[16px] font-medium text-[#111111] font-['Helvetica_Now_Text_Medium',sans-serif]"
-                  style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
-                >
-                  Return And Exchange Policy
-                </span>
-                <ChevronDown
-                  className={`w-4 h-4 text-[#111111] transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                    isReturnPolicyOpen ? 'rotate-180' : ''
-                  }`}
-                />
-              </button>
-              <div
-                className={`grid transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                  isReturnPolicyOpen
-                    ? 'grid-rows-[1fr] opacity-100 pb-4'
-                    : 'grid-rows-[0fr] opacity-0 pb-0'
-                }`}
-              >
-                <div className="overflow-hidden text-[13.5px] leading-[22px] text-[rgba(0,19,37,0.92)]">
-                  <p>
-                    This product is eligible for hassle-free returns or size exchanges within 7 days of delivery. Kindly ensure the footwear is unworn outdoors, with original packaging, shoe box, and tags intact.
-                  </p>
-                </div>
-              </div>
             </div>
-
           </div>
-        </div>
 
-        {/* Horizontal Divider */}
-        <div className="border-t border-[#e5e5e5] mt-12 mb-8" />
+          {/* Horizontal Divider */}
+          <div className="border-t border-[#e5e5e5] mt-12 mb-8" />
         </div>
 
         {/* Bottom Section 1: More From [Category] */}
@@ -1079,7 +1070,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
               <button
                 type="button"
                 onClick={() => scrollCarousel(moreCarouselRef, 'left')}
-                className="w-10 h-10 rounded-full bg-[#f5f5f5] hover:bg-[#e5e5e5] flex items-center justify-center transition-colors cursor-pointer"
+                className="w-10 h-10 rounded-full   hover:bg-[#e5e5e5] flex items-center justify-center transition-colors cursor-pointer"
                 aria-label="Scroll left"
               >
                 <ChevronLeft className="w-5 h-5 text-[#111111]" />
@@ -1087,7 +1078,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
               <button
                 type="button"
                 onClick={() => scrollCarousel(moreCarouselRef, 'right')}
-                className="w-10 h-10 rounded-full bg-[#f5f5f5] hover:bg-[#e5e5e5] flex items-center justify-center transition-colors cursor-pointer"
+                className="w-10 h-10 rounded-full   hover:bg-[#e5e5e5] flex items-center justify-center transition-colors cursor-pointer"
                 aria-label="Scroll right"
               >
                 <ChevronRight className="w-5 h-5 text-[#111111]" />
@@ -1133,9 +1124,8 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
                       aria-label="Save to Wishlist"
                     >
                       <Heart
-                        className={`w-4 h-4 transition-colors ${
-                          isFav ? 'fill-rose-500 text-rose-500' : 'text-[#111111]'
-                        }`}
+                        className={`w-4 h-4 transition-colors ${isFav ? 'fill-rose-500 text-rose-500' : 'text-[#111111]'
+                          }`}
                       />
                     </button>
                   </div>
@@ -1176,7 +1166,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
                 <button
                   type="button"
                   onClick={() => scrollCarousel(recentCarouselRef, 'left')}
-                  className="w-10 h-10 rounded-full bg-[#f5f5f5] hover:bg-[#e5e5e5] flex items-center justify-center transition-colors cursor-pointer"
+                  className="w-10 h-10 rounded-full   hover:bg-[#e5e5e5] flex items-center justify-center transition-colors cursor-pointer"
                   aria-label="Scroll left"
                 >
                   <ChevronLeft className="w-5 h-5 text-[#111111]" />
@@ -1184,7 +1174,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
                 <button
                   type="button"
                   onClick={() => scrollCarousel(recentCarouselRef, 'right')}
-                  className="w-10 h-10 rounded-full bg-[#f5f5f5] hover:bg-[#e5e5e5] flex items-center justify-center transition-colors cursor-pointer"
+                  className="w-10 h-10 rounded-full   hover:bg-[#e5e5e5] flex items-center justify-center transition-colors cursor-pointer"
                   aria-label="Scroll right"
                 >
                   <ChevronRight className="w-5 h-5 text-[#111111]" />
@@ -1223,9 +1213,8 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
                         aria-label="Save to Wishlist"
                       >
                         <Heart
-                          className={`w-4 h-4 transition-colors ${
-                            isFav ? 'fill-rose-500 text-rose-500' : 'text-[#111111]'
-                          }`}
+                          className={`w-4 h-4 transition-colors ${isFav ? 'fill-rose-500 text-rose-500' : 'text-[#111111]'
+                            }`}
                         />
                       </button>
                     </div>
@@ -1261,17 +1250,15 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
       {isProductDetailsMounted && (
         <div className="fixed inset-0 z-50 overflow-hidden font-['Helvetica_Now_Text',sans-serif]">
           <div
-            className={`fixed inset-0 bg-black/60 transition-opacity duration-300 ease-out cursor-pointer ${
-              isProductDetailsVisible ? 'opacity-100' : 'opacity-0'
-            }`}
+            className={`fixed inset-0 bg-black/60 transition-opacity duration-300 ease-out cursor-pointer ${isProductDetailsVisible ? 'opacity-100' : 'opacity-0'
+              }`}
             onClick={closeProductDetails}
           />
           <div
-            className={`fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 w-full sm:max-w-[520px] bg-white rounded-t-[28px] sm:rounded-[24px] shadow-2xl z-50 p-6 sm:p-7 overflow-y-auto max-h-[85vh] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-              isProductDetailsVisible
+            className={`fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 w-full sm:max-w-[520px] bg-white rounded-t-[28px] sm:rounded-[24px] shadow-2xl z-50 p-6 sm:p-7 overflow-y-auto max-h-[85vh] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isProductDetailsVisible
                 ? 'translate-y-0 opacity-100 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:scale-100'
                 : 'translate-y-full opacity-0 sm:-translate-x-1/2 sm:-translate-y-[45%] sm:scale-95'
-            }`}
+              }`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between pb-3 border-b border-[#f0f0f0]">
@@ -1284,7 +1271,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
               <button
                 type="button"
                 onClick={closeProductDetails}
-                className="w-9 h-9 rounded-full bg-[#f5f5f5] hover:bg-[#e8e8e8] flex items-center justify-center text-[#111111] transition-colors cursor-pointer"
+                className="w-9 h-9 rounded-full   hover:bg-[#e8e8e8] flex items-center justify-center text-[#111111] transition-colors cursor-pointer"
                 aria-label="Close"
               >
                 <X className="w-5 h-5" />
@@ -1346,17 +1333,15 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
       {isKnowMoreMounted && (
         <div className="fixed inset-0 z-50 overflow-hidden font-['Helvetica_Now_Text',sans-serif]">
           <div
-            className={`fixed inset-0 bg-black/60 transition-opacity duration-300 ease-out cursor-pointer ${
-              isKnowMoreVisible ? 'opacity-100' : 'opacity-0'
-            }`}
+            className={`fixed inset-0 bg-black/60 transition-opacity duration-300 ease-out cursor-pointer ${isKnowMoreVisible ? 'opacity-100' : 'opacity-0'
+              }`}
             onClick={closeKnowMore}
           />
           <div
-            className={`fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 w-full sm:max-w-[560px] bg-white rounded-t-[28px] sm:rounded-[24px] shadow-2xl z-50 p-6 sm:p-7 overflow-y-auto max-h-[85vh] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-              isKnowMoreVisible
+            className={`fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 w-full sm:max-w-[560px] bg-white rounded-t-[28px] sm:rounded-[24px] shadow-2xl z-50 p-6 sm:p-7 overflow-y-auto max-h-[85vh] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isKnowMoreVisible
                 ? 'translate-y-0 opacity-100 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:scale-100'
                 : 'translate-y-full opacity-0 sm:-translate-x-1/2 sm:-translate-y-[45%] sm:scale-95'
-            }`}
+              }`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between pb-3 border-b border-[#f0f0f0]">
@@ -1369,7 +1354,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
               <button
                 type="button"
                 onClick={closeKnowMore}
-                className="w-9 h-9 rounded-full bg-[#f5f5f5] hover:bg-[#e8e8e8] flex items-center justify-center text-[#111111] transition-colors cursor-pointer"
+                className="w-9 h-9 rounded-full   hover:bg-[#e8e8e8] flex items-center justify-center text-[#111111] transition-colors cursor-pointer"
                 aria-label="Close"
               >
                 <X className="w-5 h-5" />
@@ -1429,17 +1414,15 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
       {isPincodeMounted && (
         <div className="fixed inset-0 z-50 overflow-hidden font-['Helvetica_Now_Text',sans-serif]">
           <div
-            className={`fixed inset-0 bg-black/60 transition-opacity duration-300 ease-out cursor-pointer ${
-              isPincodeVisible ? 'opacity-100' : 'opacity-0'
-            }`}
+            className={`fixed inset-0 bg-black/60 transition-opacity duration-300 ease-out cursor-pointer ${isPincodeVisible ? 'opacity-100' : 'opacity-0'
+              }`}
             onClick={closePincodeModal}
           />
           <div
-            className={`fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 w-full sm:max-w-[420px] bg-white rounded-t-[28px] sm:rounded-[24px] shadow-2xl z-50 p-6 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-              isPincodeVisible
+            className={`fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 w-full sm:max-w-[420px] bg-white rounded-t-[28px] sm:rounded-[24px] shadow-2xl z-50 p-6 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isPincodeVisible
                 ? 'translate-y-0 opacity-100 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:scale-100'
                 : 'translate-y-full opacity-0 sm:-translate-x-1/2 sm:-translate-y-[45%] sm:scale-95'
-            }`}
+              }`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between pb-3 border-b border-[#f0f0f0]">
@@ -1452,7 +1435,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
               <button
                 type="button"
                 onClick={closePincodeModal}
-                className="w-8 h-8 rounded-full bg-[#f5f5f5] hover:bg-[#e8e8e8] flex items-center justify-center text-[#111111] cursor-pointer"
+                className="w-8 h-8 rounded-full   hover:bg-[#e8e8e8] flex items-center justify-center text-[#111111] cursor-pointer"
                 aria-label="Close"
               >
                 <X className="w-4 h-4" />
@@ -1510,7 +1493,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
                             'sonu_shipping_address',
                             JSON.stringify({ pincode: cleanPin, city: newCity })
                           );
-                        } catch {}
+                        } catch { }
                         setIsPincodeLoading(false);
                         closePincodeModal();
                       }
@@ -1535,18 +1518,16 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
         <div className="fixed inset-0 z-50 overflow-hidden font-['Helvetica_Now_Text',sans-serif]">
           {/* Blacked-out backdrop overlay */}
           <div
-            className={`fixed inset-0 bg-black/60 transition-opacity duration-300 ease-out cursor-pointer ${
-              isBagBackdropVisible ? 'opacity-100' : 'opacity-0'
-            }`}
+            className={`fixed inset-0 bg-black/60 transition-opacity duration-300 ease-out cursor-pointer ${isBagBackdropVisible ? 'opacity-100' : 'opacity-0'
+              }`}
             onClick={closeBagModal}
           />
 
           <div
-            className={`fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 w-full sm:max-w-[540px] bg-white rounded-t-[28px] sm:rounded-[24px] shadow-2xl z-50 p-6 sm:p-7 overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-              isBagModalVisible
+            className={`fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 w-full sm:max-w-[540px] bg-white rounded-t-[28px] sm:rounded-[24px] shadow-2xl z-50 p-6 sm:p-7 overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isBagModalVisible
                 ? 'translate-y-0 opacity-100 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:scale-100 sm:opacity-100'
                 : 'translate-y-full opacity-0 sm:-translate-x-1/2 sm:translate-y-[100vh] sm:scale-95 sm:opacity-0'
-            }`}
+              }`}
             onClick={(e) => e.stopPropagation()}
           >
             {bagModalMode === 'select-size' ? (
@@ -1604,11 +1585,10 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
                           key={sz}
                           type="button"
                           onClick={() => setTempDrawerSize(sz)}
-                          className={`h-[50px] sm:h-[52px] rounded-[8px] border text-[15px] sm:text-[16px] font-medium flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
-                            isSelected
+                          className={`h-[50px] sm:h-[52px] rounded-[8px] border text-[15px] sm:text-[16px] font-medium flex items-center justify-center transition-all cursor-pointer active:scale-95 ${isSelected
                               ? 'border-[#111111] bg-[#111111] text-white font-semibold'
                               : 'border-[#d1d5db] bg-white text-[#111111] hover:border-[#111111]'
-                          }`}
+                            }`}
                         >
                           {sz}
                         </button>
@@ -1626,11 +1606,10 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
                       if (!tempDrawerSize) return;
                       handleSelectSizeInDrawer(tempDrawerSize);
                     }}
-                    className={`w-full py-4 rounded-full text-[16px] font-medium transition-all ${
-                      tempDrawerSize
+                    className={`w-full py-4 rounded-full text-[16px] font-medium transition-all ${tempDrawerSize
                         ? 'bg-[#111111] text-white hover:bg-black active:scale-[0.99] cursor-pointer'
                         : 'bg-[#e5e5e5] text-[#8e8e93] cursor-not-allowed'
-                    }`}
+                      }`}
                   >
                     Add to bag
                   </button>
@@ -1662,7 +1641,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
                   <button
                     type="button"
                     onClick={closeBagModal}
-                    className="w-9 h-9 rounded-full bg-[#f5f5f5] hover:bg-[#e8e8e8] flex items-center justify-center text-[#111111] transition-colors cursor-pointer"
+                    className="w-9 h-9 rounded-full   hover:bg-[#e8e8e8] flex items-center justify-center text-[#111111] transition-colors cursor-pointer"
                     aria-label="Close"
                   >
                     <X className="w-4 h-4" />
@@ -1670,7 +1649,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
                 </div>
 
                 <div className="mt-6 flex items-start gap-4">
-                  <div className="w-[104px] h-[104px] sm:w-[112px] sm:h-[112px] bg-[#f5f5f5] rounded-xl flex items-center justify-center shrink-0 overflow-hidden">
+                  <div className="w-[104px] h-[104px] sm:w-[112px] sm:h-[112px]   rounded-xl flex items-center justify-center shrink-0 overflow-hidden">
                     <img
                       src={activeImage}
                       alt={product.name}
@@ -1737,7 +1716,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
                   <button
                     type="button"
                     onClick={closeBagModal}
-                    className="w-9 h-9 rounded-full bg-[#f5f5f5] hover:bg-[#e8e8e8] flex items-center justify-center text-[#111111] transition-colors cursor-pointer"
+                    className="w-9 h-9 rounded-full   hover:bg-[#e8e8e8] flex items-center justify-center text-[#111111] transition-colors cursor-pointer"
                     aria-label="Close"
                   >
                     <X className="w-4 h-4" />
@@ -1745,7 +1724,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
                 </div>
 
                 <div className="mt-6 flex items-start gap-4">
-                  <div className="w-[104px] h-[104px] sm:w-[112px] sm:h-[112px] bg-[#f5f5f5] rounded-xl flex items-center justify-center shrink-0 overflow-hidden">
+                  <div className="w-[104px] h-[104px] sm:w-[112px] sm:h-[112px]   rounded-xl flex items-center justify-center shrink-0 overflow-hidden">
                     <img
                       src={activeImage}
                       alt={product.name}
@@ -1798,18 +1777,16 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
       {isModalMounted && (
         <div className="fixed inset-0 z-50 overflow-hidden font-['Helvetica_Now_Text',sans-serif]">
           <div
-            className={`fixed inset-0 bg-black/60 transition-opacity duration-300 ease-out cursor-pointer ${
-              isModalVisible ? 'opacity-100' : 'opacity-0'
-            }`}
+            className={`fixed inset-0 bg-black/60 transition-opacity duration-300 ease-out cursor-pointer ${isModalVisible ? 'opacity-100' : 'opacity-0'
+              }`}
             onClick={closeSizeGuide}
           />
 
           <div
-            className={`fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 w-full sm:max-w-[620px] max-h-[92vh] sm:max-h-[88vh] bg-white rounded-t-[26px] sm:rounded-[24px] shadow-2xl z-50 px-6 pt-6 pb-8 overflow-y-auto transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-              isModalVisible
+            className={`fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 w-full sm:max-w-[620px] max-h-[92vh] sm:max-h-[88vh] bg-white rounded-t-[26px] sm:rounded-[24px] shadow-2xl z-50 px-6 pt-6 pb-8 overflow-y-auto transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isModalVisible
                 ? 'translate-y-0 opacity-100 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:scale-100'
                 : 'translate-y-full opacity-0 sm:-translate-x-1/2 sm:-translate-y-[45%] sm:scale-95'
-            }`}
+              }`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start justify-between">
@@ -1838,27 +1815,24 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
 
             {/* in / cm Pill Switcher */}
             <div className="mb-6">
-              <div className="relative inline-flex items-center bg-[#f5f5f5] rounded-full p-1 h-[44px]">
+              <div className="relative inline-flex items-center   rounded-full p-1 h-[44px]">
                 <div
-                  className={`absolute top-1 bottom-1 w-[52px] rounded-full bg-white border border-[#111111]  transition-all duration-300 ease-in-out ${
-                    unit === 'in' ? 'left-1' : 'left-[55px]'
-                  }`}
+                  className={`absolute top-1 bottom-1 w-[52px] rounded-full bg-white border border-[#111111]  transition-all duration-300 ease-in-out ${unit === 'in' ? 'left-1' : 'left-[55px]'
+                    }`}
                 />
                 <button
                   type="button"
                   onClick={() => setUnit('in')}
-                  className={`relative z-10 w-[52px] h-[36px] flex items-center justify-center text-[15px] font-medium transition-colors cursor-pointer ${
-                    unit === 'in' ? 'text-[#111111]' : 'text-[#707072]'
-                  }`}
+                  className={`relative z-10 w-[52px] h-[36px] flex items-center justify-center text-[15px] font-medium transition-colors cursor-pointer ${unit === 'in' ? 'text-[#111111]' : 'text-[#707072]'
+                    }`}
                 >
                   in
                 </button>
                 <button
                   type="button"
                   onClick={() => setUnit('cm')}
-                  className={`relative z-10 w-[52px] h-[36px] flex items-center justify-center text-[15px] font-medium transition-colors cursor-pointer ${
-                    unit === 'cm' ? 'text-[#111111]' : 'text-[#707072]'
-                  }`}
+                  className={`relative z-10 w-[52px] h-[36px] flex items-center justify-center text-[15px] font-medium transition-colors cursor-pointer ${unit === 'cm' ? 'text-[#111111]' : 'text-[#707072]'
+                    }`}
                 >
                   cm
                 </button>

@@ -254,11 +254,10 @@ export default function LastMinuteSection() {
                       <button
                         type="button"
                         onClick={() => handleMoveToBag(addon)}
-                        className={`mt-2.5 w-full py-1.5 sm:py-2 rounded-full border text-[12px] sm:text-[13px] font-medium transition-all cursor-pointer active:scale-[0.98] ${
-                          isAdded
+                        className={`mt-2.5 w-full py-1.5 sm:py-2 rounded-full border text-[12px] sm:text-[13px] font-medium transition-all cursor-pointer active:scale-[0.98] ${isAdded
                             ? 'bg-[#0d8240] text-white border-[#0d8240]'
                             : 'border-[#111111] text-[#111111] bg-white hover:bg-[#111111] hover:text-white'
-                        }`}
+                          }`}
                       >
                         {isAdded ? 'Added ✓' : 'Move to Bag'}
                       </button>
@@ -279,19 +278,17 @@ export default function LastMinuteSection() {
         <div className="fixed inset-0 z-50 overflow-hidden font-['Helvetica_Now_Text',sans-serif]">
           {/* Backdrop overlay */}
           <div
-            className={`fixed inset-0 bg-black/60 transition-opacity duration-400 ease-out cursor-pointer ${
-              isDrawerVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
-            }`}
+            className={`fixed inset-0 bg-black/60 transition-opacity duration-400 ease-out cursor-pointer ${isDrawerVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
+              }`}
             onClick={closeDrawer}
           />
 
           {/* Modal / Bottom Sheet */}
           <div
-            className={`fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 w-full sm:max-w-[500px] bg-white rounded-t-[28px] sm:rounded-[24px] shadow-2xl z-50 p-6 sm:p-7 overflow-hidden transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] transform will-change-transform ${
-              isDrawerVisible
+            className={`fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 w-full sm:max-w-[500px] bg-white rounded-t-[28px] sm:rounded-[24px] shadow-2xl z-50 p-6 sm:p-7 overflow-hidden transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] transform will-change-transform ${isDrawerVisible
                 ? 'translate-y-0 opacity-100 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:scale-100 sm:opacity-100'
                 : 'translate-y-full opacity-0 sm:-translate-x-1/2 sm:translate-y-[40%] sm:scale-95 sm:opacity-0 pointer-events-none'
-            }`}
+              }`}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header: Green Checkmark + Added to Bag + Close Button */}
@@ -318,7 +315,7 @@ export default function LastMinuteSection() {
               <button
                 type="button"
                 onClick={closeDrawer}
-                className="w-9 h-9 rounded-full bg-[#f5f5f5] hover:bg-[#e8e8e8] flex items-center justify-center text-[#111111] transition-colors cursor-pointer"
+                className="w-9 h-9 rounded-full   hover:bg-[#e8e8e8] flex items-center justify-center text-[#111111] transition-colors cursor-pointer"
                 aria-label="Close"
               >
                 <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.2">

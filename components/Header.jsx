@@ -321,15 +321,14 @@ export default function Header() {
     { label: 'Men', href: '/#collection', hasArrow: true },
     { label: 'Women', href: '/#collection', hasArrow: true },
     { label: 'Kids', href: '/#collection', hasArrow: true },
- 
+
   ];
 
   return (
     <>
       <header
-        className={`sticky top-0 z-40 w-full bg-white transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-          isVisible ? 'translate-y-0' : '-translate-y-full'
-        }`}
+        className={`sticky top-0 z-40 w-full bg-white transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isVisible ? 'translate-y-0' : '-translate-y-full'
+          }`}
       >
         <div className="max-w-[1440px] mx-auto px-6 sm:px-10 h-16 sm:h-20 flex items-center justify-between">
           {/* Left section: Logo only */}
@@ -358,10 +357,10 @@ export default function Header() {
                   setSearchOpen(true);
                   searchInputRef.current?.focus();
                 }}
-                className="group w-[170px] lg:w-[180px] h-10 rounded-full bg-[#f5f5f5] hover:bg-[#e5e5e5] px-3.5 flex items-center gap-2.5 transition-colors cursor-pointer text-left"
+                className="group w-[170px] lg:w-[180px] h-10 rounded-full   hover:bg-[#e5e5e5] px-3.5 flex items-center gap-2.5 transition-colors cursor-pointer text-left"
                 aria-label="Search"
               >
-                <svg  focusable="false" viewBox="0 0 24 24" role="img" width="22px" height="22px" fill="none" className="shrink-0">
+                <svg focusable="false" viewBox="0 0 24 24" role="img" width="22px" height="22px" fill="none" className="shrink-0">
                   <path stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" d="M13.962 16.296a6.716 6.716 0 01-3.462.954 6.728 6.728 0 01-4.773-1.977A6.728 6.728 0 013.75 10.5c0-1.864.755-3.551 1.977-4.773A6.728 6.728 0 0110.5 3.75c1.864 0 3.551.755 4.773 1.977A6.728 6.728 0 0117.25 10.5a6.726 6.726 0 01-.921 3.407c-.517.882-.434 1.988.289 2.711l3.853 3.853" />
                 </svg>
                 <span className="text-[15px] text-[#707072] font-normal group-hover:text-[#111111] transition-colors leading-none">
@@ -509,18 +508,16 @@ export default function Header() {
 
       {/* Slide-over Drawer Backdrop */}
       <div
-        className={`fixed inset-0 bg-black/50 z-50 transition-opacity duration-300 ${
-          menuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-        }`}
+        className={`fixed inset-0 bg-black/50 z-50 transition-opacity duration-300 ${menuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+          }`}
         onClick={() => setMenuOpen(false)}
         aria-hidden="true"
       />
 
       {/* Slide-over Drawer Panel */}
       <aside
-        className={`fixed top-0 right-0 bottom-0 w-[320px] sm:w-[360px] bg-white z-50 shadow-2xl flex flex-col justify-between overflow-y-auto transform transition-transform duration-300 ease-out font-['Helvetica_Now_Text_Medium',sans-serif] ${
-          menuOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
+        className={`fixed top-0 right-0 bottom-0 w-[320px] sm:w-[360px] bg-white z-50 shadow-2xl flex flex-col justify-between overflow-y-auto transform transition-transform duration-300 ease-out font-['Helvetica_Now_Text_Medium',sans-serif] ${menuOpen ? 'translate-x-0' : 'translate-x-full'
+          }`}
         style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
         role="dialog"
         aria-modal="true"
@@ -671,9 +668,8 @@ export default function Header() {
 
       {/* Full-screen Search Window sliding in from the right with opacity transition */}
       <div
-        className={`fixed inset-0 z-50 bg-white flex flex-col transition-all duration-300 ease-out font-['Helvetica_Now_Text',sans-serif] ${
-          searchOpen ? 'translate-x-0 opacity-100 pointer-events-auto' : 'translate-x-full opacity-0 pointer-events-none'
-        }`}
+        className={`fixed inset-0 z-50 bg-white flex flex-col transition-all duration-300 ease-out font-['Helvetica_Now_Text',sans-serif] ${searchOpen ? 'translate-x-0 opacity-100 pointer-events-auto' : 'translate-x-full opacity-0 pointer-events-none'
+          }`}
         style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
         role="dialog"
         aria-modal="true"
@@ -684,7 +680,7 @@ export default function Header() {
           {/* Pill Input */}
           <form
             onSubmit={handleSearchSubmit}
-            className="flex-1 flex items-center bg-[#f5f5f5] rounded-full px-4 py-2 sm:py-2.5 gap-2.5"
+            className="flex-1 flex items-center   rounded-full px-4 py-2 sm:py-2.5 gap-2.5"
           >
             <svg
               aria-hidden="true"

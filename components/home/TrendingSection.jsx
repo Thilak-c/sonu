@@ -62,7 +62,7 @@ export default function TrendingSection() {
             className="group flex-shrink-0 w-[80vw] sm:w-[420px] md:w-[460px] flex flex-col cursor-pointer"
           >
             {/* Visual Box */}
-            <div className="w-full aspect-[4/3] bg-[#f5f5f5] flex items-center justify-center overflow-hidden">
+            <div className="w-full aspect-[4/3]   flex items-center justify-center overflow-hidden">
               <img
                 src={story.image}
                 alt={story.alt}

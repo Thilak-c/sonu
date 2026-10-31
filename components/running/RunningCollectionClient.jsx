@@ -210,19 +210,19 @@ function ShoeCard({ shoe, isWishlisted, onToggleWishlist, selectedColorFilter })
   // When shoe has linked colors, render the linked colors as dots
   const dots = hasMultipleColors
     ? variants.map((v, i) => ({
-        index: i,
-        name: v.color || `Color ${i + 1}`,
-        hex: v.colorHex || (i === 0 ? '#ffffff' : '#111111'),
-        border: (v.colorHex || '').toLowerCase() === '#ffffff' || v.border,
-      }))
+      index: i,
+      name: v.color || `Color ${i + 1}`,
+      hex: v.colorHex || (i === 0 ? '#ffffff' : '#111111'),
+      border: (v.colorHex || '').toLowerCase() === '#ffffff' || v.border,
+    }))
     : shoe.colorDots || [
-        { index: 0, name: shoe.color || 'White', hex: shoe.colorHex || '#ffffff', border: true },
-      ];
+      { index: 0, name: shoe.color || 'White', hex: shoe.colorHex || '#ffffff', border: true },
+    ];
 
   return (
     <div className="group flex flex-col text-left">
       {/* Image Square Box with Heart Overlay */}
-      <div className="relative aspect-square w-full bg-[#f5f5f5] flex items-center justify-center overflow-hidden rounded-[4px] sm:rounded-[6px]">
+      <div className="relative aspect-square w-full   flex items-center justify-center overflow-hidden rounded-[4px] sm:rounded-[6px]">
         <Link
           href={`/product/${pid}`}
           className="w-full h-full flex items-center justify-center cursor-pointer"
@@ -251,9 +251,8 @@ function ShoeCard({ shoe, isWishlisted, onToggleWishlist, selectedColorFilter })
           className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 w-8 h-8 rounded-full bg-white/95 hover:bg-white flex items-center justify-center shadow-xs text-[#111111] transition-transform active:scale-90 cursor-pointer z-10"
         >
           <Heart
-            className={`w-4 h-4 transition-colors ${
-              isWishlisted ? 'fill-[#111111] text-[#111111]' : 'text-[#111111] stroke-[2]'
-            }`}
+            className={`w-4 h-4 transition-colors ${isWishlisted ? 'fill-[#111111] text-[#111111]' : 'text-[#111111] stroke-[2]'
+              }`}
           />
         </button>
       </div>
@@ -295,18 +294,15 @@ function ShoeCard({ shoe, isWishlisted, onToggleWishlist, selectedColorFilter })
                   if (hasMultipleColors) setActiveIdx(dot.index);
                 }}
                 title={dot.name}
-                className={`relative flex items-center justify-center rounded-full transition-all cursor-pointer ${
-                  isSelected ? 'scale-110' : 'hover:scale-105'
-                }`}
+                className={`relative flex items-center justify-center rounded-full transition-all cursor-pointer ${isSelected ? 'scale-110' : 'hover:scale-105'
+                  }`}
               >
                 <span
-                  className={`w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full inline-block shadow-2xs transition-all ${
-                    dot.border || dot.hex?.toLowerCase() === '#ffffff'
+                  className={`w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full inline-block shadow-2xs transition-all ${dot.border || dot.hex?.toLowerCase() === '#ffffff'
                       ? 'border border-[#d4d4d4]'
                       : ''
-                  } ${
-                    isSelected ? 'ring-1.5 ring-black ring-offset-1.5' : ''
-                  }`}
+                    } ${isSelected ? 'ring-1.5 ring-black ring-offset-1.5' : ''
+                    }`}
                   style={{ backgroundColor: dot.hex }}
                 />
               </button>
@@ -525,11 +521,10 @@ export default function RunningCollectionClient({ initialProducts = [] }) {
                   key={g}
                   type="button"
                   onClick={() => setSelectedGender(g)}
-                  className={`relative py-1 transition-colors cursor-pointer ${
-                    isSelected
+                  className={`relative py-1 transition-colors cursor-pointer ${isSelected
                       ? 'text-[#111111] font-semibold'
                       : 'text-[#707072] hover:text-[#111111]'
-                  }`}
+                    }`}
                   style={{ fontFamily: isSelected ? "'Helvetica Now Text Medium', sans-serif" : "'Helvetica Now Text', sans-serif" }}
                 >
                   <span>{g === 'All' ? 'All' : g}</span>
@@ -561,12 +556,12 @@ export default function RunningCollectionClient({ initialProducts = [] }) {
                   {selectedSort === 'featured'
                     ? 'Featured'
                     : selectedSort === 'price_asc'
-                    ? 'Price: Low-High'
-                    : selectedSort === 'price_desc'
-                    ? 'Price: High-Low'
-                    : selectedSort === 'discount'
-                    ? 'Biggest Discount'
-                    : 'Newest'}
+                      ? 'Price: Low-High'
+                      : selectedSort === 'price_desc'
+                        ? 'Price: High-Low'
+                        : selectedSort === 'discount'
+                          ? 'Biggest Discount'
+                          : 'Newest'}
                 </span>
                 <ChevronDown className="w-3.5 h-3.5 text-neutral-500" />
               </button>
@@ -590,9 +585,8 @@ export default function RunningCollectionClient({ initialProducts = [] }) {
                         setSelectedSort(opt.id);
                         setIsSortOpen(false);
                       }}
-                      className={`w-full text-left px-4 py-2 text-[13px] hover:bg-neutral-50 flex items-center justify-between cursor-pointer ${
-                        selectedSort === opt.id ? 'font-semibold text-black' : 'text-neutral-700'
-                      }`}
+                      className={`w-full text-left px-4 py-2 text-[13px] hover:bg-neutral-50 flex items-center justify-between cursor-pointer ${selectedSort === opt.id ? 'font-semibold text-black' : 'text-neutral-700'
+                        }`}
                     >
                       <span>{opt.label}</span>
                       {selectedSort === opt.id && <Check className="w-3.5 h-3.5" />}
@@ -702,11 +696,10 @@ export default function RunningCollectionClient({ initialProducts = [] }) {
                         key={g}
                         type="button"
                         onClick={() => setSelectedGender(g)}
-                        className={`h-10 px-4 rounded-lg border text-[13px] font-medium transition-all cursor-pointer text-center ${
-                          isSelected
+                        className={`h-10 px-4 rounded-lg border text-[13px] font-medium transition-all cursor-pointer text-center ${isSelected
                             ? 'border-black bg-black text-white'
                             : 'border-neutral-200 bg-white text-[#111111] hover:border-neutral-400'
-                        }`}
+                          }`}
                       >
                         {g === 'All' ? 'All Genders' : g}
                       </button>
@@ -727,11 +720,10 @@ export default function RunningCollectionClient({ initialProducts = [] }) {
                   <button
                     type="button"
                     onClick={() => setSelectedColor('All')}
-                    className={`h-9 px-3.5 rounded-full text-[12.5px] font-medium border transition-all cursor-pointer ${
-                      selectedColor === 'All'
+                    className={`h-9 px-3.5 rounded-full text-[12.5px] font-medium border transition-all cursor-pointer ${selectedColor === 'All'
                         ? 'border-black bg-black text-white'
                         : 'border-neutral-200 bg-white text-neutral-700 hover:border-neutral-400'
-                    }`}
+                      }`}
                   >
                     All Colors
                   </button>
@@ -742,16 +734,14 @@ export default function RunningCollectionClient({ initialProducts = [] }) {
                         key={c.name}
                         type="button"
                         onClick={() => setSelectedColor(isSelected ? 'All' : c.name)}
-                        className={`h-9 px-3.5 rounded-full flex items-center gap-2 border transition-all cursor-pointer ${
-                          isSelected
+                        className={`h-9 px-3.5 rounded-full flex items-center gap-2 border transition-all cursor-pointer ${isSelected
                             ? 'border-black ring-1 ring-black bg-neutral-50 font-medium'
                             : 'border-neutral-200 bg-white hover:border-neutral-400'
-                        }`}
+                          }`}
                       >
                         <span
-                          className={`w-3.5 h-3.5 rounded-full shrink-0 ${
-                            c.border ? 'border border-neutral-300' : ''
-                          }`}
+                          className={`w-3.5 h-3.5 rounded-full shrink-0 ${c.border ? 'border border-neutral-300' : ''
+                            }`}
                           style={{ backgroundColor: c.hex }}
                         />
                         <span className="text-[12.5px] text-[#111111]">{c.name}</span>

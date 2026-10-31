@@ -40,7 +40,7 @@ export default async function FreshDropsSection({ products: passedProducts }) {
               className="group flex-shrink-0 w-[78vw] sm:w-[320px] md:w-[360px] flex flex-col cursor-pointer"
             >
               {/* Grey Product Square Box */}
-              <div className="w-full aspect-square bg-[#f5f5f5] flex items-center justify-center overflow-hidden">
+              <div className="w-full aspect-square   flex items-center justify-center overflow-hidden">
                 {imgUrl ? (
                   <img
                     src={imgUrl}

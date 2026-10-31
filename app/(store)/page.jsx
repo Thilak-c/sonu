@@ -7,6 +7,9 @@ import SpotlightSection from '@/components/home/SpotlightSection';
 import LastMinuteSection from '@/components/home/LastMinuteSection';
 import { getAllProducts } from '@/lib/products';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export const metadata = {
   title: 'Sonu Shoe — For the Long Way Home',
   description:

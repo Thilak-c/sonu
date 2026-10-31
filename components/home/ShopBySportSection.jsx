@@ -60,7 +60,7 @@ export default function ShopBySportSection() {
             className="group flex-shrink-0 w-[78vw] sm:w-[320px] md:w-[360px] flex flex-col cursor-pointer"
           >
             {/* Grey Product Square Box - exact match to fresh drops */}
-            <div className="w-full aspect-square bg-[#f5f5f5] flex items-center justify-center overflow-hidden">
+            <div className="w-full aspect-square   flex items-center justify-center overflow-hidden">
               <img
                 src={sport.image}
                 alt={sport.alt}

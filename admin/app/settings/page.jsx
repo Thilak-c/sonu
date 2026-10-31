@@ -138,18 +138,15 @@ function FloatingInput({
     <div className={`w-full ${className}`}>
       <div
         onClick={() => !disabled && inputRef.current?.focus()}
-        className={`relative w-full ${
-          compact ? 'h-[46px] px-3.5 rounded-[8px]' : 'h-[52px] px-4 rounded-[8px]'
-        } border transition-all duration-200 cursor-text bg-white flex items-center ${
-          isFocused ? 'border-[#111111] ring-1 ring-[#111111]/10' : 'border-[#8d8d8d]'
-        } ${disabled ? 'bg-neutral-50/70 cursor-not-allowed opacity-75' : ''}`}
+        className={`relative w-full ${compact ? 'h-[46px] px-3.5 rounded-[8px]' : 'h-[52px] px-4 rounded-[8px]'
+          } border transition-all duration-200 cursor-text bg-white flex items-center ${isFocused ? 'border-[#111111] ring-1 ring-[#111111]/10' : 'border-[#8d8d8d]'
+          } ${disabled ? 'bg-neutral-50/70 cursor-not-allowed opacity-75' : ''}`}
       >
         <span
-          className={`absolute transition-all duration-200 ease-out pointer-events-none select-none truncate max-w-[calc(100%-14px)] ${
-            isFloating
+          className={`absolute transition-all duration-200 ease-out pointer-events-none select-none truncate max-w-[calc(100%-14px)] ${isFloating
               ? `-top-2 left-2.5 px-1.5 bg-white leading-none z-10 text-[11px] text-[#111111] font-medium`
               : `top-1/2 -translate-y-1/2 left-3.5 text-[13px] text-[#707072]`
-          }`}
+            }`}
           style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
         >
           {label}
@@ -159,9 +156,8 @@ function FloatingInput({
         <div className="flex items-center w-full min-w-0">
           {prefix && (
             <span
-              className={`text-[13px] text-neutral-500 font-semibold select-none pr-1 shrink-0 ${
-                isFloating ? 'opacity-100' : 'opacity-0'
-              } transition-opacity duration-150`}
+              className={`text-[13px] text-neutral-500 font-semibold select-none pr-1 shrink-0 ${isFloating ? 'opacity-100' : 'opacity-0'
+                } transition-opacity duration-150`}
               style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
             >
               {prefix}
@@ -232,18 +228,15 @@ function FloatingSelect({
     <div ref={containerRef} className={`relative w-full ${className}`}>
       <div
         onClick={() => setIsOpen((prev) => !prev)}
-        className={`relative w-full ${
-          compact ? 'h-[46px] px-3.5 rounded-[8px]' : 'h-[52px] px-4 rounded-[8px]'
-        } border transition-all duration-200 cursor-pointer bg-white flex items-center justify-between ${
-          isOpen ? 'border-[#111111] ring-1 ring-[#111111]/10' : 'border-[#8d8d8d]'
-        }`}
+        className={`relative w-full ${compact ? 'h-[46px] px-3.5 rounded-[8px]' : 'h-[52px] px-4 rounded-[8px]'
+          } border transition-all duration-200 cursor-pointer bg-white flex items-center justify-between ${isOpen ? 'border-[#111111] ring-1 ring-[#111111]/10' : 'border-[#8d8d8d]'
+          }`}
       >
         <span
-          className={`absolute transition-all duration-200 ease-out pointer-events-none select-none truncate max-w-[calc(100%-24px)] ${
-            isFloating
+          className={`absolute transition-all duration-200 ease-out pointer-events-none select-none truncate max-w-[calc(100%-24px)] ${isFloating
               ? `-top-2 left-2.5 px-1.5 bg-white leading-none z-10 text-[11px] text-[#111111] font-medium`
               : `top-1/2 -translate-y-1/2 left-3.5 text-[13px] text-[#707072]`
-          }`}
+            }`}
           style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
         >
           {label}
@@ -251,18 +244,16 @@ function FloatingSelect({
         </span>
 
         <span
-          className={`text-[13.5px] text-[#111111] font-medium truncate mr-2 ${
-            value ? 'opacity-100' : 'opacity-0'
-          }`}
+          className={`text-[13.5px] text-[#111111] font-medium truncate mr-2 ${value ? 'opacity-100' : 'opacity-0'
+            }`}
           style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
         >
           {displayLabel || 'Select'}
         </span>
 
         <svg
-          className={`w-3.5 h-3.5 text-[#111111] transition-transform duration-200 shrink-0 ${
-            isOpen ? 'rotate-180' : ''
-          }`}
+          className={`w-3.5 h-3.5 text-[#111111] transition-transform duration-200 shrink-0 ${isOpen ? 'rotate-180' : ''
+            }`}
           viewBox="0 0 24 24"
           fill="currentColor"
         >
@@ -277,8 +268,8 @@ function FloatingSelect({
               typeof opt === 'string'
                 ? opt
                 : opt.value !== undefined
-                ? opt.value
-                : opt.id || opt.name;
+                  ? opt.value
+                  : opt.id || opt.name;
             const optLabel =
               typeof opt === 'string'
                 ? opt
@@ -291,11 +282,10 @@ function FloatingSelect({
                   onSelect(optVal);
                   setIsOpen(false);
                 }}
-                className={`w-full flex items-center justify-between px-3.5 py-2 text-[13px] transition-colors cursor-pointer select-none ${
-                  isSelected
-                    ? 'bg-[#f5f5f5] text-[#111111] font-semibold'
+                className={`w-full flex items-center justify-between px-3.5 py-2 text-[13px] transition-colors cursor-pointer select-none ${isSelected
+                    ? '  text-[#111111] font-semibold'
                     : 'text-[#222222] hover:bg-[#fafafa]'
-                }`}
+                  }`}
                 style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
               >
                 <span className="truncate flex-1 mr-2">{optLabel}</span>
@@ -327,16 +317,14 @@ function FloatingTextarea({
     <div className={`w-full ${className}`}>
       <div
         onClick={() => textareaRef.current?.focus()}
-        className={`relative w-full rounded-[8px] border p-3 pt-3.5 transition-all duration-200 cursor-text bg-white ${
-          isFocused ? 'border-[#111111] ring-1 ring-[#111111]/10' : 'border-[#8d8d8d]'
-        }`}
+        className={`relative w-full rounded-[8px] border p-3 pt-3.5 transition-all duration-200 cursor-text bg-white ${isFocused ? 'border-[#111111] ring-1 ring-[#111111]/10' : 'border-[#8d8d8d]'
+          }`}
       >
         <span
-          className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${
-            isFloating
+          className={`absolute transition-all duration-200 ease-out pointer-events-none select-none ${isFloating
               ? '-top-2 left-2.5 px-1.5 bg-white text-[11px] text-[#111111] font-medium leading-none z-10'
               : 'top-3.5 left-3.5 text-[13px] text-[#707072]'
-          }`}
+            }`}
           style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}
         >
           {label}
@@ -558,11 +546,10 @@ export default function SettingsPage() {
           <button
             type="button"
             onClick={() => setActiveTab('homepage')}
-            className={`px-3.5 py-1.5 rounded-lg text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
-              activeTab === 'homepage'
+            className={`px-3.5 py-1.5 rounded-lg text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${activeTab === 'homepage'
                 ? 'bg-neutral-100 text-[#111111] font-semibold shadow-2xs'
                 : 'text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50'
-            }`}
+              }`}
           >
             Homepage (CMS)
           </button>
@@ -570,11 +557,10 @@ export default function SettingsPage() {
           <button
             type="button"
             onClick={() => setActiveTab('checkout')}
-            className={`px-3.5 py-1.5 rounded-lg text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
-              activeTab === 'checkout'
+            className={`px-3.5 py-1.5 rounded-lg text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${activeTab === 'checkout'
                 ? 'bg-neutral-100 text-[#111111] font-semibold shadow-2xs'
                 : 'text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50'
-            }`}
+              }`}
           >
             Checkout & Payments
           </button>
@@ -582,11 +568,10 @@ export default function SettingsPage() {
           <button
             type="button"
             onClick={() => setActiveTab('shiprocket')}
-            className={`px-3.5 py-1.5 rounded-lg text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
-              activeTab === 'shiprocket'
+            className={`px-3.5 py-1.5 rounded-lg text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${activeTab === 'shiprocket'
                 ? 'bg-neutral-100 text-[#111111] font-semibold shadow-2xs'
                 : 'text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50'
-            }`}
+              }`}
           >
             Shiprocket & Logistics
           </button>
@@ -594,11 +579,10 @@ export default function SettingsPage() {
           <button
             type="button"
             onClick={() => setActiveTab('invoice')}
-            className={`px-3.5 py-1.5 rounded-lg text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
-              activeTab === 'invoice'
+            className={`px-3.5 py-1.5 rounded-lg text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${activeTab === 'invoice'
                 ? 'bg-neutral-100 text-[#111111] font-semibold shadow-2xs'
                 : 'text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50'
-            }`}
+              }`}
           >
             Seller & Tax Invoice
           </button>
@@ -606,11 +590,10 @@ export default function SettingsPage() {
           <button
             type="button"
             onClick={() => setActiveTab('auth')}
-            className={`px-3.5 py-1.5 rounded-lg text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
-              activeTab === 'auth'
+            className={`px-3.5 py-1.5 rounded-lg text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${activeTab === 'auth'
                 ? 'bg-neutral-100 text-[#111111] font-semibold shadow-2xs'
                 : 'text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50'
-            }`}
+              }`}
           >
             Verification & Security
           </button>
@@ -873,14 +856,12 @@ export default function SettingsPage() {
                         </span>
                         <div
                           onClick={() => handleCheckoutChange('freeDelivery', !checkout.freeDelivery)}
-                          className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-200 ${
-                            checkout.freeDelivery ? 'bg-[#111111]' : 'bg-neutral-300'
-                          }`}
+                          className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-200 ${checkout.freeDelivery ? 'bg-[#111111]' : 'bg-neutral-300'
+                            }`}
                         >
                           <div
-                            className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ${
-                              checkout.freeDelivery ? 'translate-x-5' : 'translate-x-0'
-                            }`}
+                            className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ${checkout.freeDelivery ? 'translate-x-5' : 'translate-x-0'
+                              }`}
                           />
                         </div>
                       </label>
@@ -943,14 +924,12 @@ export default function SettingsPage() {
                         </span>
                         <div
                           onClick={() => handleCheckoutChange('enablePartialCod', !checkout.enablePartialCod)}
-                          className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-200 ${
-                            checkout.enablePartialCod ? 'bg-[#111111]' : 'bg-neutral-300'
-                          }`}
+                          className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-200 ${checkout.enablePartialCod ? 'bg-[#111111]' : 'bg-neutral-300'
+                            }`}
                         >
                           <div
-                            className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ${
-                              checkout.enablePartialCod ? 'translate-x-5' : 'translate-x-0'
-                            }`}
+                            className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ${checkout.enablePartialCod ? 'translate-x-5' : 'translate-x-0'
+                              }`}
                           />
                         </div>
                       </label>
@@ -1001,14 +980,12 @@ export default function SettingsPage() {
                         </span>
                         <div
                           onClick={() => handleCheckoutChange('enableFullCod', !checkout.enableFullCod)}
-                          className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-200 ${
-                            checkout.enableFullCod ? 'bg-[#111111]' : 'bg-neutral-300'
-                          }`}
+                          className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-200 ${checkout.enableFullCod ? 'bg-[#111111]' : 'bg-neutral-300'
+                            }`}
                         >
                           <div
-                            className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ${
-                              checkout.enableFullCod ? 'translate-x-5' : 'translate-x-0'
-                            }`}
+                            className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ${checkout.enableFullCod ? 'translate-x-5' : 'translate-x-0'
+                              }`}
                           />
                         </div>
                       </label>
@@ -1059,14 +1036,12 @@ export default function SettingsPage() {
                         </span>
                         <div
                           onClick={() => handleCheckoutChange('enablePrepaid', !checkout.enablePrepaid)}
-                          className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-200 ${
-                            checkout.enablePrepaid ? 'bg-[#111111]' : 'bg-neutral-300'
-                          }`}
+                          className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-200 ${checkout.enablePrepaid ? 'bg-[#111111]' : 'bg-neutral-300'
+                            }`}
                         >
                           <div
-                            className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ${
-                              checkout.enablePrepaid ? 'translate-x-5' : 'translate-x-0'
-                            }`}
+                            className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ${checkout.enablePrepaid ? 'translate-x-5' : 'translate-x-0'
+                              }`}
                           />
                         </div>
                       </label>
@@ -1148,13 +1123,12 @@ export default function SettingsPage() {
                           type="button"
                           onClick={() => setPreviewPaymentMethod('prepaid')}
                           disabled={!checkout.enablePrepaid}
-                          className={`py-2 px-1 text-[11px] font-semibold rounded-lg border text-center transition-all cursor-pointer ${
-                            previewPaymentMethod === 'prepaid'
+                          className={`py-2 px-1 text-[11px] font-semibold rounded-lg border text-center transition-all cursor-pointer ${previewPaymentMethod === 'prepaid'
                               ? 'bg-[#111111] text-white border-[#111111] shadow-2xs'
                               : checkout.enablePrepaid
-                              ? 'bg-white text-neutral-700 border-neutral-200 hover:border-neutral-400'
-                              : 'bg-neutral-100 text-neutral-400 border-neutral-200 cursor-not-allowed opacity-50'
-                          }`}
+                                ? 'bg-white text-neutral-700 border-neutral-200 hover:border-neutral-400'
+                                : 'bg-neutral-100 text-neutral-400 border-neutral-200 cursor-not-allowed opacity-50'
+                            }`}
                         >
                           UPI / Prepaid
                         </button>
@@ -1163,13 +1137,12 @@ export default function SettingsPage() {
                           type="button"
                           onClick={() => setPreviewPaymentMethod('partial_cod')}
                           disabled={!checkout.enablePartialCod}
-                          className={`py-2 px-1 text-[11px] font-semibold rounded-lg border text-center transition-all cursor-pointer ${
-                            previewPaymentMethod === 'partial_cod'
+                          className={`py-2 px-1 text-[11px] font-semibold rounded-lg border text-center transition-all cursor-pointer ${previewPaymentMethod === 'partial_cod'
                               ? 'bg-[#111111] text-white border-[#111111] shadow-2xs'
                               : checkout.enablePartialCod
-                              ? 'bg-white text-neutral-700 border-neutral-200 hover:border-neutral-400'
-                              : 'bg-neutral-100 text-neutral-400 border-neutral-200 cursor-not-allowed opacity-50'
-                          }`}
+                                ? 'bg-white text-neutral-700 border-neutral-200 hover:border-neutral-400'
+                                : 'bg-neutral-100 text-neutral-400 border-neutral-200 cursor-not-allowed opacity-50'
+                            }`}
                         >
                           Partial COD
                         </button>
@@ -1178,13 +1151,12 @@ export default function SettingsPage() {
                           type="button"
                           onClick={() => setPreviewPaymentMethod('full_cod')}
                           disabled={!checkout.enableFullCod}
-                          className={`py-2 px-1 text-[11px] font-semibold rounded-lg border text-center transition-all cursor-pointer ${
-                            previewPaymentMethod === 'full_cod'
+                          className={`py-2 px-1 text-[11px] font-semibold rounded-lg border text-center transition-all cursor-pointer ${previewPaymentMethod === 'full_cod'
                               ? 'bg-[#111111] text-white border-[#111111] shadow-2xs'
                               : checkout.enableFullCod
-                              ? 'bg-white text-neutral-700 border-neutral-200 hover:border-neutral-400'
-                              : 'bg-neutral-100 text-neutral-400 border-neutral-200 cursor-not-allowed opacity-50'
-                          }`}
+                                ? 'bg-white text-neutral-700 border-neutral-200 hover:border-neutral-400'
+                                : 'bg-neutral-100 text-neutral-400 border-neutral-200 cursor-not-allowed opacity-50'
+                            }`}
                         >
                           Full COD
                         </button>
@@ -1271,8 +1243,8 @@ export default function SettingsPage() {
                             {previewPaymentMethod === 'partial_cod'
                               ? checkout.partialCodNote
                               : previewPaymentMethod === 'full_cod'
-                              ? checkout.fullCodNote
-                              : checkout.prepaidNote}
+                                ? checkout.fullCodNote
+                                : checkout.prepaidNote}
                           </div>
                         </div>
                       );
