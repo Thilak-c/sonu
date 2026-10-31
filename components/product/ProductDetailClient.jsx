@@ -559,18 +559,35 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
       : ['UK 3', 'UK 4', 'UK 5', 'UK 6', 'UK 7', 'UK 8', 'UK 9'];
 
   const swatches = (() => {
-    const siblings = (allCatalog || []).filter(
-      (p) =>
-        (p.id || p.slug) !== (product.id || product.slug) &&
-        (p.category === product.category || p.name?.split(' ')[0] === product.name?.split(' ')[0])
+    const rawLinks = Array.isArray(product.linkedColorways) && product.linkedColorways.length > 0
+      ? product.linkedColorways
+      : (Array.isArray(product.colorways) ? product.colorways : []);
+
+    if (!rawLinks || rawLinks.length === 0) {
+      return [];
+    }
+
+    const currentKey = product.slug || product.id;
+    const linkedSlugs = new Set(
+      rawLinks
+        .map((item) => (typeof item === 'string' ? item : item?.slug || item?.id))
+        .filter((val) => Boolean(val) && val !== currentKey)
     );
-    const list = [
-      product,
-      ...(siblings.length > 0
-        ? siblings
-        : (allCatalog || []).filter((p) => (p.id || p.slug) !== (product.id || product.slug))),
-    ];
-    return list.slice(0, 4);
+
+    if (linkedSlugs.size === 0) {
+      return [];
+    }
+
+    const matchedSiblings = (allCatalog || []).filter((p) => {
+      const pKey = p.slug || p.id;
+      return linkedSlugs.has(pKey) || linkedSlugs.has(String(p._id));
+    });
+
+    if (matchedSiblings.length === 0) {
+      return [];
+    }
+
+    return [product, ...matchedSiblings];
   })();
 
   return (
@@ -690,7 +707,7 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
                   {productImages.map((img, idx) => (
                     <div
                       key={`mob-slide-${idx}`}
-                      className="w-screen shrink-0 aspect-square snap-center flex items-center justify-center p-0 select-none bg-[#f1f1f1]"
+                      className="w-screen shrink-0 aspect-square snap-center flex items-center justify-center p-0 select-none"
                     >
                       <FallbackImage
                         src={img}

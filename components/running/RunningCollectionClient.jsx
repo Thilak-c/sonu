@@ -502,7 +502,7 @@ export default function RunningCollectionClient({ initialProducts = [] }) {
 
   return (
     <div className="w-full min-h-screen bg-white select-none font-['Helvetica_Now_Text',sans-serif]">
-      <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-12">
+      <div className="w-full max-w-[1440px] mx-auto px-2 sm:px-8 lg:px-12">
         {/* ================= 1. PAGE HEADER ================= */}
         <div className="pt-4 sm:pt-6">
           <h1
@@ -628,7 +628,7 @@ export default function RunningCollectionClient({ initialProducts = [] }) {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-x-3.5 gap-y-7 sm:gap-x-6 sm:gap-y-10 lg:grid-cols-3 xl:grid-cols-4 pb-20">
+          <div className="grid grid-cols-2 gap-x-2.5 gap-y-7 sm:gap-x-6 sm:gap-y-10 lg:grid-cols-3 xl:grid-cols-4 pb-20">
             {filteredProducts.map((shoe) => {
               const pid = shoe.slug || shoe.id;
               const isWishlisted = Boolean(wishlistMap[pid]);
