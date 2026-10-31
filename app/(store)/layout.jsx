@@ -6,6 +6,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import PageTransition from '@/components/PageTransition';
 import GlobalImageCache from '@/components/GlobalImageCache';
+import PageViewTracker from '@/components/analytics/PageViewTracker';
 
 export default function StoreLayout({ children }) {
   const pathname = usePathname();
@@ -45,6 +46,7 @@ export default function StoreLayout({ children }) {
 
   return (
     <div className={`min-h-dvh bg-white flex flex-col justify-between ${isCheckout ? 'lg:pb-0 pb-[80px]' : ''}`}>
+      <PageViewTracker />
       <GlobalImageCache />
       {!isHelpCenter && <Header />}
       <main id="main" className="flex-1 flex flex-col">

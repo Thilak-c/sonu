@@ -86,7 +86,6 @@ const DEFAULT_SHIPROCKET = {
   additionalHeightPerUnit: 12,
 
   courierPreference: 'Delhivery Surface Express',
-  isMockMode: false,
 };
 
 const DEFAULT_CHECKOUT = {

@@ -4,8 +4,11 @@ import TrendingSection from '@/components/home/TrendingSection';
 import FreshDropsSection from '@/components/home/FreshDropsSection';
 import ShopBySportSection from '@/components/home/ShopBySportSection';
 import SpotlightSection from '@/components/home/SpotlightSection';
+import ColorwayShowcaseSections from '@/components/home/ColorwayShowcaseSections';
 import LastMinuteSection from '@/components/home/LastMinuteSection';
+import GrowingCollectionNote from '@/components/common/GrowingCollectionNote';
 import { getAllProducts } from '@/lib/products';
+import { getDb } from '@/lib/mongodb';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -34,7 +37,12 @@ export const metadata = {
 };
 
 export default async function HomePage() {
-  const products = await getAllProducts();
+  const [products, homepageSettings] = await Promise.all([
+    getAllProducts(),
+    getDb()
+      .then((db) => db.collection('settings').findOne({ _id: 'homepage_settings' }))
+      .catch(() => null),
+  ]);
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -76,16 +84,35 @@ export default async function HomePage() {
         <HeroSection />
 
         {/* 2. Featured Section (from DB) */}
-        {products.length > 0 && <FeaturedSection products={products} />}
+        {products.length > 0 && (
+          <FeaturedSection
+            products={products}
+            curatedIds={homepageSettings?.featuredProductIds}
+          />
+        )}
 
         {/* 4. Fresh Drops Section (from DB) */}
-        {products.length > 0 && <FreshDropsSection products={products} />}
+        {products.length > 0 && (
+          <FreshDropsSection
+            products={products}
+            curatedIds={homepageSettings?.freshDropProductIds}
+          />
+        )}
 
         {/* 5. Shop by Sport Section */}
         <ShopBySportSection />
 
-        {/* 7. Last Minute Addition */}
-        <LastMinuteSection />
+        {/* 6. Spotlight Section */}
+        <SpotlightSection />
+
+        {/* 7. Multi-Color Model Sections (Nike Alfa Fly 2, etc.) */}
+        <ColorwayShowcaseSections products={products} />
+
+        {/* 8. Growing Collection Sticky Note */}
+        <GrowingCollectionNote />
+
+        {/* 8. Last Minute Addition (Hidden for now) */}
+        {/* <LastMinuteSection /> */}
       </div>
     </>
   );

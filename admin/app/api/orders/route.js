@@ -132,7 +132,7 @@ export async function POST(request) {
 
     return NextResponse.json({
       success: true,
-      message: `Test order #${orderId} created successfully with mock Shiprocket & WhatsApp`,
+      message: `Test order #${orderId} created successfully`,
       order: testOrder,
     });
   } catch (error) {

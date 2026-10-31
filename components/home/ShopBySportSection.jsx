@@ -3,31 +3,23 @@ import Link from 'next/link';
 const SPORTS_CATEGORIES = [
   {
     id: 'running',
-    name: 'Running',
+    name: 'Sport shoe',
     image: '/asset/Urban Sprint on Blue Concrete.webp',
-    alt: 'SONU Running Footwear',
+    alt: 'SONU Sport shoe Footwear',
     link: '/running',
   },
   {
-    id: 'basketball',
-    name: 'Basketball',
-    image: '/asset/Intense Indoor Basketball Drive.webp',
-    alt: 'SONU Basketball Footwear',
-    link: '/product/drop-court-studio',
-  },
-  {
     id: 'sportswear',
-    name: 'Sportswear',
+    name: 'Sneaker',
     image: '/asset/Cinematic Streetwear on Concrete Steps.webp',
-    alt: 'SONU Sportswear Footwear',
-    link: '/product/drop-stride-tempo',
+    alt: 'SONU Sneaker Footwear',
+    link: '/sneakers',
   },
   {
-    id: 'training',
-    name: 'Training',
-    image: '/asset/Industrial Overpass Barbell Split Squat.webp',
-    alt: 'SONU Training Footwear',
-    link: '/product/drop-offpath-trail',
+    id: 'more-shoes',
+    name: '',
+    image: null,
+    link: null,
   },
 ];
 
@@ -53,33 +45,50 @@ export default function ShopBySportSection() {
         className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 overflow-x-auto no-scrollbar scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden flex items-start gap-3 sm:gap-4 pb-2"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
-        {SPORTS_CATEGORIES.map((sport) => (
-          <Link
-            key={sport.id}
-            href={sport.link || '/#fresh-drops'}
-            className="group flex-shrink-0 w-[78vw] sm:w-[320px] md:w-[360px] flex flex-col cursor-pointer"
-          >
-            {/* Grey Product Square Box - exact match to fresh drops */}
-            <div className="w-full aspect-square   flex items-center justify-center overflow-hidden">
-              <img
-                src={sport.image}
-                alt={sport.alt}
-                className="w-full h-auto object-contain transform group-hover:scale-105 transition-transform duration-300"
-                loading="lazy"
-              />
-            </div>
+        {SPORTS_CATEGORIES.map((sport) => {
+          const CardTag = sport.link ? Link : 'div';
+          return (
+            <CardTag
+              key={sport.id}
+              {...(sport.link ? { href: sport.link } : {})}
+              className="group flex-shrink-0 w-[78vw] sm:w-[320px] md:w-[360px] flex flex-col select-none cursor-pointer"
+            >
+              {/* Grey Product Square Box - exact match to fresh drops */}
+              <div className="w-full aspect-square bg-[#f6f6f6] flex items-center justify-center overflow-hidden">
+                {sport.image ? (
+                  <img
+                    src={sport.image}
+                    alt={sport.alt}
+                    className="w-full h-auto object-contain transform group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center">
+                    <span className="text-[12px] uppercase tracking-[0.2em] font-medium text-[#707072] mb-2 font-['Helvetica_Now_Text_Medium',sans-serif]">
+                      Coming Soon
+                    </span>
+                    <p
+                      className="text-[20px] sm:text-[22px] font-medium text-[#111111] leading-snug font-['Helvetica_Now_Text_Medium',sans-serif]"
+                      style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                    >
+                      More shoes on the way
+                    </p>
+                  </div>
+                )}
+              </div>
 
-            {/* Single line sport name below image */}
-            <div className="pt-3 text-left">
-              <p
-                className="text-[20px] sm:text-[18px] font-medium text-[#111111] leading-snug font-['Helvetica_Now_Text_Medium',sans-serif]"
-                style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
-              >
-                {sport.name}
-              </p>
-            </div>
-          </Link>
-        ))}
+              {/* Single line sport name below image */}
+              <div className="pt-3 text-left">
+                <p
+                  className="text-[20px] sm:text-[18px] font-medium text-[#111111] leading-snug font-['Helvetica_Now_Text_Medium',sans-serif]"
+                  style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
+                >
+                  {sport.name}
+                </p>
+              </div>
+            </CardTag>
+          );
+        })}
       </div>
     </section>
   );

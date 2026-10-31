@@ -452,7 +452,7 @@ function OrdersContent() {
     );
   };
 
-  // Step 1: Ready to Ship (Assign AWB & Courier - Mocked Shiprocket + WhatsApp)
+  // Step 1: Ready to Ship (Assign AWB & Courier - Shiprocket Live Production)
   const handleShipNow = async (orderId, e) => {
     if (e) e.stopPropagation();
     try {
@@ -481,7 +481,7 @@ function OrdersContent() {
     }
   };
 
-  // Step 2: Request Pickup (Mocked Shiprocket + WhatsApp)
+  // Step 2: Request Pickup (Shiprocket Live Production)
   const handleRequestPickup = async (orderId, e) => {
     if (e) e.stopPropagation();
     try {
@@ -1559,9 +1559,9 @@ function OrdersContent() {
             <h1 className="text-[22px] font-bold text-[#111111] tracking-tight">
               Orders
             </h1>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-neutral-200 bg-neutral-100 text-[11.5px] font-medium text-neutral-800">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#111111]" />
-              <span>Shiprocket Mock</span>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-emerald-200 bg-emerald-50 text-[11.5px] font-medium text-emerald-800">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+              <span>Shiprocket Production</span>
             </div>
           </div>
 

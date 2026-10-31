@@ -5,61 +5,73 @@ const SPOTLIGHT_ITEMS = [
     id: 'air-jordan-1',
     name: 'Air Jordan 1',
     image: '/images/spotlight/air-jordan-1.png',
+    link: '/sneakers',
   },
   {
     id: 'air-force-1',
     name: 'Air Force 1',
     image: '/images/spotlight/air-force-1.png',
+    link: '/sneakers',
   },
   {
-    id: 'graphic-tees',
-    name: 'Graphic Tees',
-    image: '/images/spotlight/graphic-tees.png',
+    id: 'alphafly-2',
+    name: 'Nike Alfa Fly 2',
+    image: '/images/spotlight/alphafly-2.png',
+    link: '/product/nike-alfa-fly-2',
   },
   {
     id: 'pegasus-premium',
     name: 'Pegasus Premium',
     image: '/images/spotlight/pegasus-premium.png',
+    link: '/running',
   },
   {
     id: 'vomero-18',
-    name: 'Vomero 18',
+    name: 'Nike Vomero',
     image: '/images/spotlight/vomero-18.png',
+    link: '/product/nike-vomero-premium',
   },
   {
     id: 'pegasus-42',
-    name: 'Pegasus 42',
+    name: 'Nike Pegasus',
     image: '/images/spotlight/pegasus-42.png',
+    link: '/product/nike-pegasus',
   },
   {
     id: 'slides',
     name: 'Slides',
     image: '/images/spotlight/slides.png',
+    link: '/sneakers',
   },
   {
     id: 'dunk',
     name: 'Dunk',
     image: '/images/spotlight/dunk.png',
+    link: '/sneakers',
   },
   {
-    id: 'bottoms',
-    name: 'Bottoms',
-    image: '/images/spotlight/bottoms.png',
+    id: 'mexico-66',
+    name: 'Mexico 66',
+    image: '/images/spotlight/mexico-66.png',
+    link: '/product/onitsuka-tiger-mexico-66',
   },
   {
     id: 'tiempo-elite',
     name: 'Tiempo Elite',
     image: '/images/spotlight/tiempo-elite.png',
+    link: '/running',
   },
   {
-    id: 'caps',
-    name: 'Caps',
-    image: '/images/spotlight/caps.png',
+    id: 'new-balance-9060',
+    name: 'NB 9060',
+    image: '/images/spotlight/new-balance-9060.png',
+    link: '/product/new-balance-9060',
   },
   {
     id: 'air-max',
     name: 'Air Max',
     image: '/images/spotlight/air-max.png',
+    link: '/sneakers',
   },
 ];
 
@@ -89,7 +101,7 @@ export default function SpotlightSection() {
           {SPOTLIGHT_ITEMS.map((item) => (
             <Link
               key={item.id}
-              href="/checkout"
+              href={item.link || '/sneakers'}
               className="group flex flex-col items-center text-center cursor-pointer select-none"
             >
               {/* Product Image Area */}

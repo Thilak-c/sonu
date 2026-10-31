@@ -10,6 +10,7 @@ import {
   ChevronDown,
   RotateCcw,
 } from 'lucide-react';
+import GrowingCollectionNote from '@/components/common/GrowingCollectionNote';
 
 /**
  * Group linked product variants into a single parent shoe entity.
@@ -336,7 +337,7 @@ function ShoeCard({ shoe, isWishlisted, onToggleWishlist, selectedColorFilter })
   );
 }
 
-export default function RunningCollectionClient({ initialProducts = [] }) {
+export default function RunningCollectionClient({ initialProducts = [], title = 'Sonu Shoe-Running' }) {
   const [selectedGender, setSelectedGender] = useState('All'); // 'All' | 'Men' | 'Women' | 'Kids'
   const [selectedColor, setSelectedColor] = useState('All');
   const [selectedSort, setSelectedSort] = useState('featured'); // 'featured' | 'newest' | 'price_asc' | 'price_desc' | 'discount'
@@ -509,12 +510,12 @@ export default function RunningCollectionClient({ initialProducts = [] }) {
             className="text-[24px] sm:text-[30px] font-bold text-[#111111] tracking-tight"
             style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
           >
-            Sonu Shoe-Running
+            {title}
           </h1>
 
           {/* Subnavigation: Men | Women | Kids matching user screenshot */}
           <div className="flex items-center gap-7 sm:gap-9 pt-3 pb-2 text-[15px] sm:text-[16px] font-medium text-[#111111]">
-            {['All', 'Men', 'Women', 'Kids'].map((g) => {
+            {['All',].map((g) => {
               const isSelected = selectedGender === g;
               return (
                 <button
@@ -597,7 +598,7 @@ export default function RunningCollectionClient({ initialProducts = [] }) {
             </div>
 
             {/* Filter Pill Button */}
-            <button
+            {/* <button
               type="button"
               onClick={() => setIsFilterDrawerOpen(true)}
               className="h-9 px-4.5 rounded-full border border-neutral-300 hover:border-black bg-white flex items-center gap-2 text-[13.5px] font-medium text-[#111111] transition-all cursor-pointer shadow-2xs"
@@ -609,7 +610,7 @@ export default function RunningCollectionClient({ initialProducts = [] }) {
                   {activeFiltersCount}
                 </span>
               )}
-            </button>
+            </button> */}
           </div>
         </div>
 
@@ -628,7 +629,7 @@ export default function RunningCollectionClient({ initialProducts = [] }) {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-x-2.5 gap-y-7 sm:gap-x-6 sm:gap-y-10 lg:grid-cols-3 xl:grid-cols-4 pb-20">
+          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pb-20">
             {filteredProducts.map((shoe) => {
               const pid = shoe.slug || shoe.id;
               const isWishlisted = Boolean(wishlistMap[pid]);
@@ -645,6 +646,9 @@ export default function RunningCollectionClient({ initialProducts = [] }) {
             })}
           </div>
         )}
+
+        {/* Growing Collection Sticky Note */}
+        <GrowingCollectionNote />
       </div>
 
       {/* ================= 4. SLIDE-OVER FILTER DRAWER ================= */}

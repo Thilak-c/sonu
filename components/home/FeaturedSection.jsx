@@ -1,10 +1,21 @@
 import Link from 'next/link';
 import { getAllProducts } from '@/lib/products';
 
-export default async function FeaturedSection({ products: passedProducts }) {
+export default async function FeaturedSection({ products: passedProducts, curatedIds = [] }) {
   const allProducts = passedProducts !== undefined ? passedProducts : await getAllProducts();
-  const featured = allProducts.filter((p) => p.featured === true);
-  const items = featured.length > 0 ? featured : allProducts;
+
+  let items = [];
+  if (Array.isArray(curatedIds) && curatedIds.length > 0) {
+    items = curatedIds
+      .map((id) => allProducts.find((p) => p.slug === id || p.id === id || String(p._id) === id))
+      .filter(Boolean)
+      .slice(0, 5);
+  }
+
+  if (items.length === 0) {
+    const featured = allProducts.filter((p) => p.featured === true);
+    items = (featured.length > 0 ? featured : allProducts).slice(0, 5);
+  }
 
   if (!items || items.length === 0) {
     return null;

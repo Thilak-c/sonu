@@ -31,6 +31,8 @@ const DEFAULT_HOMEPAGE = {
   secondaryBtnLink: '/#fresh-drops',
   announcementBarText: 'Free Express Shipping Across India On All Orders',
   enableAnnouncementBar: true,
+  featuredProductIds: [],
+  freshDropProductIds: [],
 };
 
 const DEFAULT_SHIPROCKET = {
@@ -62,7 +64,6 @@ const DEFAULT_SHIPROCKET = {
 
   // Courier
   courierPreference: 'Delhivery Surface Express',
-  isMockMode: false,
 };
 
 const DEFAULT_CHECKOUT = {
@@ -182,17 +183,30 @@ export async function POST(request) {
 
     // 3. Homepage settings
     if (body.homepage && typeof body.homepage === 'object') {
+      const existingHomepage = await db.collection('settings').findOne({ _id: 'homepage_settings' });
+
       const cleanedHomepage = {
-        heroImage: (body.homepage.heroImage || DEFAULT_HOMEPAGE.heroImage).trim(),
-        eyebrowTag: (body.homepage.eyebrowTag || DEFAULT_HOMEPAGE.eyebrowTag).trim(),
-        headline: (body.homepage.headline || DEFAULT_HOMEPAGE.headline).trim(),
-        description: (body.homepage.description || DEFAULT_HOMEPAGE.description).trim(),
-        primaryBtnText: (body.homepage.primaryBtnText || DEFAULT_HOMEPAGE.primaryBtnText).trim(),
-        primaryBtnLink: (body.homepage.primaryBtnLink || DEFAULT_HOMEPAGE.primaryBtnLink).trim(),
-        secondaryBtnText: (body.homepage.secondaryBtnText || DEFAULT_HOMEPAGE.secondaryBtnText).trim(),
-        secondaryBtnLink: (body.homepage.secondaryBtnLink || DEFAULT_HOMEPAGE.secondaryBtnLink).trim(),
-        announcementBarText: (body.homepage.announcementBarText || DEFAULT_HOMEPAGE.announcementBarText).trim(),
-        enableAnnouncementBar: body.homepage.enableAnnouncementBar !== false,
+        heroImage: (body.homepage.heroImage || existingHomepage?.heroImage || DEFAULT_HOMEPAGE.heroImage).trim(),
+        eyebrowTag: (body.homepage.eyebrowTag || existingHomepage?.eyebrowTag || DEFAULT_HOMEPAGE.eyebrowTag).trim(),
+        headline: (body.homepage.headline || existingHomepage?.headline || DEFAULT_HOMEPAGE.headline).trim(),
+        description: (body.homepage.description || existingHomepage?.description || DEFAULT_HOMEPAGE.description).trim(),
+        primaryBtnText: (body.homepage.primaryBtnText || existingHomepage?.primaryBtnText || DEFAULT_HOMEPAGE.primaryBtnText).trim(),
+        primaryBtnLink: (body.homepage.primaryBtnLink || existingHomepage?.primaryBtnLink || DEFAULT_HOMEPAGE.primaryBtnLink).trim(),
+        secondaryBtnText: (body.homepage.secondaryBtnText || existingHomepage?.secondaryBtnText || DEFAULT_HOMEPAGE.secondaryBtnText).trim(),
+        secondaryBtnLink: (body.homepage.secondaryBtnLink || existingHomepage?.secondaryBtnLink || DEFAULT_HOMEPAGE.secondaryBtnLink).trim(),
+        announcementBarText: (body.homepage.announcementBarText || existingHomepage?.announcementBarText || DEFAULT_HOMEPAGE.announcementBarText).trim(),
+        enableAnnouncementBar: body.homepage.enableAnnouncementBar !== undefined
+          ? body.homepage.enableAnnouncementBar !== false
+          : existingHomepage?.enableAnnouncementBar !== false,
+        heroImages: Array.isArray(body.homepage.heroImages)
+          ? body.homepage.heroImages
+          : (existingHomepage?.heroImages || []),
+        featuredProductIds: Array.isArray(body.homepage.featuredProductIds)
+          ? body.homepage.featuredProductIds.slice(0, 5)
+          : (existingHomepage?.featuredProductIds || []),
+        freshDropProductIds: Array.isArray(body.homepage.freshDropProductIds)
+          ? body.homepage.freshDropProductIds.slice(0, 5)
+          : (existingHomepage?.freshDropProductIds || []),
         updatedAt: new Date(),
       };
 
@@ -230,7 +244,6 @@ export async function POST(request) {
         additionalHeightPerUnit: Number(body.shiprocket.additionalHeightPerUnit) || 12,
 
         courierPreference: (body.shiprocket.courierPreference || DEFAULT_SHIPROCKET.courierPreference).trim(),
-        isMockMode: false,
         updatedAt: new Date(),
       };
 

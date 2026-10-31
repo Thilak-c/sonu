@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { addToCart, getCartItems } from '@/components/cart/cartStore';
 import FallbackImage from '@/components/FallbackImage';
+import ProductViewCounter from '@/components/product/ProductViewCounter';
 
 const SIZE_CHART = [
   { size: 'UK 3', inLength: '8.8', cmLength: '22.4', us: '5.5', eu: '36', cmJp: '22.5' },
@@ -598,9 +599,12 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
 
           {/* Mobile Header (Hidden on Desktop) */}
           <div className="flex flex-col text-left mb-5 lg:hidden">
-            <span className="text-[#c83200] text-[15px] sm:text-[16px] font-medium leading-none mb-1.5">
-              Just In
-            </span>
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[#c83200] text-[15px] sm:text-[16px] font-medium leading-none">
+                Just In
+              </span>
+              <ProductViewCounter slug={product.slug || product.id} />
+            </div>
 
             <h1
               className="text-[26px] sm:text-[28px] font-medium text-[#111111] tracking-[-0.02em] leading-[1.15] font-['Helvetica_Now_Text_Medium',sans-serif]"
@@ -747,9 +751,12 @@ export default function ProductDetailClient({ product: initialProduct, initialCa
             <div className="w-full lg:w-[380px] xl:w-[410px] shrink-0 mt-6 lg:mt-0">
               {/* Desktop Header */}
               <div className="hidden lg:flex flex-col text-left mb-6">
-                <span className="text-[#c83200] text-[15px] xl:text-[16px] font-medium leading-none mb-1.5">
-                  Just In
-                </span>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[#c83200] text-[15px] xl:text-[16px] font-medium leading-none">
+                    Just In
+                  </span>
+                  <ProductViewCounter slug={product.slug || product.id} />
+                </div>
                 <h1
                   className="text-[26px] xl:text-[28px] font-medium text-[#111111] tracking-[-0.02em] leading-[1.15] font-['Helvetica_Now_Text_Medium',sans-serif]"
                   style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}

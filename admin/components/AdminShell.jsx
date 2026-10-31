@@ -18,6 +18,7 @@ import {
   Database,
   ArrowUpRight,
   Plus,
+  SlidersHorizontal,
 } from 'lucide-react';
 
 export default function AdminShell({ children, onNewProductClick }) {
@@ -45,6 +46,7 @@ export default function AdminShell({ children, onNewProductClick }) {
   const navLinks = [
     { label: 'Orders', href: '/orders', icon: ShoppingBag },
     { label: 'Products', href: '/products', icon: Package },
+    { label: 'Edit', href: '/edit', icon: SlidersHorizontal },
     { label: 'Overview', href: '/overview', icon: LayoutDashboard },
     { label: 'Customers', href: '/customers', icon: Users },
     { label: 'Settings', href: '/settings', icon: Settings },
@@ -53,6 +55,7 @@ export default function AdminShell({ children, onNewProductClick }) {
   const getPageTitle = () => {
     if (pathname.startsWith('/orders')) return 'Orders';
     if (pathname.startsWith('/products')) return 'Products';
+    if (pathname.startsWith('/edit')) return 'Edit Content';
     if (pathname.startsWith('/overview')) return 'Overview';
     if (pathname.startsWith('/customers')) return 'Customers';
     if (pathname.startsWith('/settings')) return 'Settings';

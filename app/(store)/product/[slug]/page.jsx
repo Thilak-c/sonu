@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getProductById, getAllProducts } from '@/lib/products';
 import ProductDetailClient from '@/components/product/ProductDetailClient';
+import GrowingCollectionNote from '@/components/common/GrowingCollectionNote';
 
 export async function generateStaticParams() {
   const products = await getAllProducts();
@@ -139,6 +140,7 @@ export default async function ProductDetailPage({ params }) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
       <ProductDetailClient product={product} initialCatalog={allCatalog} />
+      <GrowingCollectionNote />
     </>
   );
 }

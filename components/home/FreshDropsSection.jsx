@@ -1,8 +1,24 @@
 import Link from 'next/link';
 import { getAllProducts } from '@/lib/products';
 
-export default async function FreshDropsSection({ products: passedProducts }) {
-  const products = passedProducts !== undefined ? passedProducts : await getAllProducts();
+export default async function FreshDropsSection({ products: passedProducts, curatedIds = [] }) {
+  const allProducts = passedProducts !== undefined ? passedProducts : await getAllProducts();
+
+  if (!allProducts || allProducts.length === 0) {
+    return null;
+  }
+
+  let products = [];
+  if (Array.isArray(curatedIds) && curatedIds.length > 0) {
+    products = curatedIds
+      .map((id) => allProducts.find((p) => p.slug === id || p.id === id || String(p._id) === id))
+      .filter(Boolean)
+      .slice(0, 5);
+  }
+
+  if (products.length === 0) {
+    products = allProducts.slice(0, 5);
+  }
 
   if (!products || products.length === 0) {
     return null;

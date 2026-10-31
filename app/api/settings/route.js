@@ -15,6 +15,8 @@ const DEFAULT_HOMEPAGE = {
   secondaryBtnLink: '/#fresh-drops',
   announcementBarText: 'Free Express Shipping Across India On All Orders',
   enableAnnouncementBar: true,
+  featuredProductIds: [],
+  freshDropProductIds: [],
 };
 
 const DEFAULT_CHECKOUT = {
