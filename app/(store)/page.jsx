@@ -5,6 +5,7 @@ import FreshDropsSection from '@/components/home/FreshDropsSection';
 import ShopBySportSection from '@/components/home/ShopBySportSection';
 import SpotlightSection from '@/components/home/SpotlightSection';
 import LastMinuteSection from '@/components/home/LastMinuteSection';
+import AccessoriesSection from '@/components/home/AccessoriesSection';
 import { getAllProducts } from '@/lib/products';
 
 export const dynamic = 'force-dynamic';
@@ -71,20 +72,7 @@ export default async function HomePage() {
 
       <div className="w-full bg-white flex flex-col font-['Helvetica_Now_Text',sans-serif]">
         {/* Empty state when no products in DB yet */}
-        {products.length === 0 && (
-          <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 py-20 text-center">
-            <span className="text-[12px] tracking-[0.2em] uppercase font-medium text-[#707072] block mb-2 font-['Helvetica_Now_Text_Medium',sans-serif]">
-              New Drop Coming Soon
-            </span>
-            <h1 className="text-[28px] sm:text-[38px] font-medium text-[#111111] tracking-tight font-['Helvetica_Now_Text_Medium',sans-serif]">
-              Crafted in Small Runs.
-            </h1>
-            <p className="text-[15px] sm:text-[16px] text-[#707072] mt-3 max-w-md mx-auto leading-relaxed">
-              Our handcrafted shoes are currently in preparation. Add products through the admin panel to populate your store catalog.
-            </p>
-          </div>
-        )}
-
+       
         {/* 1. Hero Showcase (Editable via Admin Settings) */}
         <HeroSection />
 
@@ -94,11 +82,14 @@ export default async function HomePage() {
         {/* 4. Fresh Drops Section (from DB) */}
         {products.length > 0 && <FreshDropsSection products={products} />}
 
-        {/* 5. Shop by Sport Section */}
-        <ShopBySportSection />
+        {/* 5. Shop by Sport Section (Hidden) */}
+        {/* <ShopBySportSection /> */}
+
+        {/* 6. Sonu Shoe Accessories & Gear (Socks, Water Bottle, Shoe Care) */}
+        <AccessoriesSection />
 
         {/* 7. Last Minute Addition */}
-        <LastMinuteSection />
+        {/* <LastMinuteSection /> */}
       </div>
     </>
   );

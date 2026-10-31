@@ -700,7 +700,6 @@ export default function Header() {
             </svg>
             <input
               ref={searchInputRef}
-              autoFocus
               type="text"
               inputMode="search"
               placeholder="Search"

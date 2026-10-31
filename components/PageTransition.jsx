@@ -11,6 +11,21 @@ export default function PageTransition({ children }) {
   const latestChildrenRef = useRef(children);
   latestChildrenRef.current = children;
 
+  // Disable browser scroll restoration on refresh and force top
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if ('scrollRestoration' in window.history) {
+        window.history.scrollRestoration = 'manual';
+      }
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    }
+  }, []);
+
+  // Force scroll to top on every page change
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [pathname]);
+
   // Keep display children in sync on normal re-renders
   useEffect(() => {
     if (!isFading) {
