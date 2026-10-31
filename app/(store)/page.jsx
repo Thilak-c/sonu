@@ -5,7 +5,6 @@ import FreshDropsSection from '@/components/home/FreshDropsSection';
 import ShopBySportSection from '@/components/home/ShopBySportSection';
 import SpotlightSection from '@/components/home/SpotlightSection';
 import LastMinuteSection from '@/components/home/LastMinuteSection';
-import AccessoriesSection from '@/components/home/AccessoriesSection';
 import { getAllProducts } from '@/lib/products';
 
 export const dynamic = 'force-dynamic';
@@ -82,14 +81,11 @@ export default async function HomePage() {
         {/* 4. Fresh Drops Section (from DB) */}
         {products.length > 0 && <FreshDropsSection products={products} />}
 
-        {/* 5. Shop by Sport Section (Hidden) */}
-        {/* <ShopBySportSection /> */}
-
-        {/* 6. Sonu Shoe Accessories & Gear (Socks, Water Bottle, Shoe Care) */}
-        <AccessoriesSection />
+        {/* 5. Shop by Sport Section */}
+        <ShopBySportSection />
 
         {/* 7. Last Minute Addition */}
-        {/* <LastMinuteSection /> */}
+        <LastMinuteSection />
       </div>
     </>
   );
