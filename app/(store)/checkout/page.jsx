@@ -2464,15 +2464,14 @@ export default function CheckoutPage() {
         </div>
       </div>
 
-      {/* SECTION: Last Minute Addition (Single row on mobile) */}
+      {/* SECTION: Last Minute Addition (Hidden) */}
+      {/*
       <section className="mt-8 sm:mt-16 lg:mt-24 pt-6 sm:pt-8 border-t border-[#f0f0f0]" aria-label="Last Minute Addition">
         <h2 className="text-[24px] sm:text-[28px] font-bold text-[#111111] mb-6 sm:mb-8 tracking-tight">
           Last Minute Addition
         </h2>
 
-        {/* Carousel / Grid Container with Navigation Arrows */}
         <div className="relative">
-          {/* Left Arrow Button */}
           <button
             type="button"
             onClick={() => scrollAddons('left')}
@@ -2484,7 +2483,6 @@ export default function CheckoutPage() {
             </svg>
           </button>
 
-          {/* Right Arrow Button */}
           <button
             type="button"
             onClick={() => scrollAddons('right')}
@@ -2496,7 +2494,6 @@ export default function CheckoutPage() {
             </svg>
           </button>
 
-          {/* Addon Items: Strictly ONE row on phone, edge-to-edge scroll bleed, 4 columns on desktop */}
           <div
             ref={carouselRef}
             className="-mx-5 px-5 sm:-mx-8 sm:px-8 lg:mx-0 lg:px-0 flex lg:grid lg:grid-cols-4 gap-2 sm:gap-6 overflow-x-auto scrollbar-none pb-2 snap-x snap-mandatory"
@@ -2511,7 +2508,6 @@ export default function CheckoutPage() {
                   key={addon.id}
                   className="flex flex-col group w-[165px] sm:w-[190px] lg:w-auto shrink-0 snap-start first:pl-3 sm:first:pl-4 lg:first:pl-0"
                 >
-                  {/* Square Image Box (Smaller compact scale) */}
                   <div className="w-full aspect-square flex items-center justify-center overflow-hidden">
                     <img
                       src={addon.image}
@@ -2523,7 +2519,6 @@ export default function CheckoutPage() {
                     />
                   </div>
 
-                  {/* Info */}
                   <div className="pt-2 flex-1 flex flex-col justify-between">
                     <div>
                       <p className="text-[11px] sm:text-[12px] text-[#707072] font-normal leading-tight">
@@ -2537,7 +2532,6 @@ export default function CheckoutPage() {
                       </p>
                     </div>
 
-                    {/* Move to Bag Button / Quantity Pill */}
                     {qty > 0 ? (
                       <div className="mt-2.5 w-full h-[34px] sm:h-[38px] rounded-full border border-[#111111] bg-white flex items-center justify-between px-3 text-[#111111]">
                         <button
@@ -2610,6 +2604,7 @@ export default function CheckoutPage() {
           </div>
         </div>
       </section>
+      */}
 
       {/* Mobile Fixed Bottom Bar (Only visible on screens < lg) */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#e5e5e5] h-[80px] flex items-center px-5 sm:px-6 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
