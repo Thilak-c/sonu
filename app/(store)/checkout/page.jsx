@@ -595,7 +595,7 @@ export default function CheckoutPage() {
         description: isPartialCod
           ? `Partial COD Advance Deposit (₹${advanceDepositAmount})`
           : `Order Payment (${totalQuantity} ${totalQuantity === 1 ? 'item' : 'items'})`,
-        image: '/images/brand/logo.svg',
+        image: 'https://sonushoe.in/favicon.ico',
         order_id: orderData.orderId,
         one_click_checkout: false,
         remember_customer: false,
