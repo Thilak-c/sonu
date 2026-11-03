@@ -530,7 +530,7 @@ function OrdersContent() {
       if (res.ok && data.success) {
         setPaymentDiffData(data.diff || data.comparison);
         setShowPaymentDiff(true);
-        showToast('✓ Razorpay live payment status verified');
+        showToast('✓ Razorpay payment status verified');
         fetchOrders();
       } else {
         alert(data.error || 'Failed to recheck payment with Razorpay');
@@ -1597,7 +1597,7 @@ function OrdersContent() {
               Orders
             </h1>
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-emerald-200 bg-emerald-50 text-[11.5px] font-medium text-emerald-800">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
               <span>Shiprocket Production</span>
             </div>
           </div>
@@ -1734,7 +1734,7 @@ function OrdersContent() {
             {loading ? (
               <div className="space-y-2 mt-2 min-w-[1280px]">
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="bg-white rounded-lg border border-neutral-200 p-4 grid grid-cols-[36px_180px_220px_190px_150px_110px_110px_125px_120px] gap-3 items-center animate-pulse">
+                  <div key={i} className="bg-white rounded-lg border border-neutral-200 p-4 grid grid-cols-[36px_180px_220px_190px_150px_110px_110px_125px_120px] gap-3 items-center">
                     <div className="w-4 h-4 rounded bg-neutral-200" />
                     <div className="space-y-2">
                       <div className="w-24 h-4 rounded bg-neutral-200" />
@@ -2811,8 +2811,8 @@ function OrdersContent() {
                   {/* Gateway Mode Badge */}
                   {selectedOrder.payment?.gatewayMode === 'live' ? (
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                      Razorpay Live Gateway
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      Razorpay Production
                     </span>
                   ) : selectedOrder.payment?.gatewayMode === 'test' ? (
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-300">
@@ -2912,7 +2912,7 @@ function OrdersContent() {
                       <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
                         paymentDiffData?.gatewayMode === 'live' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
                       }`}>
-                        {paymentDiffData?.gatewayMode ? `${paymentDiffData.gatewayMode.toUpperCase()} GATEWAY` : 'PENDING CHECK'}
+                        RAZORPAY GATEWAY
                       </span>
                     </div>
 

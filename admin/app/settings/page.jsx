@@ -1080,8 +1080,8 @@ export default function SettingsPage() {
                         </h3>
                       </div>
                       <span className="px-2 py-0.5 rounded-full text-[10.5px] font-semibold bg-neutral-100 text-neutral-700 border border-neutral-200 flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        Live Sync
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        Active Sync
                       </span>
                     </div>
 
@@ -1481,8 +1481,8 @@ export default function SettingsPage() {
                           </p>
                         </div>
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                          Live Production
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                          Production
                         </span>
                       </div>
                     </div>

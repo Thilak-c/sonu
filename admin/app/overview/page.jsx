@@ -235,7 +235,7 @@ export default function OverviewPage() {
     ];
   }, [dbData]);
 
-  // Lifetime Top Selling Products list
+  // Top Selling Products list
   const topSellingList = useMemo(() => {
     if (dbData?.topSellingProducts && dbData.topSellingProducts.length > 0) {
       return dbData.topSellingProducts;
@@ -656,13 +656,13 @@ export default function OverviewPage() {
           {/* COLUMN 3 (RIGHT, ~33%): TOTAL SALES ANALYTICS DONUT      */}
           {/* ------------------------------------------------------- */}
           <div className="lg:col-span-4 bg-white rounded-[26px] p-6 sm:p-7 border border-neutral-100 shadow-[0_2px_12px_rgba(0,0,0,0.02)] flex flex-col justify-between">
-            {/* Header: Title and Lifetime Badge */}
+            {/* Header: Title and All Time Badge */}
             <div className="flex items-center justify-between">
               <h3 className="text-[17px] sm:text-[18px] font-semibold text-[#111111] tracking-tight">
                 Total Sales Analytics
               </h3>
               <div className="px-3 py-1 rounded-full border border-neutral-200 text-[12px] font-medium text-neutral-700 bg-neutral-50/70 select-none">
-                Lifetime
+                All Time
               </div>
             </div>
 
@@ -747,16 +747,16 @@ export default function OverviewPage() {
                       : '11 Sold'}
                   </span>
                   <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-[#dcfce7] text-[#15803d] text-[10px] font-semibold mt-1">
-                    Lifetime
+                    Total
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Bottom Total Lifetime Sales */}
+            {/* Bottom Total Sales */}
             <div className="text-center pt-4 border-t border-neutral-100/60">
               <p className="text-[13px] text-neutral-400 font-normal">
-                Total Lifetime Sales
+                Total Sales
               </p>
               <p className="text-[30px] sm:text-[34px] font-bold text-[#111111] tracking-tight leading-none mt-1">
                 {dbData?.stats?.totalRevenue != null
@@ -895,7 +895,7 @@ export default function OverviewPage() {
           {/* RIGHT: TOP SELLING PRODUCTS (~32% WIDTH)                */}
           {/* ------------------------------------------------------- */}
           <div className="lg:col-span-4 bg-white rounded-[26px] p-6 sm:p-7 border border-neutral-100 shadow-[0_2px_12px_rgba(0,0,0,0.02)] flex flex-col justify-between">
-            {/* Header: Title and Lifetime Badge */}
+            {/* Header: Title */}
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-[17px] sm:text-[18px] font-semibold text-[#111111] tracking-tight">
@@ -904,7 +904,7 @@ export default function OverviewPage() {
                
               </div>
 
-              {/* Top Selling Products List (Lifetime) */}
+              {/* Top Selling Products List */}
               <div className="flex flex-col gap-2.5">
                 {topSellingList.map((prod, idx) => (
                   <div

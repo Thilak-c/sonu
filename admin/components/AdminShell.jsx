@@ -19,6 +19,8 @@ import {
   ArrowUpRight,
   Plus,
   SlidersHorizontal,
+  BarChart3,
+  Eye,
 } from 'lucide-react';
 
 export default function AdminShell({ children, onNewProductClick }) {
@@ -48,6 +50,7 @@ export default function AdminShell({ children, onNewProductClick }) {
     { label: 'Products', href: '/products', icon: Package },
     { label: 'Edit', href: '/edit', icon: SlidersHorizontal },
     { label: 'Overview', href: '/overview', icon: LayoutDashboard },
+    { label: 'Analytics', href: '/analytics', icon: BarChart3 },
     { label: 'Customers', href: '/customers', icon: Users },
     { label: 'Settings', href: '/settings', icon: Settings },
   ];
@@ -57,6 +60,7 @@ export default function AdminShell({ children, onNewProductClick }) {
     if (pathname.startsWith('/products')) return 'Products';
     if (pathname.startsWith('/edit')) return 'Edit Content';
     if (pathname.startsWith('/overview')) return 'Overview';
+    if (pathname.startsWith('/analytics') || pathname.startsWith('/views')) return 'Analytics';
     if (pathname.startsWith('/customers')) return 'Customers';
     if (pathname.startsWith('/settings')) return 'Settings';
     return 'Admin';
@@ -228,7 +232,7 @@ export default function AdminShell({ children, onNewProductClick }) {
       {/* Main Content Container */}
       <div className="flex-1 flex flex-col min-w-0 bg-[#f9fafb]">
         {/* Top Desktop Navigation Bar */}
-        {!pathname.startsWith('/overview') && (
+        {!pathname.startsWith('/overview') && !pathname.startsWith('/analytics') && !pathname.startsWith('/views') && (
           <header className="hidden md:flex items-center justify-between px-8 h-14 bg-white border-b border-neutral-200/80 sticky top-0 z-30">
             <div className="flex items-center gap-2 text-[13px] text-neutral-400 font-normal">
               <span>Sonu Shoe</span>
