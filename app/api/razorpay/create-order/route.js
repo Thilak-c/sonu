@@ -1,98 +1,111 @@
 import { NextResponse } from 'next/server';
 import { initDb } from '@/lib/mongodb';
+import { createRazorpayOrder, getRazorpayCredentials } from '@/lib/razorpay';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(request) {
   try {
-    const { amount, receipt, orderId, notes, items } = await request.json();
+    const { amount, receipt, orderId, notes = {}, items = [] } = await request.json();
 
-    if (!amount || amount <= 0) {
+    const numericAmount = Number(amount);
+    if (!numericAmount || numericAmount <= 0) {
       return NextResponse.json(
-        { error: 'Valid amount is required' },
+        { error: 'Valid positive amount is required' },
         { status: 400 }
       );
     }
 
-    const keyId = process.env.RAZORPAY_KEY_ID || 'rzp_test_ToeynJ0XXfrtyp';
-    const keySecret = process.env.RAZORPAY_KEY_SECRET || 'usK3zc5FrVqz83iZSL5YMEiJ';
-
-    const authHeader = `Basic ${Buffer.from(`${keyId}:${keySecret}`).toString('base64')}`;
-
-    // Razorpay amount is in paise (1 INR = 100 paise)
-    const amountInPaise = Math.round(Number(amount) * 100);
-    const finalOrderId = orderId || receipt || `SONU-IN-${Math.floor(100000 + Math.random() * 900000)}`;
-    const receiptId = String(finalOrderId).slice(0, 40);
-
-    const res = await fetch('https://api.razorpay.com/v1/orders', {
-      method: 'POST',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        amount: amountInPaise,
-        currency: 'INR',
-        receipt: receiptId,
-        notes: notes || {},
-      }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
+    // Verify credentials configuration
+    let creds;
+    try {
+      creds = getRazorpayCredentials();
+    } catch (credErr) {
+      console.error('[Razorpay Config Error]:', credErr.message);
       return NextResponse.json(
-        { error: data.error?.description || 'Failed to create Razorpay order' },
-        { status: res.status }
+        { error: 'Payment gateway configuration error. Please contact store support.' },
+        { status: 500 }
       );
     }
 
-    // Save initial order record into MongoDB BEFORE payment starts
+    const amountInPaise = Math.round(numericAmount * 100);
+    const finalOrderId = orderId || receipt || `SONU-IN-${Math.floor(100000 + Math.random() * 900000)}`;
+    const receiptId = String(finalOrderId).slice(0, 40);
+
+    const rzpOrder = await createRazorpayOrder({
+      amountInPaise,
+      receipt: receiptId,
+      notes: {
+        ...notes,
+        orderId: finalOrderId,
+        gatewayMode: creds.mode,
+      },
+    });
+
+    // Save initial order draft record in MongoDB BEFORE payment starts
     try {
       const db = await initDb();
       await db.collection('orders').updateOne(
-        { razorpayOrderId: data.id },
+        { razorpayOrderId: rzpOrder.orderId },
         {
           $set: {
             orderId: finalOrderId,
-            razorpayOrderId: data.id,
-            amount: Number(amount),
-            currency: data.currency || 'INR',
+            razorpayOrderId: rzpOrder.orderId,
+            totalAmount: numericAmount,
+            amount: numericAmount,
+            currency: rzpOrder.currency || 'INR',
             items: items || [],
             customer: {
-              name: notes?.customerName || '',
-              email: (notes?.customerEmail || '').toLowerCase().trim(),
-              mobile: notes?.contact || '',
-              address: notes?.address || '',
+              name: notes.customerName || '',
+              email: (notes.customerEmail || '').toLowerCase().trim(),
+              mobile: notes.contact || '',
+              address: notes.address || '',
             },
             payment: {
-              method: notes?.method || 'razorpay',
+              method: notes.method || 'razorpay',
               status: 'PENDING_PAYMENT',
-              razorpayOrderId: data.id,
+              razorpayOrderId: rzpOrder.orderId,
+              expectedAmount: numericAmount,
+              expectedAmountInPaise: amountInPaise,
+              gatewayMode: creds.mode,
             },
             status: 'PENDING',
             updatedAt: new Date(),
           },
           $setOnInsert: {
             createdAt: new Date(),
+            paymentHistory: [
+              {
+                event: 'ORDER_INTENT_CREATED',
+                status: 'PENDING_PAYMENT',
+                amount: numericAmount,
+                razorpayOrderId: rzpOrder.orderId,
+                gatewayMode: creds.mode,
+                timestamp: new Date(),
+                note: `Checkout initialized in ${creds.mode.toUpperCase()} mode for ₹${numericAmount}`,
+              },
+            ],
           },
         },
         { upsert: true }
       );
-      console.log(`[MongoDB] Initial order draft saved with Razorpay order ID ${data.id}`);
+      console.log(`[MongoDB] Initial order draft saved: ${finalOrderId} (${rzpOrder.orderId}) [Mode: ${creds.mode}]`);
     } catch (dbErr) {
       console.error('[MongoDB] Warning: Failed to write initial order to DB:', dbErr);
     }
 
     return NextResponse.json({
-      orderId: data.id,
-      amount: data.amount,
-      currency: data.currency,
+      orderId: rzpOrder.orderId,
+      amount: rzpOrder.amount,
+      currency: rzpOrder.currency,
       receipt: receiptId,
-      keyId,
+      keyId: rzpOrder.keyId,
+      mode: creds.mode,
     });
   } catch (error) {
     console.error('Razorpay order creation error:', error);
     return NextResponse.json(
-      { error: 'Internal server error while initializing payment' },
+      { error: error.message || 'Internal server error while initializing payment' },
       { status: 500 }
     );
   }

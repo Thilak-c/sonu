@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
-import crypto from 'crypto';
-import { getDb, initDb } from '@/lib/mongodb';
+import { initDb } from '@/lib/mongodb';
 import { createShiprocketOrder } from '@/lib/shiprocket';
 import { sendOrderConfirmationEmail } from '@/lib/email';
+import { verifyAndRecheckPayment } from '@/lib/razorpay';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(request) {
   try {
@@ -19,39 +21,104 @@ export async function POST(request) {
       placedAt,
     } = body;
 
-    if (!orderId || !items || !Array.isArray(items)) {
+    if (!orderId || !items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
-        { error: 'Invalid order payload. orderId and items are required.' },
+        { error: 'Invalid order payload. orderId and at least one item are required.' },
+        { status: 400 }
+      );
+    }
+
+    const numericTotal = Number(totalAmount);
+    if (!numericTotal || numericTotal <= 0) {
+      return NextResponse.json(
+        { error: 'Valid total amount is required.' },
         { status: 400 }
       );
     }
 
     const isPartialCod = paymentMethod === 'partial_cod';
     const isFullCod = paymentMethod === 'full_cod' || paymentMethod === 'cod';
+    const isOnline = !isFullCod;
 
-    // Cryptographic signature check for online payments
-    let isPaymentVerified = false;
-    if (razorpayPaymentId && razorpayOrderId && razorpaySignature) {
-      const keySecret = process.env.RAZORPAY_KEY_SECRET || 'usK3zc5FrVqz83iZSL5YMEiJ';
-      const expectedSignature = crypto
-        .createHmac('sha256', keySecret)
-        .update(`${razorpayOrderId}|${razorpayPaymentId}`)
-        .digest('hex');
+    const db = await initDb();
 
-      if (expectedSignature === razorpaySignature) {
-        isPaymentVerified = true;
-      } else {
-        console.warn(`[Razorpay Security] Signature mismatch for Order ${orderId}. Expected ${expectedSignature}, received ${razorpaySignature}`);
+    // 1. Mandatory Payment Verification for All Online / Partial COD Orders
+    let verifiedPaymentInfo = null;
+    if (isOnline) {
+      if (!razorpayPaymentId || !razorpayOrderId || !razorpaySignature) {
         return NextResponse.json(
-          { error: 'Payment signature verification failed. Untrusted payment attempt.' },
+          {
+            error:
+              'Payment proof missing. Razorpay payment ID, order ID, and signature are required for online orders.',
+          },
           { status: 400 }
         );
       }
-    } else if (!isFullCod) {
-      console.warn(`[Orders API] Online order ${orderId} submitted without payment signature`);
-    }
 
-    const db = await initDb();
+      const expectedAmountInPaise = isPartialCod
+        ? Math.round(Number(body.advancePaid || 200) * 100)
+        : Math.round(numericTotal * 100);
+
+      // Perform bulletproof verification: Signature + Direct Gateway Query + Status check + Capture
+      const verification = await verifyAndRecheckPayment({
+        razorpayPaymentId,
+        razorpayOrderId,
+        razorpaySignature,
+        expectedAmountInPaise,
+      });
+
+      if (!verification.isVerified) {
+        console.error(
+          `[Razorpay Verification Failed] Order ${orderId} (Payment: ${razorpayPaymentId}):`,
+          verification.errors
+        );
+
+        // Record failed attempt in order paymentHistory if draft exists
+        try {
+          await db.collection('orders').updateOne(
+            {
+              $or: [
+                { orderId },
+                { razorpayOrderId },
+                { 'payment.razorpayOrderId': razorpayOrderId },
+              ],
+            },
+            {
+              $set: {
+                'payment.status': 'VERIFICATION_FAILED',
+                'payment.lastError': verification.errors.join('; '),
+                updatedAt: new Date(),
+              },
+              $push: {
+                paymentHistory: {
+                  event: 'PAYMENT_VERIFICATION_FAILED',
+                  status: 'FAILED',
+                  razorpayPaymentId,
+                  razorpayOrderId,
+                  errors: verification.errors,
+                  timestamp: new Date(),
+                },
+              },
+            }
+          );
+        } catch (dbErr) {
+          console.error('[MongoDB] Failed to log payment failure:', dbErr);
+        }
+
+        return NextResponse.json(
+          {
+            error: 'Payment could not be verified with Razorpay gateway.',
+            details: verification.errors,
+          },
+          { status: 400 }
+        );
+      }
+
+      verifiedPaymentInfo = verification;
+      console.log(
+        `[Razorpay Verified ✓] Order ${orderId}: ₹${verification.payment.amount} collected via ${verification.payment.method} [Mode: ${verification.mode}]`
+      );
+    }
 
     const fullName =
       address.name ||
@@ -60,13 +127,14 @@ export async function POST(request) {
 
     const advancePaid = isPartialCod
       ? Number(body.advancePaid || 200)
-      : isPaymentVerified
-      ? Number(totalAmount)
-      : 0;
-    const balanceDue = isPartialCod
-      ? Math.max(0, Number(totalAmount) - advancePaid)
       : isFullCod
-      ? Number(totalAmount)
+      ? 0
+      : numericTotal;
+
+    const balanceDue = isPartialCod
+      ? Math.max(0, numericTotal - advancePaid)
+      : isFullCod
+      ? numericTotal
       : 0;
 
     const orderDoc = {
@@ -81,7 +149,7 @@ export async function POST(request) {
         quantity: Number(item.quantity || 1),
         image: item.image,
       })),
-      totalAmount: Number(totalAmount),
+      totalAmount: numericTotal,
       currency: 'INR',
       customer: {
         name: fullName,
@@ -101,28 +169,42 @@ export async function POST(request) {
       payment: {
         method: isPartialCod ? 'partial_cod' : isFullCod ? 'full_cod' : paymentMethod,
         status: isPartialCod
-          ? isPaymentVerified
-            ? 'PARTIALLY_PAID'
-            : 'PENDING'
+          ? 'PARTIALLY_PAID'
           : isFullCod
           ? 'PENDING_COD'
-          : isPaymentVerified
-          ? 'PAID'
-          : 'PENDING',
+          : 'PAID',
         advancePaid,
         balanceDue,
+        gateway: isFullCod ? 'cod' : 'razorpay',
+        gatewayMode: verifiedPaymentInfo?.mode || 'none',
         razorpayPaymentId: razorpayPaymentId || null,
         razorpayOrderId: razorpayOrderId || null,
         razorpaySignature: razorpaySignature || null,
+        amountCaptured: verifiedPaymentInfo?.payment?.amount || (isFullCod ? 0 : advancePaid),
+        currency: 'INR',
+        acquirerRrn: verifiedPaymentInfo?.payment?.rrn || null,
+        methodDetails: verifiedPaymentInfo
+          ? {
+              instrument: verifiedPaymentInfo.payment.method,
+              vpa: verifiedPaymentInfo.payment.vpa,
+              bank: verifiedPaymentInfo.payment.bank,
+              wallet: verifiedPaymentInfo.payment.wallet,
+              card: verifiedPaymentInfo.payment.card,
+              fee: verifiedPaymentInfo.payment.fee,
+              tax: verifiedPaymentInfo.payment.tax,
+            }
+          : null,
+        verifiedAt: new Date(),
       },
       status: 'CONFIRMED',
+      fulfillmentStatus: 'unfulfilled',
       estimatedDelivery: '3-5 business days',
       placedAt: placedAt || new Date().toISOString(),
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
-    // 1. Insert or update existing order draft in MongoDB
+    // 2. Insert or update existing order in MongoDB & Append Payment History
     const orderFilter = razorpayOrderId
       ? {
           $or: [
@@ -133,13 +215,32 @@ export async function POST(request) {
         }
       : { orderId };
 
+    const paymentHistoryEntry = {
+      event: isFullCod ? 'COD_ORDER_PLACED' : 'PAYMENT_VERIFIED_AND_CAPTURED',
+      status: orderDoc.payment.status,
+      amount: advancePaid,
+      balanceDue,
+      gateway: isFullCod ? 'cod' : 'razorpay',
+      gatewayMode: verifiedPaymentInfo?.mode || 'none',
+      razorpayPaymentId: razorpayPaymentId || null,
+      razorpayOrderId: razorpayOrderId || null,
+      acquirerRrn: verifiedPaymentInfo?.payment?.rrn || null,
+      timestamp: new Date(),
+      note: isFullCod
+        ? 'Full Cash on Delivery order confirmed by buyer'
+        : `₹${advancePaid} successfully captured on Razorpay [${verifiedPaymentInfo?.mode?.toUpperCase()}]`,
+    };
+
     await db.collection('orders').updateOne(
       orderFilter,
-      { $set: orderDoc },
+      {
+        $set: orderDoc,
+        $push: { paymentHistory: paymentHistoryEntry },
+      },
       { upsert: true }
     );
 
-    // 2. Upsert customer profile in MongoDB 'users' collection
+    // 3. Upsert customer profile in MongoDB 'users' collection
     if (address.email || address.mobile) {
       const userFilter = address.email
         ? { email: address.email.toLowerCase().trim() }
@@ -175,9 +276,9 @@ export async function POST(request) {
       );
     }
 
-    console.log(`[MongoDB] Successfully saved Order ${orderId} into database.`);
+    console.log(`[MongoDB] Successfully confirmed Order ${orderId} in database.`);
 
-    // 3. Automatically push order to Shiprocket
+    // 4. Automatically push confirmed order to Shiprocket
     let shiprocketResult = null;
     try {
       shiprocketResult = await createShiprocketOrder(orderDoc);
@@ -216,7 +317,7 @@ export async function POST(request) {
       );
     }
 
-    // 4. Send Order Confirmation Email via Hostinger SMTP
+    // 5. Send Order Confirmation Email via Hostinger SMTP
     if (orderDoc.customer?.email) {
       sendOrderConfirmationEmail(orderDoc).catch((e) =>
         console.warn(`[Email Service] Non-blocking order confirmation error for #${orderId}:`, e.message)
@@ -226,13 +327,14 @@ export async function POST(request) {
     return NextResponse.json({
       success: true,
       orderId,
+      paymentStatus: orderDoc.payment.status,
       shiprocket: shiprocketResult,
-      message: 'Order saved in MongoDB and pushed to Shiprocket successfully',
+      message: 'Order verified, placed, and pushed to Shiprocket successfully',
     });
   } catch (error) {
-    console.error('[MongoDB] Error saving order:', error);
+    console.error('[Orders API Error]:', error);
     return NextResponse.json(
-      { error: 'Internal server error while saving order to MongoDB' },
+      { error: error.message || 'Internal server error while processing order' },
       { status: 500 }
     );
   }
@@ -248,45 +350,37 @@ export async function GET(request) {
     const db = await initDb();
 
     if (orderId) {
-      let order = await db.collection('orders').findOne({ orderId });
-      if (!order && orderId.length === 24) {
-        try {
-          const { ObjectId } = await import('mongodb');
-          order = await db.collection('orders').findOne({ _id: new ObjectId(orderId) });
-        } catch (e) {}
-      }
+      const order = await db.collection('orders').findOne({ orderId });
       if (!order) {
         return NextResponse.json({ error: 'Order not found' }, { status: 404 });
       }
       return NextResponse.json({ success: true, order });
     }
 
-    const query = {};
-    if (email) query['customer.email'] = email.toLowerCase().trim();
-    if (mobile) {
-      const cleanMobile = mobile.replace(/\D/g, '').slice(-10);
-      query.$or = [
-        { 'customer.mobile': mobile.trim() },
-        { 'customer.mobile': cleanMobile },
-        { 'customer.mobile': `+91${cleanMobile}` },
-        { 'customer.mobile': `91${cleanMobile}` },
-        { 'address.mobile': mobile.trim() },
-        { 'address.mobile': cleanMobile },
-        { 'address.mobile': `+91${cleanMobile}` },
-        { 'address.mobile': `91${cleanMobile}` },
-      ];
+    if (email || mobile) {
+      const filter = {};
+      if (email) filter['customer.email'] = email.toLowerCase().trim();
+      if (mobile) filter['customer.mobile'] = mobile.trim();
+
+      const orders = await db
+        .collection('orders')
+        .find(filter)
+        .sort({ createdAt: -1 })
+        .toArray();
+
+      return NextResponse.json({ success: true, orders });
     }
 
     const orders = await db
       .collection('orders')
-      .find(query)
+      .find({ 'payment.status': { $ne: 'PENDING_PAYMENT' } })
       .sort({ createdAt: -1 })
       .limit(50)
       .toArray();
 
-    return NextResponse.json({ success: true, count: orders.length, orders });
+    return NextResponse.json({ success: true, orders });
   } catch (error) {
-    console.error('[MongoDB] Error fetching orders:', error);
+    console.error('[Orders GET Error]:', error);
     return NextResponse.json(
       { error: 'Failed to retrieve orders from database' },
       { status: 500 }

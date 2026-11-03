@@ -582,8 +582,13 @@ export default function CheckoutPage() {
       const activeSequence = sequenceMap[paymentMethod] || sequenceMap.upi;
 
       // Configure and open Razorpay modal with full options
+      const razorpayKey = orderData.keyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+      if (!razorpayKey) {
+        throw new Error('Razorpay public key ID is not configured. Please contact store support.');
+      }
+
       const options = {
-        key: orderData.keyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_ToeynJ0XXfrtyp',
+        key: razorpayKey,
         amount: orderData.amount,
         currency: orderData.currency || 'INR',
         name: 'Sonu shoe',
@@ -644,49 +649,57 @@ export default function CheckoutPage() {
           },
         },
         handler: async function (response) {
-          const isPartial = paymentMethod === 'partial_cod';
-          const confirmedData = {
-            orderId: placedOrderId,
-            razorpayPaymentId: response.razorpay_payment_id,
-            razorpayOrderId: response.razorpay_order_id,
-            razorpaySignature: response.razorpay_signature,
-            items: [...cartItems],
-            totalAmount: totalOrderAmount,
-            address: { ...address },
-            paymentMethod,
-            advancePaid: isPartial ? advanceDepositAmount : totalOrderAmount,
-            balanceDue: isPartial ? Math.max(0, totalOrderAmount - advanceDepositAmount) : 0,
-            paymentStatus: isPartial ? 'PARTIALLY_PAID' : 'PAID',
-            placedAt: new Date().toISOString(),
-            estimatedDelivery: checkoutSettings.deliveryTimelineText || '3-5 business days',
-          };
-
-          // 1. Save confirmed order directly into MongoDB
           try {
-            await fetch('/api/orders', {
+            const isPartial = paymentMethod === 'partial_cod';
+            const confirmedData = {
+              orderId: placedOrderId,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpayOrderId: response.razorpay_order_id,
+              razorpaySignature: response.razorpay_signature,
+              items: [...cartItems],
+              totalAmount: totalOrderAmount,
+              address: { ...address },
+              paymentMethod,
+              advancePaid: isPartial ? advanceDepositAmount : totalOrderAmount,
+              balanceDue: isPartial ? Math.max(0, totalOrderAmount - advanceDepositAmount) : 0,
+              paymentStatus: isPartial ? 'PARTIALLY_PAID' : 'PAID',
+              placedAt: new Date().toISOString(),
+              estimatedDelivery: checkoutSettings.deliveryTimelineText || '3-5 business days',
+            };
+
+            // 1. Save and strictly verify confirmed order on server
+            const orderRes = await fetch('/api/orders', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(confirmedData),
             });
-          } catch (dbErr) {
-            console.error('[MongoDB] Order save failed:', dbErr);
-          }
 
-          try {
-            const pastOrders = JSON.parse(localStorage.getItem('sonu_orders') || '[]');
-            pastOrders.unshift(confirmedData);
-            localStorage.setItem('sonu_orders', JSON.stringify(pastOrders));
-          } catch (err) {
-            // ignore
-          }
+            if (!orderRes.ok) {
+              const errPayload = await orderRes.json().catch(() => ({}));
+              const errMsg = errPayload.error || (Array.isArray(errPayload.details) ? errPayload.details.join('; ') : 'Payment verification failed');
+              throw new Error(errMsg);
+            }
 
-          setConfirmedOrder(confirmedData);
-          clearCart();
-          setIsPlacingOrder(false);
-          setCheckoutStep('confirmation');
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-          // Seamless redirect directly to the live Order Tracking page
-          router.push(`/order/${placedOrderId}`);
+            try {
+              const pastOrders = JSON.parse(localStorage.getItem('sonu_orders') || '[]');
+              pastOrders.unshift(confirmedData);
+              localStorage.setItem('sonu_orders', JSON.stringify(pastOrders));
+            } catch (err) {
+              // ignore
+            }
+
+            setConfirmedOrder(confirmedData);
+            clearCart();
+            setIsPlacingOrder(false);
+            setCheckoutStep('confirmation');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            // Seamless redirect directly to the live Order Tracking page
+            router.push(`/order/${placedOrderId}`);
+          } catch (handlerErr) {
+            console.error('[Order Placement Error]:', handlerErr);
+            setIsPlacingOrder(false);
+            alert(`Order confirmation failed: ${handlerErr.message || 'Payment could not be verified'}`);
+          }
         },
       };
 

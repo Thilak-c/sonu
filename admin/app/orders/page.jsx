@@ -290,6 +290,10 @@ function OrdersContent() {
   const [editForm, setEditForm] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [copiedId, setCopiedId] = useState(false);
+  const [recheckingPayment, setRecheckingPayment] = useState(false);
+  const [paymentDiffData, setPaymentDiffData] = useState(null);
+  const [showPaymentDiff, setShowPaymentDiff] = useState(false);
+  const [copiedPaymentId, setCopiedPaymentId] = useState(false);
   const [actionLoading, setActionLoading] = useState(null);
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const [toastMessage, setToastMessage] = useState(null);
@@ -507,6 +511,39 @@ function OrdersContent() {
       alert('Network error while requesting pickup');
     } finally {
       setActionLoading(null);
+    }
+  };
+
+  useEffect(() => {
+    setPaymentDiffData(null);
+    setShowPaymentDiff(false);
+  }, [selectedOrder?.orderId]);
+
+  const handleRecheckPayment = async (orderId) => {
+    if (!orderId) return;
+    try {
+      setRecheckingPayment(true);
+      const res = await fetch(`/api/orders/${orderId}/recheck-payment`, {
+        method: 'POST',
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setPaymentDiffData(data.diff || data.comparison);
+        setShowPaymentDiff(true);
+        showToast('✓ Razorpay live payment status verified');
+        fetchOrders();
+      } else {
+        alert(data.error || 'Failed to recheck payment with Razorpay');
+        if (data.comparison) {
+          setPaymentDiffData(data.comparison);
+          setShowPaymentDiff(true);
+        }
+      }
+    } catch (err) {
+      console.error('Recheck payment error:', err);
+      alert('Network error while querying Razorpay API.');
+    } finally {
+      setRecheckingPayment(false);
     }
   };
 
@@ -2764,12 +2801,190 @@ function OrdersContent() {
 
               {/* 4. Payment & Billing Card */}
               <div className="p-4 bg-white space-y-4">
-                <div className="flex items-center gap-2 pb-1 border-b border-neutral-100">
-                  <CreditCard className="w-4 h-4 text-neutral-600" />
-                  <span className="text-[11.5px] font-bold uppercase tracking-wider text-neutral-800">
-                    Payment & Bill Summary
-                  </span>
+                <div className="flex items-center justify-between pb-1 border-b border-neutral-100">
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="w-4 h-4 text-neutral-600" />
+                    <span className="text-[11.5px] font-bold uppercase tracking-wider text-neutral-800">
+                      Payment & Bill Summary
+                    </span>
+                  </div>
+                  {/* Gateway Mode Badge */}
+                  {selectedOrder.payment?.gatewayMode === 'live' ? (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      Razorpay Live Gateway
+                    </span>
+                  ) : selectedOrder.payment?.gatewayMode === 'test' ? (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-300">
+                      <AlertTriangle className="w-3 h-3 text-amber-600" />
+                      Razorpay Test Mode (₹0 Collected)
+                    </span>
+                  ) : selectedOrder.payment?.method === 'full_cod' || selectedOrder.payment?.method === 'cod' ? (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-neutral-100 text-neutral-800 border border-neutral-200">
+                      Cash on Delivery
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-neutral-100 text-neutral-600 border border-neutral-200">
+                      {selectedOrder.payment?.gateway || 'Online Gateway'}
+                    </span>
+                  )}
                 </div>
+
+                {/* Gateway Metadata Strip */}
+                {(selectedOrder.payment?.razorpayPaymentId || selectedOrder.payment?.razorpayOrderId) && (
+                  <div className="p-3 rounded-lg bg-neutral-50/90 border border-neutral-200/80 space-y-2 text-[12px]">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-semibold text-neutral-500">Payment ID (Gateway):</span>
+                      {selectedOrder.payment?.razorpayPaymentId ? (
+                        <div className="flex items-center gap-1.5">
+                          <code className="px-1.5 py-0.5 rounded bg-white border border-neutral-200 font-mono text-[11px] text-[#111111] font-semibold">
+                            {selectedOrder.payment.razorpayPaymentId}
+                          </code>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText(selectedOrder.payment.razorpayPaymentId);
+                              setCopiedPaymentId(true);
+                              setTimeout(() => setCopiedPaymentId(false), 2000);
+                            }}
+                            className="p-1 text-neutral-500 hover:text-black transition-colors cursor-pointer"
+                            title="Copy Payment ID"
+                          >
+                            {copiedPaymentId ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-neutral-400 italic">Not generated</span>
+                      )}
+                    </div>
+
+                    {selectedOrder.payment?.razorpayOrderId && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-semibold text-neutral-500">Razorpay Order ID:</span>
+                        <code className="px-1.5 py-0.5 rounded bg-white border border-neutral-200 font-mono text-[11px] text-neutral-700">
+                          {selectedOrder.payment.razorpayOrderId}
+                        </code>
+                      </div>
+                    )}
+
+                    {selectedOrder.payment?.acquirerRrn && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-semibold text-neutral-500">Bank Ref (RRN):</span>
+                        <span className="font-semibold text-neutral-800 font-mono text-[11px]">
+                          {selectedOrder.payment.acquirerRrn}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Recheck Action Button */}
+                    <div className="pt-2 flex items-center justify-between border-t border-neutral-200/60">
+                      <button
+                        type="button"
+                        disabled={recheckingPayment}
+                        onClick={() => handleRecheckPayment(selectedOrder.orderId)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white border border-neutral-300 hover:border-black text-[11.5px] font-semibold text-[#111111] shadow-2xs hover:shadow-xs transition-all cursor-pointer disabled:opacity-50"
+                      >
+                        <RefreshCw className={`w-3.5 h-3.5 text-neutral-600 ${recheckingPayment ? 'animate-spin' : ''}`} />
+                        <span>{recheckingPayment ? 'Checking Gateway...' : 'Recheck with Razorpay'}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setShowPaymentDiff((prev) => !prev)}
+                        className="text-[11.5px] font-semibold text-neutral-600 hover:text-black underline underline-offset-2 transition-colors cursor-pointer"
+                      >
+                        {showPaymentDiff ? 'Hide Diff View' : 'Show Diff View'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Diff View / Payment Audit Panel */}
+                {showPaymentDiff && (
+                  <div className="p-3.5 rounded-lg bg-neutral-900 text-white space-y-3 text-[12px] animate-fadeIn">
+                    <div className="flex items-center justify-between border-b border-neutral-800 pb-2">
+                      <div className="flex items-center gap-1.5">
+                        <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                        <span className="font-bold text-[11.5px] uppercase tracking-wider text-neutral-200">
+                          Payment Verification Diff Audit
+                        </span>
+                      </div>
+                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                        paymentDiffData?.gatewayMode === 'live' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                      }`}>
+                        {paymentDiffData?.gatewayMode ? `${paymentDiffData.gatewayMode.toUpperCase()} GATEWAY` : 'PENDING CHECK'}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2.5 text-[11.5px]">
+                      <div className="p-2 rounded bg-neutral-800/80 border border-neutral-700/50">
+                        <span className="text-neutral-400 block text-[10px] uppercase font-bold">Database Expected</span>
+                        <p className="font-bold text-white text-[13px] mt-0.5">
+                          ₹ {(paymentDiffData?.amounts?.databaseExpected || editForm.advancePaid || editForm.totalAmount).toLocaleString('en-IN')}
+                        </p>
+                        <span className="text-[10px] text-neutral-400">Status: {editForm.paymentStatus}</span>
+                      </div>
+
+                      <div className="p-2 rounded bg-neutral-800/80 border border-neutral-700/50">
+                        <span className="text-neutral-400 block text-[10px] uppercase font-bold">Razorpay Collected</span>
+                        <p className={`font-bold text-[13px] mt-0.5 ${paymentDiffData?.isCaptured ? 'text-emerald-400' : 'text-neutral-300'}`}>
+                          {paymentDiffData?.amounts?.gatewayCollected !== undefined ? `₹ ${paymentDiffData.amounts.gatewayCollected.toLocaleString('en-IN')}` : 'Click Recheck'}
+                        </p>
+                        <span className="text-[10px] text-neutral-400">
+                          Gateway: {paymentDiffData?.gatewayStatus || 'Awaiting Check'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Discrepancy / Diff Alert */}
+                    {paymentDiffData?.amounts && (
+                      <div className={`p-2 rounded flex items-center justify-between text-[11.5px] font-semibold border ${
+                        paymentDiffData.amounts.difference === 0 && paymentDiffData.isCaptured
+                          ? 'bg-emerald-950/60 border-emerald-800/80 text-emerald-300'
+                          : 'bg-rose-950/60 border-rose-800/80 text-rose-300'
+                      }`}>
+                        <span>Diff (Discrepancy):</span>
+                        <span>
+                          {paymentDiffData.amounts.difference === 0 ? '₹ 0.00 (Exact Match ✓)' : `₹ ${paymentDiffData.amounts.difference} Mismatch!`}
+                        </span>
+                      </div>
+                    )}
+
+                    {paymentDiffData?.acquirerRrn && (
+                      <div className="text-[11px] text-neutral-300 flex items-center justify-between border-t border-neutral-800 pt-2">
+                        <span>Bank RRN / UTR:</span>
+                        <code className="text-emerald-400 font-mono">{paymentDiffData.acquirerRrn}</code>
+                      </div>
+                    )}
+
+                    {paymentDiffData?.netSettlement && (
+                      <div className="text-[11px] text-neutral-300 flex items-center justify-between">
+                        <span>Net Bank Settlement (Est):</span>
+                        <span className="font-semibold text-white">₹ {paymentDiffData.netSettlement.toLocaleString('en-IN')}</span>
+                      </div>
+                    )}
+
+                    {/* Payment History Log */}
+                    {Array.isArray(selectedOrder.paymentHistory) && selectedOrder.paymentHistory.length > 0 && (
+                      <div className="pt-2 border-t border-neutral-800 space-y-1.5">
+                        <span className="text-[10.5px] font-bold uppercase tracking-wider text-neutral-400 block">
+                          Payment Timeline Ledger
+                        </span>
+                        <div className="space-y-1 max-h-36 overflow-y-auto pr-1">
+                          {selectedOrder.paymentHistory.map((item, hIdx) => (
+                            <div key={hIdx} className="text-[10.5px] p-1.5 rounded bg-neutral-800/50 flex flex-col gap-0.5">
+                              <div className="flex items-center justify-between text-neutral-300 font-medium">
+                                <span className="font-bold text-white">{item.event}</span>
+                                <span className="text-neutral-500">{new Date(item.timestamp).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</span>
+                              </div>
+                              {item.note && <p className="text-neutral-400">{item.note}</p>}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <div className="grid grid-cols-2 gap-3 pt-1">
                   <FloatingSelect
