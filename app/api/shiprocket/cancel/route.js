@@ -2,8 +2,24 @@ import { NextResponse } from 'next/server';
 import { initDb } from '@/lib/mongodb';
 import { getShiprocketToken } from '@/lib/shiprocket';
 
+const VALID_ADMINS = ['8008', '9122'];
+
 export async function POST(request) {
   try {
+    // Restrict cancellation to authenticated admin users only
+    const adminCookie = request.cookies.get('sonu_admin_user')?.value;
+    const authHeader = request.headers.get('authorization');
+    const isAuthorized =
+      (adminCookie && VALID_ADMINS.includes(adminCookie)) ||
+      (authHeader && authHeader === `Bearer ${process.env.ADMIN_SECRET || 'sonu-admin-2026'}`);
+
+    if (!isAuthorized) {
+      return NextResponse.json(
+        { error: 'Unauthorized. Admin credentials required to cancel shipments.' },
+        { status: 401 }
+      );
+    }
+
     const { orderId, shiprocketOrderId } = await request.json();
 
     let targetSrId = shiprocketOrderId;

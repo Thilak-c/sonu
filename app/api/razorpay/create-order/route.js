@@ -1,10 +1,18 @@
 import { NextResponse } from 'next/server';
 import { initDb } from '@/lib/mongodb';
 import { createRazorpayOrder, getRazorpayCredentials } from '@/lib/razorpay';
+import { rateLimit } from '@/lib/ratelimit';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request) {
+  // Rate limit: max 15 razorpay order creation calls per 10 mins per IP
+  const blockedResponse = rateLimit(request, 'razorpay_order', {
+    limit: 15,
+    windowMs: 10 * 60 * 1000,
+  });
+  if (blockedResponse) return blockedResponse;
+
   try {
     const { amount, receipt, orderId, notes = {}, items = [] } = await request.json();
 

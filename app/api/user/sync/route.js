@@ -1,7 +1,15 @@
 import { NextResponse } from 'next/server';
 import { getDb, initDb } from '@/lib/mongodb';
+import { rateLimit } from '@/lib/ratelimit';
 
 export async function POST(request) {
+  // Rate limit profile updates: max 20 per 15 mins per IP
+  const blockedResponse = rateLimit(request, 'user_sync_post', {
+    limit: 20,
+    windowMs: 15 * 60 * 1000,
+  });
+  if (blockedResponse) return blockedResponse;
+
   try {
     const body = await request.json();
     const {
@@ -86,6 +94,13 @@ export async function POST(request) {
 }
 
 export async function GET(request) {
+  // Guard against user harvesting: max 10 profile lookups per 15 mins per IP
+  const blockedResponse = rateLimit(request, 'user_sync_get', {
+    limit: 10,
+    windowMs: 15 * 60 * 1000,
+  });
+  if (blockedResponse) return blockedResponse;
+
   try {
     const { searchParams } = new URL(request.url);
     const email = searchParams.get('email');

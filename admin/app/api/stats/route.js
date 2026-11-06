@@ -29,15 +29,33 @@ export async function GET() {
       }
     });
 
-    // 3. Compute Totals & Global Stats
-    const totalOrders = orders.length;
+    // Helper: Identify cancelled orders so they are never calculated or shown in overview
+    const isOrderCancelled = (ord) => {
+      const fStatus = (ord.fulfillmentStatus || ord.shiprocket?.status || '').toLowerCase();
+      const pStatus = (ord.paymentStatus || ord.payment?.status || '').toLowerCase();
+      const oStatus = (ord.status || '').toLowerCase();
+      return (
+        fStatus === 'cancelled' ||
+        fStatus === 'canceled' ||
+        pStatus === 'cancelled' ||
+        pStatus === 'canceled' ||
+        oStatus === 'cancelled' ||
+        oStatus === 'canceled'
+      );
+    };
+
+    // Filter active (non-cancelled) orders for all metrics and calculations
+    const activeOrders = orders.filter((ord) => !isOrderCancelled(ord));
+
+    // 3. Compute Totals & Global Stats (Active non-cancelled orders only)
+    const totalOrders = activeOrders.length;
     let totalRevenue = 0;
     let totalProfit = 0;
     let totalUnitsSold = 0;
     const productSalesMap = {};
     const dayVolumeMap = { Tue: 0, Wed: 0, Thu: 0, Fri: 0 };
 
-    orders.forEach((ord) => {
+    activeOrders.forEach((ord) => {
       let ordRev =
         Number(ord.totalAmount) ||
         (ord.items || []).reduce(
@@ -100,8 +118,8 @@ export async function GET() {
 
     // 5. Determine 5-day sales (Mon through Fri or last 5 days around latest orders)
     let refDate = new Date();
-    if (orders.length > 0 && orders[0].createdAt) {
-      const latestDate = new Date(orders[0].createdAt);
+    if (activeOrders.length > 0 && activeOrders[0].createdAt) {
+      const latestDate = new Date(activeOrders[0].createdAt);
       if (Math.abs(refDate.getTime() - latestDate.getTime()) > 7 * 86400000) {
         refDate = latestDate;
       }
@@ -126,7 +144,7 @@ export async function GET() {
       });
     }
 
-    orders.forEach((ord) => {
+    activeOrders.forEach((ord) => {
       if (!ord.createdAt) return;
       const oDate = new Date(ord.createdAt).toISOString().split('T')[0];
       const targetDay = daysData.find((d) => d.dateStr === oDate);
@@ -224,8 +242,8 @@ export async function GET() {
 
     const topProduct = topSellingProducts[0] || null;
 
-    // 7. Formatted Orders for Overview Table
-    const formattedOrders = orders.slice(0, 10).map((ord) => {
+    // 7. Formatted Orders for Overview Table (active orders only)
+    const formattedOrders = activeOrders.slice(0, 10).map((ord) => {
       const firstItem = ord.items?.[0] || {};
       const itemCount = ord.items?.length || 1;
       const prodName = firstItem.name

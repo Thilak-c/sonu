@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { initDb } from '@/lib/mongodb';
-import { recheckRazorpayPayment, getRazorpayCredentials } from '@/lib/razorpay';
+import { recheckRazorpayPayment, fetchRazorpayOrderPayments, getRazorpayCredentials } from '@/lib/razorpay';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,7 +20,7 @@ export async function POST(request, { params }) {
       return NextResponse.json({ error: 'Order not found in database' }, { status: 404 });
     }
 
-    const paymentId = order.payment?.razorpayPaymentId;
+    let paymentId = order.payment?.razorpayPaymentId;
     const razorpayOrderId = order.payment?.razorpayOrderId || order.razorpayOrderId;
     const isCod = order.payment?.method === 'full_cod' || order.payment?.method === 'cod';
 
@@ -40,12 +40,55 @@ export async function POST(request, { params }) {
       });
     }
 
+    // If paymentId is missing but razorpayOrderId exists, attempt to find completed payment from Razorpay
+    if (!paymentId && razorpayOrderId) {
+      try {
+        const orderPayments = await fetchRazorpayOrderPayments(razorpayOrderId);
+        const capturedOrAuth = orderPayments.items?.find(
+          (p) => p.status === 'captured' || p.status === 'authorized'
+        );
+        if (capturedOrAuth) {
+          paymentId = capturedOrAuth.id;
+          // Sync discovered payment back to database
+          await db.collection('orders').updateOne(
+            { $or: [{ orderId: id }, { _id: id }] },
+            {
+              $set: {
+                'payment.razorpayPaymentId': paymentId,
+                'payment.status': capturedOrAuth.status === 'captured' ? 'PAID' : 'AUTHORIZED',
+                'payment.method': capturedOrAuth.method || order.payment?.method,
+                'payment.gatewayMode': orderPayments.gatewayMode || 'live',
+                'payment.updatedAt': new Date(),
+              },
+            }
+          );
+        } else if (orderPayments.items && orderPayments.items.length > 0) {
+          const latestPayment = orderPayments.items[0];
+          return NextResponse.json({
+            success: false,
+            orderId: order.orderId,
+            error: `Razorpay payment failed or not captured (Status: ${latestPayment.status}). Reason: ${latestPayment.error_description || 'Customer cancelled or transaction declined'}`,
+            gatewayStatus: latestPayment.status.toUpperCase(),
+          }, { status: 400 });
+        } else {
+          return NextResponse.json({
+            success: false,
+            orderId: order.orderId,
+            error: `Customer opened checkout on Razorpay (Order ${razorpayOrderId}) but did not complete the transaction.`,
+            gatewayStatus: 'ABANDONED',
+          }, { status: 400 });
+        }
+      } catch (orderFetchErr) {
+        console.warn(`[Admin Recheck] Could not fetch order payments for ${razorpayOrderId}:`, orderFetchErr.message);
+      }
+    }
+
     if (!paymentId) {
       return NextResponse.json({
         success: false,
         orderId: order.orderId,
         hasPaymentId: false,
-        error: 'No Razorpay Payment ID is recorded for this order.',
+        error: 'No Razorpay payment transaction exists for this order.',
         comparison: {
           databaseStatus: order.payment?.status || 'PENDING',
           method: order.payment?.method,

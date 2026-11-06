@@ -17,3 +17,5 @@ whatsapp-gateway/.wwebjs_cache/
 
 uploads/*
 !uploads/.gitkeep
+public/junk/
+

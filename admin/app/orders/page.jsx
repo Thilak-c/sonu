@@ -1596,9 +1596,9 @@ function OrdersContent() {
             <h1 className="text-[22px] font-bold text-[#111111] tracking-tight">
               Orders
             </h1>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-emerald-200 bg-emerald-50 text-[11.5px] font-medium text-emerald-800">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 text-[11.5px] font-medium text-emerald-800">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
-              <span>Shiprocket Production</span>
+             
             </div>
           </div>
 
@@ -1632,19 +1632,7 @@ function OrdersContent() {
 
           {/* Right: + Create Test Order & Refresh */}
           <div className="flex items-center gap-2.5 shrink-0">
-            <button
-              type="button"
-              disabled={actionLoading === 'create_test'}
-              onClick={handleCreateTestOrder}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#111111] hover:bg-black text-white text-[13px] font-medium transition-all shadow-xs cursor-pointer active:scale-[0.98] disabled:opacity-50"
-            >
-              {actionLoading === 'create_test' ? (
-                <RefreshCw className="w-3.5 h-3.5 animate-spin text-white" />
-              ) : (
-                <Plus className="w-3.5 h-3.5" />
-              )}
-              <span>Create Test Order</span>
-            </button>
+            
 
             <button
               type="button"
@@ -1734,7 +1722,7 @@ function OrdersContent() {
             {loading ? (
               <div className="space-y-2 mt-2 min-w-[1280px]">
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="bg-white rounded-lg border border-neutral-200 p-4 grid grid-cols-[36px_180px_220px_190px_150px_110px_110px_125px_120px] gap-3 items-center">
+                  <div key={i} className="bg-white border border-neutral-200 p-4 grid grid-cols-[36px_180px_220px_190px_150px_110px_110px_125px_120px] gap-3 items-center">
                     <div className="w-4 h-4 rounded bg-neutral-200" />
                     <div className="space-y-2">
                       <div className="w-24 h-4 rounded bg-neutral-200" />
@@ -1798,7 +1786,7 @@ function OrdersContent() {
                     <div
                       key={ord.orderId}
                       onClick={() => setSelectedOrder(ord)}
-                      className={`grid grid-cols-[36px_180px_220px_190px_150px_110px_110px_125px_120px] gap-3 px-4 py-3.5 bg-white rounded-lg border transition-all cursor-pointer items-start text-[13px] ${isSelected
+                      className={`grid grid-cols-[36px_180px_220px_190px_150px_110px_110px_125px_120px] gap-3 px-4 py-3.5 bg-white rounded-lg border transition-all cursor-pointer items-start text-[13px] relative hover:z-30 ${isSelected
                         ? 'border-[#111111] shadow-[0_0_0_1px_#111111] bg-neutral-50/60'
                         : 'border-neutral-200 hover:border-neutral-400 hover:shadow-2xs'
                         }`}
@@ -1876,13 +1864,13 @@ function OrdersContent() {
                           </div>
 
                           {/* Speech Bubble Tooltip */}
-                          <div className="invisible group-hover/addr:visible opacity-0 group-hover/addr:opacity-100 transition-all duration-150 absolute bottom-full left-0 mb-2.5 z-50 w-72 p-4 bg-white rounded-2xl shadow-2xl border border-neutral-200/90 pointer-events-none text-left">
+                          <div className="invisible group-hover/addr:visible opacity-0 group-hover/addr:opacity-100 transition-all duration-150 absolute top-full left-0 mt-2 z-50 w-72 p-4 bg-white rounded-2xl shadow-2xl border border-neutral-200/90 pointer-events-none text-left">
                             <div className="text-[13px] font-semibold text-[#111111] leading-relaxed space-y-0.5">
                               {formatAddressLines(addr, fullAddress).map((line, idx) => (
                                 <p key={idx}>{line}</p>
                               ))}
                             </div>
-                            <div className="absolute -bottom-1.5 left-6 w-3 h-3 bg-white border-r border-b border-neutral-200/90 rotate-45" />
+                            <div className="absolute -top-1.5 left-6 w-3 h-3 bg-white border-l border-t border-neutral-200/90 rotate-45" />
                           </div>
                         </div>
                       </div>
@@ -1959,7 +1947,7 @@ function OrdersContent() {
                           </span>
 
                           {/* Speech Bubble Tooltip */}
-                          <div className="invisible group-hover/pickup:visible opacity-0 group-hover/pickup:opacity-100 transition-all duration-150 absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 z-50 w-80 p-4 bg-white rounded-2xl shadow-2xl border border-neutral-200/90 pointer-events-none text-left">
+                          <div className="invisible group-hover/pickup:visible opacity-0 group-hover/pickup:opacity-100 transition-all duration-150 absolute top-full left-1/2 -translate-x-1/2 mt-2 z-50 w-80 p-4 bg-white rounded-2xl shadow-2xl border border-neutral-200/90 pointer-events-none text-left">
                             <div className="text-[13px] font-semibold text-[#111111] leading-relaxed space-y-0.5">
                               <p className="font-bold text-[#111111]">Patna One Plaza Hub</p>
                               <p>First & Second floor, Patna One Plaza Mall,</p>
@@ -1968,7 +1956,7 @@ function OrdersContent() {
                               <p>Patna, Bihar - 800001, India</p>
                               <p className="text-[11.5px] text-neutral-500 pt-1">Contact: Mohammad Shamshad (9122913620)</p>
                             </div>
-                            <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-r border-b border-neutral-200/90 rotate-45" />
+                            <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-l border-t border-neutral-200/90 rotate-45" />
                           </div>
                         </div>
                       </div>
@@ -2901,36 +2889,38 @@ function OrdersContent() {
 
                 {/* Diff View / Payment Audit Panel */}
                 {showPaymentDiff && (
-                  <div className="p-3.5 rounded-lg bg-neutral-900 text-white space-y-3 text-[12px] animate-fadeIn">
-                    <div className="flex items-center justify-between border-b border-neutral-800 pb-2">
+                  <div className="p-3.5 rounded-xl bg-neutral-50/90 border border-neutral-200/90 space-y-3 text-[12px] text-[#111111] animate-fadeIn">
+                    <div className="flex items-center justify-between border-b border-neutral-200/70 pb-2">
                       <div className="flex items-center gap-1.5">
-                        <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                        <span className="font-bold text-[11.5px] uppercase tracking-wider text-neutral-200">
+                        <ShieldCheck className="w-4 h-4 text-[#111111]" />
+                        <span className="font-bold text-[11.5px] uppercase tracking-wider text-neutral-800">
                           Payment Verification Diff Audit
                         </span>
                       </div>
-                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                        paymentDiffData?.gatewayMode === 'live' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
+                        paymentDiffData?.gatewayMode === 'live'
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                          : 'bg-amber-50 text-amber-700 border-amber-200'
                       }`}>
-                        RAZORPAY GATEWAY
+                        {paymentDiffData?.gatewayMode ? `${paymentDiffData.gatewayMode.toUpperCase()} GATEWAY` : 'RAZORPAY GATEWAY'}
                       </span>
                     </div>
 
                     <div className="grid grid-cols-2 gap-2.5 text-[11.5px]">
-                      <div className="p-2 rounded bg-neutral-800/80 border border-neutral-700/50">
-                        <span className="text-neutral-400 block text-[10px] uppercase font-bold">Database Expected</span>
-                        <p className="font-bold text-white text-[13px] mt-0.5">
+                      <div className="p-2.5 rounded-lg bg-white border border-neutral-200 shadow-2xs">
+                        <span className="text-neutral-500 block text-[10px] uppercase font-semibold">Database Expected</span>
+                        <p className="font-bold text-[#111111] text-[13.5px] mt-0.5">
                           ₹ {(paymentDiffData?.amounts?.databaseExpected || editForm.advancePaid || editForm.totalAmount).toLocaleString('en-IN')}
                         </p>
-                        <span className="text-[10px] text-neutral-400">Status: {editForm.paymentStatus}</span>
+                        <span className="text-[10.5px] text-neutral-500">Status: {editForm.paymentStatus}</span>
                       </div>
 
-                      <div className="p-2 rounded bg-neutral-800/80 border border-neutral-700/50">
-                        <span className="text-neutral-400 block text-[10px] uppercase font-bold">Razorpay Collected</span>
-                        <p className={`font-bold text-[13px] mt-0.5 ${paymentDiffData?.isCaptured ? 'text-emerald-400' : 'text-neutral-300'}`}>
+                      <div className="p-2.5 rounded-lg bg-white border border-neutral-200 shadow-2xs">
+                        <span className="text-neutral-500 block text-[10px] uppercase font-semibold">Razorpay Collected</span>
+                        <p className={`font-bold text-[13.5px] mt-0.5 ${paymentDiffData?.isCaptured ? 'text-emerald-700' : 'text-[#111111]'}`}>
                           {paymentDiffData?.amounts?.gatewayCollected !== undefined ? `₹ ${paymentDiffData.amounts.gatewayCollected.toLocaleString('en-IN')}` : 'Click Recheck'}
                         </p>
-                        <span className="text-[10px] text-neutral-400">
+                        <span className="text-[10.5px] text-neutral-500">
                           Gateway: {paymentDiffData?.gatewayStatus || 'Awaiting Check'}
                         </span>
                       </div>
@@ -2938,10 +2928,10 @@ function OrdersContent() {
 
                     {/* Discrepancy / Diff Alert */}
                     {paymentDiffData?.amounts && (
-                      <div className={`p-2 rounded flex items-center justify-between text-[11.5px] font-semibold border ${
+                      <div className={`p-2.5 rounded-lg flex items-center justify-between text-[11.5px] font-semibold border ${
                         paymentDiffData.amounts.difference === 0 && paymentDiffData.isCaptured
-                          ? 'bg-emerald-950/60 border-emerald-800/80 text-emerald-300'
-                          : 'bg-rose-950/60 border-rose-800/80 text-rose-300'
+                          ? 'bg-emerald-50/80 border-emerald-200 text-emerald-800'
+                          : 'bg-rose-50/80 border-rose-200 text-rose-800'
                       }`}>
                         <span>Diff (Discrepancy):</span>
                         <span>
@@ -2951,33 +2941,35 @@ function OrdersContent() {
                     )}
 
                     {paymentDiffData?.acquirerRrn && (
-                      <div className="text-[11px] text-neutral-300 flex items-center justify-between border-t border-neutral-800 pt-2">
+                      <div className="text-[11px] text-neutral-600 flex items-center justify-between border-t border-neutral-200/70 pt-2">
                         <span>Bank RRN / UTR:</span>
-                        <code className="text-emerald-400 font-mono">{paymentDiffData.acquirerRrn}</code>
+                        <code className="text-[#111111] font-mono font-semibold bg-white px-1.5 py-0.5 rounded border border-neutral-200">
+                          {paymentDiffData.acquirerRrn}
+                        </code>
                       </div>
                     )}
 
                     {paymentDiffData?.netSettlement && (
-                      <div className="text-[11px] text-neutral-300 flex items-center justify-between">
+                      <div className="text-[11px] text-neutral-600 flex items-center justify-between">
                         <span>Net Bank Settlement (Est):</span>
-                        <span className="font-semibold text-white">₹ {paymentDiffData.netSettlement.toLocaleString('en-IN')}</span>
+                        <span className="font-semibold text-[#111111]">₹ {paymentDiffData.netSettlement.toLocaleString('en-IN')}</span>
                       </div>
                     )}
 
                     {/* Payment History Log */}
                     {Array.isArray(selectedOrder.paymentHistory) && selectedOrder.paymentHistory.length > 0 && (
-                      <div className="pt-2 border-t border-neutral-800 space-y-1.5">
-                        <span className="text-[10.5px] font-bold uppercase tracking-wider text-neutral-400 block">
+                      <div className="pt-2 border-t border-neutral-200/70 space-y-1.5">
+                        <span className="text-[10.5px] font-bold uppercase tracking-wider text-neutral-600 block">
                           Payment Timeline Ledger
                         </span>
                         <div className="space-y-1 max-h-36 overflow-y-auto pr-1">
                           {selectedOrder.paymentHistory.map((item, hIdx) => (
-                            <div key={hIdx} className="text-[10.5px] p-1.5 rounded bg-neutral-800/50 flex flex-col gap-0.5">
-                              <div className="flex items-center justify-between text-neutral-300 font-medium">
-                                <span className="font-bold text-white">{item.event}</span>
-                                <span className="text-neutral-500">{new Date(item.timestamp).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</span>
+                            <div key={hIdx} className="text-[10.5px] p-2 rounded-lg bg-white border border-neutral-200 flex flex-col gap-0.5 shadow-2xs">
+                              <div className="flex items-center justify-between text-neutral-700 font-medium">
+                                <span className="font-bold text-[#111111]">{item.event}</span>
+                                <span className="text-neutral-400 text-[10px]">{new Date(item.timestamp).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</span>
                               </div>
-                              {item.note && <p className="text-neutral-400">{item.note}</p>}
+                              {item.note && <p className="text-neutral-600 text-[11px] mt-0.5">{item.note}</p>}
                             </div>
                           ))}
                         </div>

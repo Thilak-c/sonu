@@ -4,9 +4,24 @@ import crypto from 'crypto';
  * Razorpay Payment Security & API Gateway Library for Sonu Admin
  */
 
-export function getRazorpayCredentials() {
-  const keyId = (process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '').trim();
-  const keySecret = (process.env.RAZORPAY_KEY_SECRET || '').trim();
+export function getRazorpayCredentials(preferredMode = null) {
+  const testKeyId = (process.env.RAZORPAY_TEST_KEY_ID || 'rzp_test_ToeynJ0XXfrtyp').trim();
+  const testKeySecret = (process.env.RAZORPAY_TEST_KEY_SECRET || 'usK3zc5FrVqz83iZSL5YMEiJ').trim();
+
+  const mainKeyId = (process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '').trim();
+  const mainKeySecret = (process.env.RAZORPAY_KEY_SECRET || '').trim();
+
+  if (preferredMode === 'test' && testKeyId && testKeySecret) {
+    return {
+      keyId: testKeyId,
+      keySecret: testKeySecret,
+      mode: 'test',
+      authHeader: `Basic ${Buffer.from(`${testKeyId}:${testKeySecret}`).toString('base64')}`,
+    };
+  }
+
+  const keyId = mainKeyId || testKeyId;
+  const keySecret = mainKeySecret || testKeySecret;
 
   if (!keyId || !keySecret) {
     throw new Error(
@@ -22,6 +37,13 @@ export function getRazorpayCredentials() {
     keySecret,
     mode: isLive ? 'live' : isTest ? 'test' : 'custom',
     authHeader: `Basic ${Buffer.from(`${keyId}:${keySecret}`).toString('base64')}`,
+    hasTestFallback: Boolean(testKeyId && testKeySecret && !isTest),
+    testCredentials: (testKeyId && testKeySecret && !isTest) ? {
+      keyId: testKeyId,
+      keySecret: testKeySecret,
+      mode: 'test',
+      authHeader: `Basic ${Buffer.from(`${testKeyId}:${testKeySecret}`).toString('base64')}`,
+    } : null,
   };
 }
 
@@ -33,22 +55,39 @@ export async function fetchRazorpayPayment(paymentId) {
     throw new Error('Payment ID is required to fetch Razorpay payment');
   }
 
-  const { authHeader, mode } = getRazorpayCredentials();
-  const res = await fetch(`https://api.razorpay.com/v1/payments/${paymentId}`, {
+  const creds = getRazorpayCredentials();
+  let res = await fetch(`https://api.razorpay.com/v1/payments/${paymentId}`, {
     method: 'GET',
     headers: {
-      Authorization: authHeader,
+      Authorization: creds.authHeader,
       'Content-Type': 'application/json',
     },
     cache: 'no-store',
   });
 
-  const data = await res.json();
+  let data = await res.json();
+
+  // If live returned "The id provided does not exist", automatically try test credentials
+  if (!res.ok && data.error?.description?.includes('does not exist') && creds.testCredentials) {
+    const testRes = await fetch(`https://api.razorpay.com/v1/payments/${paymentId}`, {
+      method: 'GET',
+      headers: {
+        Authorization: creds.testCredentials.authHeader,
+        'Content-Type': 'application/json',
+      },
+      cache: 'no-store',
+    });
+    const testData = await testRes.json();
+    if (testRes.ok) {
+      return { ...testData, gatewayMode: 'test' };
+    }
+  }
+
   if (!res.ok) {
     throw new Error(data.error?.description || `Failed to fetch payment ${paymentId} from Razorpay`);
   }
 
-  return { ...data, gatewayMode: mode };
+  return { ...data, gatewayMode: creds.mode };
 }
 
 /**
@@ -59,30 +98,88 @@ export async function fetchRazorpayOrder(orderId) {
     throw new Error('Order ID is required to fetch Razorpay order');
   }
 
-  const { authHeader, mode } = getRazorpayCredentials();
-  const res = await fetch(`https://api.razorpay.com/v1/orders/${orderId}`, {
+  const creds = getRazorpayCredentials();
+  let res = await fetch(`https://api.razorpay.com/v1/orders/${orderId}`, {
     method: 'GET',
     headers: {
-      Authorization: authHeader,
+      Authorization: creds.authHeader,
       'Content-Type': 'application/json',
     },
     cache: 'no-store',
   });
 
-  const data = await res.json();
+  let data = await res.json();
+
+  if (!res.ok && data.error?.description?.includes('does not exist') && creds.testCredentials) {
+    const testRes = await fetch(`https://api.razorpay.com/v1/orders/${orderId}`, {
+      method: 'GET',
+      headers: {
+        Authorization: creds.testCredentials.authHeader,
+        'Content-Type': 'application/json',
+      },
+      cache: 'no-store',
+    });
+    const testData = await testRes.json();
+    if (testRes.ok) {
+      return { ...testData, gatewayMode: 'test' };
+    }
+  }
+
   if (!res.ok) {
     throw new Error(data.error?.description || `Failed to fetch order ${orderId} from Razorpay`);
   }
 
-  return { ...data, gatewayMode: mode };
+  return { ...data, gatewayMode: creds.mode };
+}
+
+/**
+ * Fetch payments associated with a Razorpay Order ID
+ */
+export async function fetchRazorpayOrderPayments(orderId) {
+  if (!orderId) {
+    throw new Error('Order ID is required to fetch Razorpay order payments');
+  }
+
+  const creds = getRazorpayCredentials();
+  let res = await fetch(`https://api.razorpay.com/v1/orders/${orderId}/payments`, {
+    method: 'GET',
+    headers: {
+      Authorization: creds.authHeader,
+      'Content-Type': 'application/json',
+    },
+    cache: 'no-store',
+  });
+
+  let data = await res.json();
+
+  if (!res.ok && data.error?.description?.includes('does not exist') && creds.testCredentials) {
+    const testRes = await fetch(`https://api.razorpay.com/v1/orders/${orderId}/payments`, {
+      method: 'GET',
+      headers: {
+        Authorization: creds.testCredentials.authHeader,
+        'Content-Type': 'application/json',
+      },
+      cache: 'no-store',
+    });
+    const testData = await testRes.json();
+    if (testRes.ok) {
+      return { ...testData, gatewayMode: 'test' };
+    }
+  }
+
+  if (!res.ok) {
+    throw new Error(data.error?.description || `Failed to fetch payments for order ${orderId}`);
+  }
+
+  return { ...data, gatewayMode: creds.mode };
 }
 
 /**
  * Verify & Recheck Payment status directly with Razorpay API
  */
 export async function recheckRazorpayPayment(paymentId, expectedAmountInPaise, orderId) {
-  const { mode } = getRazorpayCredentials();
   const paymentData = await fetchRazorpayPayment(paymentId);
+  const mode = paymentData.gatewayMode || 'live';
 
   const expected = expectedAmountInPaise ? Math.round(Number(expectedAmountInPaise)) : null;
   const actual = Math.round(Number(paymentData.amount));
@@ -123,4 +220,3 @@ export async function recheckRazorpayPayment(paymentId, expectedAmountInPaise, o
     },
   };
 }
-

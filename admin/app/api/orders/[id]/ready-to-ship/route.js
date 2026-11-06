@@ -30,20 +30,23 @@ export async function POST(request, context) {
     // Call Shiprocket Production to assign courier & generate real AWB
     const awbResult = await assignShiprocketAWB(shipmentId);
 
-    // Trigger Mock WhatsApp notification
+    // Trigger WhatsApp notification if customer phone exists
     const customer = order.customer || {};
-    const customerPhone = customer.mobile || order.address?.mobile || '8008439762';
+    const customerPhone = customer.mobile || order.address?.mobile || '';
     const customerName = customer.name || `${customer.firstName || ''} ${customer.lastName || ''}`.trim() || 'Valued Runner';
 
-    const waResult = await sendMockWhatsAppMessage({
-      phone: customerPhone,
-      recipientName: customerName,
-      template: 'READY_TO_SHIP',
-      orderId,
-      courierName: awbResult.courierName,
-      awbCode: awbResult.awbCode,
-      totalAmount: order.totalAmount,
-    });
+    let waResult = null;
+    if (customerPhone) {
+      waResult = await sendMockWhatsAppMessage({
+        phone: customerPhone,
+        recipientName: customerName,
+        template: 'READY_TO_SHIP',
+        orderId,
+        courierName: awbResult.courierName,
+        awbCode: awbResult.awbCode,
+        totalAmount: order.totalAmount,
+      });
+    }
 
     // Dispatch Shipping Notification Email via Hostinger SMTP
     let emailResult = null;

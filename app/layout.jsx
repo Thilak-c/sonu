@@ -3,11 +3,11 @@ import '@/app/globals.css';
 export const metadata = {
   metadataBase: new URL('https://sonushoe.in'),
   title: {
-    default: 'Sonu Shoe — Premium Footwear | For the Long Way Home',
+    default: 'Sonu Shoe | Best Shoe Band In Patna,Bihar',
     template: '%s | Sonu Shoe',
   },
   description:
-    'Sonu Shoe crafts small-run, precision-engineered footwear designed for all-day comfort and timeless minimalism. Discover handcrafted sneakers built for the long way home.',
+    'Sonu Shoe is a footwear brand that makes comfortable and stylish shoes for men and women. We use high-quality materials and construction techniques to create shoes that are built to last. Our shoes are perfect for everyday wear, and they come in a variety of styles and colors to suit any taste.',
   keywords: [
     'Sonu Shoe',
     'premium footwear',
@@ -27,9 +27,9 @@ export const metadata = {
     telephone: false,
   },
   openGraph: {
-    title: 'Sonu Shoe — Premium Footwear | For the Long Way Home',
+    title: 'Sonu Shoe | Best Shoe Band In Patna,Bihar',
     description:
-      'Small-run, precision-engineered footwear built for timeless street style and ergonomic comfort.',
+      'Sonu Shoe is a footwear brand that makes comfortable and stylish shoes for men and women. We use high-quality materials and construction techniques to create shoes that are built to last. Our shoes are perfect for everyday wear, and they come in a variety of styles and colors to suit any taste.',
     url: 'https://sonushoe.in',
     siteName: 'Sonu Shoe',
     images: [

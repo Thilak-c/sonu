@@ -3,10 +3,18 @@ import { initDb } from '@/lib/mongodb';
 import { createShiprocketOrder } from '@/lib/shiprocket';
 import { sendOrderConfirmationEmail } from '@/lib/email';
 import { verifyAndRecheckPayment } from '@/lib/razorpay';
+import { rateLimit } from '@/lib/ratelimit';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request) {
+  // Rate limit: max 10 order placement calls per 15 mins per IP
+  const blockedResponse = rateLimit(request, 'create_order', {
+    limit: 10,
+    windowMs: 15 * 60 * 1000,
+  });
+  if (blockedResponse) return blockedResponse;
+
   try {
     const body = await request.json();
     const {
@@ -240,6 +248,28 @@ export async function POST(request) {
       { upsert: true }
     );
 
+    // 2b. Atomically decrement stock for ordered products
+    try {
+      for (const item of orderDoc.items) {
+        const qty = Number(item.quantity) || 1;
+        const prodId = item.slug || item.id;
+        if (prodId) {
+          await db.collection('products').updateOne(
+            {
+              $or: [{ slug: prodId }, { id: prodId }, { sku: prodId }],
+              stockQuantity: { $exists: true, $gt: 0 },
+            },
+            {
+              $inc: { stockQuantity: -qty },
+              $set: { updatedAt: new Date() },
+            }
+          );
+        }
+      }
+    } catch (stockErr) {
+      console.warn('[Inventory] Non-blocking stock decrement warning:', stockErr.message);
+    }
+
     // 3. Upsert customer profile in MongoDB 'users' collection
     if (address.email || address.mobile) {
       const userFilter = address.email
@@ -341,11 +371,25 @@ export async function POST(request) {
 }
 
 export async function GET(request) {
+  // Rate limit public order queries: max 30 queries per min per IP
+  const blockedResponse = rateLimit(request, 'query_order', {
+    limit: 30,
+    windowMs: 60 * 1000,
+  });
+  if (blockedResponse) return blockedResponse;
+
   try {
     const { searchParams } = new URL(request.url);
     const orderId = searchParams.get('orderId');
     const email = searchParams.get('email');
     const mobile = searchParams.get('mobile');
+
+    if (!orderId && !email && !mobile) {
+      return NextResponse.json(
+        { error: 'Valid orderId, email, or mobile is required to query orders.' },
+        { status: 400 }
+      );
+    }
 
     const db = await initDb();
 
@@ -357,25 +401,15 @@ export async function GET(request) {
       return NextResponse.json({ success: true, order });
     }
 
-    if (email || mobile) {
-      const filter = {};
-      if (email) filter['customer.email'] = email.toLowerCase().trim();
-      if (mobile) filter['customer.mobile'] = mobile.trim();
-
-      const orders = await db
-        .collection('orders')
-        .find(filter)
-        .sort({ createdAt: -1 })
-        .toArray();
-
-      return NextResponse.json({ success: true, orders });
-    }
+    const filter = {};
+    if (email) filter['customer.email'] = email.toLowerCase().trim();
+    if (mobile) filter['customer.mobile'] = mobile.trim();
 
     const orders = await db
       .collection('orders')
-      .find({ 'payment.status': { $ne: 'PENDING_PAYMENT' } })
+      .find(filter)
       .sort({ createdAt: -1 })
-      .limit(50)
+      .limit(20)
       .toArray();
 
     return NextResponse.json({ success: true, orders });

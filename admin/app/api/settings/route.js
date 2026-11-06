@@ -50,7 +50,7 @@ const DEFAULT_SHIPROCKET = {
   singleLength: 30,
   singleBreadth: 20,
   singleHeight: 12,
-  singleWeight: 0.9,
+  singleWeight: 0.5,
 
   // Two shoes package (2 Units)
   doubleLength: 35,
@@ -233,7 +233,7 @@ export async function POST(request) {
         singleLength: Number(body.shiprocket.singleLength) || 30,
         singleBreadth: Number(body.shiprocket.singleBreadth) || 20,
         singleHeight: Number(body.shiprocket.singleHeight) || 12,
-        singleWeight: Number(body.shiprocket.singleWeight) || 0.9,
+        singleWeight: Number(body.shiprocket.singleWeight) || 0.5,
 
         doubleLength: Number(body.shiprocket.doubleLength) || 35,
         doubleBreadth: Number(body.shiprocket.doubleBreadth) || 28,

@@ -22,6 +22,17 @@ import {
   Filter,
 } from 'lucide-react';
 
+const getStorefrontUrl = (path = '') => {
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1') {
+      return `http://localhost:3000${cleanPath}`;
+    }
+  }
+  return `https://sonushoe.in${cleanPath}`;
+};
+
 export default function AnalyticsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTypeFilter, setSelectedTypeFilter] = useState('ALL'); // 'ALL' | 'product' | 'page' | 'category' | 'home'
@@ -600,19 +611,33 @@ export default function AnalyticsPage() {
                       </span>
 
                       {/* Product Image */}
-                      <div className="w-12 h-12 rounded-xl bg-neutral-100 overflow-hidden border border-neutral-200/60 shrink-0 flex items-center justify-center">
+                      <a
+                        href={getStorefrontUrl(`/product/${prod.slug}`)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="w-12 h-12 rounded-xl bg-neutral-100 overflow-hidden border border-neutral-200/60 shrink-0 flex items-center justify-center hover:opacity-85 transition-opacity"
+                        title={`View ${prod.name} on sonushoe.in`}
+                      >
                         <img
                           src={prod.image}
                           alt={prod.name}
                           className="w-full h-full object-contain mix-blend-multiply"
                         />
-                      </div>
+                      </a>
 
                       {/* Product Name & Category */}
                       <div className="min-w-0">
-                        <p className="text-[13.5px] font-semibold text-[#111111] truncate">
-                          {prod.name}
-                        </p>
+                        <a
+                          href={getStorefrontUrl(`/product/${prod.slug}`)}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="hover:underline block"
+                          title={`View ${prod.name} on sonushoe.in`}
+                        >
+                          <p className="text-[13.5px] font-semibold text-[#111111] truncate hover:text-black">
+                            {prod.name}
+                          </p>
+                        </a>
                         <p className="text-[11.5px] text-neutral-400">
                           {prod.category} • ₹{prod.priceNumber.toLocaleString('en-IN')}
                         </p>
@@ -632,11 +657,11 @@ export default function AnalyticsPage() {
                       </div>
 
                       <a
-                        href={`/product/${prod.slug}`}
+                        href={getStorefrontUrl(`/product/${prod.slug}`)}
                         target="_blank"
                         rel="noreferrer"
                         className="p-1.5 rounded-lg border border-neutral-200 text-neutral-500 hover:text-black hover:border-black transition-colors"
-                        title="View Shoe Page"
+                        title="View Shoe Page on sonushoe.in"
                       >
                         <ExternalLink className="w-3.5 h-3.5" />
                       </a>
@@ -704,9 +729,18 @@ export default function AnalyticsPage() {
                         }`}>
                           {page.type || 'page'}
                         </span>
-                        <code className="text-[11.5px] font-mono text-neutral-800 font-semibold truncate max-w-[170px]">
-                          {page.path}
-                        </code>
+                        <a
+                          href={getStorefrontUrl(page.path)}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="hover:underline flex items-center gap-1 group/route"
+                          title={`Open ${page.path} on sonushoe.in`}
+                        >
+                          <code className="text-[11.5px] font-mono text-neutral-800 font-semibold truncate max-w-[170px] group-hover/route:text-black">
+                            {page.path}
+                          </code>
+                          <ExternalLink className="w-2.5 h-2.5 text-neutral-400 group-hover/route:text-neutral-700 shrink-0" />
+                        </a>
                       </div>
                       <p className="text-[11.5px] text-neutral-400 truncate mt-0.5">
                         {page.title || page.identifier}

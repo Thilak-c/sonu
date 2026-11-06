@@ -54,7 +54,7 @@ export async function getShiprocketToken() {
   return cachedToken;
 }
 
-export async function checkShiprocketServiceability(deliveryPincode, pickupPincode = null, weight = '0.9') {
+export async function checkShiprocketServiceability(deliveryPincode, pickupPincode = null, weight = '0.5') {
   // 1. Official India Post Pincode Lookup (guarantees exact real District/City & State)
   let postCity = '';
   let postState = '';
@@ -213,7 +213,7 @@ export async function createShiprocketOrder(order) {
     length: 30,
     breadth: 20,
     height: 12,
-    weight: 0.9,
+    weight: 0.5,
   };
 
   const res = await fetch(`${base}/orders/create/adhoc`, {

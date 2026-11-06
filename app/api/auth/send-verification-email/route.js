@@ -1,7 +1,15 @@
 import { NextResponse } from 'next/server';
 import { sendVerificationEmail } from '@/lib/email';
+import { rateLimit } from '@/lib/ratelimit';
 
 export async function POST(request) {
+  // Rate limit: max 5 OTP emails per 15 mins per IP to protect SMTP quota
+  const blockedResponse = rateLimit(request, 'send_email', {
+    limit: 5,
+    windowMs: 15 * 60 * 1000,
+  });
+  if (blockedResponse) return blockedResponse;
+
   try {
     const body = await request.json();
     const { email, name } = body;

@@ -21,6 +21,8 @@ import {
   SlidersHorizontal,
   BarChart3,
   Eye,
+  LogOut,
+  UserCheck,
 } from 'lucide-react';
 
 export default function AdminShell({ children, onNewProductClick }) {
@@ -28,6 +30,38 @@ export default function AdminShell({ children, onNewProductClick }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [dbHealthy, setDbHealthy] = useState(true);
   const [currentTime, setCurrentTime] = useState('');
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    // Read user from localStorage or cookie
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('sonu_admin_user');
+      if (stored) {
+        setUser(stored);
+      } else {
+        fetch('/api/auth')
+          .then((r) => r.json())
+          .then((d) => {
+            if (d.authenticated && d.user) {
+              setUser(d.user);
+              localStorage.setItem('sonu_admin_user', d.user);
+            }
+          })
+          .catch(() => {});
+      }
+    }
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth', { method: 'DELETE' });
+    } catch {}
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('sonu_admin_user');
+      document.cookie = 'sonu_admin_user=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+      window.location.href = '/login';
+    }
+  };
 
   useEffect(() => {
     const updateTime = () => {
@@ -173,6 +207,21 @@ export default function AdminShell({ children, onNewProductClick }) {
                 <span className="text-neutral-400">{currentTime || 'Live'}</span>
               </div>
             </div>
+
+            <button
+              type="button"
+              onClick={handleLogout}
+              title={user ? `Signed in as User ${user} - Sign Out` : 'Sign Out'}
+              className="w-full flex items-center h-9 px-2 rounded-[10px] text-neutral-400 hover:text-red-400 hover:bg-white/5 text-[12px] font-medium transition-colors whitespace-nowrap overflow-hidden cursor-pointer"
+            >
+              <div className="w-7 flex items-center justify-center shrink-0">
+                <LogOut className="w-4 h-4" />
+              </div>
+              <div className="ml-2.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-between flex-1">
+                <span>Sign Out</span>
+                {user && <span className="text-[10px] text-neutral-400 bg-white/10 px-1.5 py-0.5 rounded font-mono">#{user}</span>}
+              </div>
+            </button>
           </div>
         </aside>
       </div>
@@ -216,15 +265,25 @@ export default function AdminShell({ children, onNewProductClick }) {
               })}
             </nav>
 
-            {/* <a
-              href="http://localhost:3000"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 py-3 rounded-full bg-white hover:bg-neutral-100 text-[#111111] font-medium text-[14px] transition-all duration-150 ease-out active:scale-95 shadow-sm"
-            >
-              <span>Go to Storefront</span>
-              <ArrowUpRight className="w-4 h-4" />
-            </a> */}
+            <div className="pt-4 border-t border-[#222222] space-y-2">
+              {user && (
+                <div className="flex items-center justify-between px-3.5 py-2 rounded-xl bg-white/5 border border-white/10 text-[13px] text-neutral-300">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                    <span>Signed in as</span>
+                  </div>
+                  <span className="font-mono font-bold text-white">#{user}</span>
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 text-[13px] font-medium transition-colors cursor-pointer"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Sign Out</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -242,8 +301,22 @@ export default function AdminShell({ children, onNewProductClick }) {
               </span>
             </div>
 
-            <div className="flex items-center gap-4">
-            
+            <div className="flex items-center gap-3">
+              {user && (
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-neutral-100 border border-neutral-200/80 text-[12px] font-medium text-neutral-800">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  <span>User {user}</span>
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-neutral-200 hover:border-neutral-300 bg-white hover:bg-neutral-50 text-[12px] font-medium text-neutral-700 hover:text-black transition-colors cursor-pointer"
+                title="Sign out of Admin"
+              >
+                <LogOut className="w-3.5 h-3.5 text-neutral-500" />
+                <span>Sign Out</span>
+              </button>
             </div>
           </header>
         )}

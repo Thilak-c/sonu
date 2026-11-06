@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "test": "node --test tests/security-and-payments.test.mjs",
     "db:sync": "node scripts/sync-live-db.mjs"
   },
   "dependencies": {

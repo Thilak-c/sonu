@@ -73,19 +73,6 @@ const INITIAL_RECENT_ORDERS = [
     statusBg: 'bg-[#e8f8ec]',
     statusText: 'text-[#16a34a]',
   },
-  {
-    id: 'SONU-IN-400204',
-    rawId: 'SONU-IN-400204',
-    productName: 'Sonu Hybrid RN v1 - Road Edition',
-    image: '/images/test/1e462d9Nike-IV2476-200_1.avif',
-    date: '28 Oct 2026',
-    payment: 'Partial COD',
-    amount: '₹13,995',
-    amountNumber: 13995,
-    status: 'Cancelled',
-    statusBg: 'bg-[#fef2f2]',
-    statusText: 'text-[#dc2626]',
-  },
 ];
 
 export default function OverviewPage() {
@@ -204,9 +191,13 @@ export default function OverviewPage() {
     ];
   }, [dailyBars]);
 
-  // Active orders list (real database orders when loaded, fallback to initial)
+  // Active orders list (real database orders when loaded, fallback to initial; exclude cancelled orders)
   const activeOrders = useMemo(() => {
-    return dbData?.recentOrders?.length ? dbData.recentOrders : INITIAL_RECENT_ORDERS;
+    const list = dbData?.recentOrders?.length ? dbData.recentOrders : INITIAL_RECENT_ORDERS;
+    return list.filter((ord) => {
+      const s = (ord.status || '').toLowerCase();
+      return s !== 'cancelled' && s !== 'canceled';
+    });
   }, [dbData]);
 
   // Filter orders based on the search product term

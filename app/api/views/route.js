@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
+import { rateLimit } from '@/lib/ratelimit';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,6 +33,13 @@ function getDocId(path = '/', type = 'page', identifier = '') {
 }
 
 export async function POST(request) {
+  // Rate limit: max 60 views recorded per minute per IP
+  const blockedResponse = rateLimit(request, 'track_views', {
+    limit: 60,
+    windowMs: 60 * 1000,
+  });
+  if (blockedResponse) return blockedResponse;
+
   try {
     const body = await request.json().catch(() => ({}));
     const path = (body.path || '/').split('?')[0];

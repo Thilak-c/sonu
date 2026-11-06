@@ -81,7 +81,7 @@ export default async function HomePage() {
         {/* Empty state when no products in DB yet */}
        
         {/* 1. Hero Showcase (Editable via Admin Settings) */}
-        <HeroSection />
+     {/*    <HeroSection /> */}
 
         {/* 2. Featured Section (from DB) */}
         {products.length > 0 && (

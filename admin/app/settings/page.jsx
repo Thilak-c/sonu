@@ -75,7 +75,7 @@ const DEFAULT_SHIPROCKET = {
   singleLength: 30,
   singleBreadth: 20,
   singleHeight: 12,
-  singleWeight: 0.9,
+  singleWeight: 0.5,
 
   doubleLength: 35,
   doubleBreadth: 28,
@@ -1383,7 +1383,7 @@ export default function SettingsPage() {
                     </div>
 
                     <p className="text-[11.5px] text-neutral-500">
-                      Calculated Volumetric Weight: <strong>{singleVolWeight} kg</strong> (Billing weight: {Math.max(Number(shiprocket.singleWeight || 0.9), Number(singleVolWeight))} kg)
+                      Calculated Volumetric Weight: <strong>{singleVolWeight} kg</strong> (Billing weight: {Math.max(Number(shiprocket.singleWeight || 0.5), Number(singleVolWeight))} kg)
                     </p>
                   </div>
 
