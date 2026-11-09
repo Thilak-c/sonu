@@ -46,11 +46,11 @@ const DEFAULT_SHIPROCKET = {
   pincode: '800001',
   country: 'India',
 
-  // Single shoe package (1 Unit)
-  singleLength: 30,
-  singleBreadth: 20,
-  singleHeight: 12,
-  singleWeight: 0.5,
+  // Single shoe package (1 Unit) - optimized for base 500g slab
+  singleLength: 20,
+  singleBreadth: 15,
+  singleHeight: 8,
+  singleWeight: 0.4,
 
   // Two shoes package (2 Units)
   doubleLength: 35,
@@ -230,10 +230,10 @@ export async function POST(request) {
         pincode: (body.shiprocket.pincode || DEFAULT_SHIPROCKET.pincode).trim(),
         country: (body.shiprocket.country || 'India').trim(),
 
-        singleLength: Number(body.shiprocket.singleLength) || 30,
-        singleBreadth: Number(body.shiprocket.singleBreadth) || 20,
-        singleHeight: Number(body.shiprocket.singleHeight) || 12,
-        singleWeight: Number(body.shiprocket.singleWeight) || 0.5,
+        singleLength: Number(body.shiprocket.singleLength) || 20,
+        singleBreadth: Number(body.shiprocket.singleBreadth) || 15,
+        singleHeight: Number(body.shiprocket.singleHeight) || 8,
+        singleWeight: Number(body.shiprocket.singleWeight) || 0.4,
 
         doubleLength: Number(body.shiprocket.doubleLength) || 35,
         doubleBreadth: Number(body.shiprocket.doubleBreadth) || 28,

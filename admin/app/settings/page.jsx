@@ -72,10 +72,10 @@ const DEFAULT_SHIPROCKET = {
   pincode: '800001',
   country: 'India',
 
-  singleLength: 30,
-  singleBreadth: 20,
-  singleHeight: 12,
-  singleWeight: 0.5,
+  singleLength: 20,
+  singleBreadth: 15,
+  singleHeight: 8,
+  singleWeight: 0.4,
 
   doubleLength: 35,
   doubleBreadth: 28,

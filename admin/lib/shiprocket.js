@@ -226,10 +226,10 @@ export async function createShiprocketOrder(order) {
     transaction_charges: 0,
     total_discount: isPartialCod ? advancePaid : 0,
     sub_total: totalAmount,
-    length: 30,
-    breadth: 20,
-    height: 12,
-    weight: 0.5,
+    length: 20,
+    breadth: 15,
+    height: 8,
+    weight: 0.4,
   };
 
   const res = await fetch(`${base}/orders/create/adhoc`, {
