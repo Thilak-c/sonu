@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "test": "node --test tests/security-and-payments.test.mjs",
-    "db:sync": "node scripts/sync-live-db.mjs"
+    "db:sync": "node scripts/sync-live-db.mjs",
+    "shiprocket:sync": "node scripts/sync-shiprocket.mjs"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.3.3",
