@@ -579,6 +579,43 @@ function OrdersContent() {
     }
   };
 
+  // Fetch / Generate Shiprocket Shipping Label PDF (Live Official Shiprocket CDN)
+  const handleGenerateLabel = async (orderId, e) => {
+    if (e) e.stopPropagation();
+    try {
+      setActionLoading(orderId);
+      const res = await fetch(`/api/orders/${orderId}/generate-label`, {
+        method: 'POST',
+      });
+      const data = await res.json();
+
+      if (res.ok && data.labelUrl) {
+        showToast('✓ Shipping label retrieved from Shiprocket!');
+        setOrders((prev) =>
+          prev.map((o) =>
+            o.orderId === orderId
+              ? { ...o, shiprocket: { ...o.shiprocket, labelUrl: data.labelUrl } }
+              : o
+          )
+        );
+        if (selectedOrder && selectedOrder.orderId === orderId) {
+          setSelectedOrder((prev) => ({
+            ...prev,
+            shiprocket: { ...prev.shiprocket, labelUrl: data.labelUrl },
+          }));
+        }
+        window.open(data.labelUrl, '_blank');
+      } else {
+        alert(data.error || 'Failed to retrieve shipping label from Shiprocket');
+      }
+    } catch (err) {
+      console.error('Generate label error:', err);
+      alert('Network error while retrieving shipping label');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   useEffect(() => {
     setPaymentDiffData(null);
     setShowPaymentDiff(false);
@@ -2171,191 +2208,224 @@ function OrdersContent() {
 
                       {/* 9. Action Buttons */}
                       <div className="flex items-center justify-end gap-1.5 relative">
-                        {isCancelled && (
-                          <span className="px-2 py-1 text-[11.5px] font-medium text-neutral-400 select-none">
-                            Cancelled
-                          </span>
-                        )}
-                        {isNew && (
-                          <button
-                            type="button"
-                            disabled={actionLoading === ord.orderId}
-                            onClick={(e) => handleShipNow(ord.orderId, e)}
-                            className="px-2.5 py-1.5 rounded-lg bg-[#111111] hover:bg-black active:scale-[0.98] text-white text-[11.5px] font-medium transition-all shadow-xs flex items-center justify-center min-w-[90px] cursor-pointer"
-                          >
-                            {actionLoading === ord.orderId ? (
-                              <RefreshCw className="w-3.5 h-3.5 animate-spin text-white" />
-                            ) : (
-                              <span>Ready to Ship</span>
-                            )}
-                          </button>
-                        )}
-
-                        {isHold && (
-                          <button
-                            type="button"
-                            disabled={actionLoading === ord.orderId}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleMoveToOnHold(ord);
-                            }}
-                            className="px-2.5 py-1.5 rounded-lg bg-white border border-neutral-300 hover:border-[#111111] text-[#111111] text-[11.5px] font-medium transition-all shadow-xs flex items-center justify-center min-w-[64px] cursor-pointer"
-                          >
-                            <span>Unhold</span>
-                          </button>
-                        )}
-
-                        {isReadyToShip && (
-                          <button
-                            type="button"
-                            disabled={actionLoading === ord.orderId}
-                            onClick={(e) => handleRequestPickup(ord.orderId, e)}
-                            className="px-2.5 py-1.5 rounded-lg bg-[#111111] hover:bg-black active:scale-[0.98] text-white text-[11.5px] font-medium transition-all shadow-xs flex items-center justify-center min-w-[68px] cursor-pointer"
-                          >
-                            {actionLoading === ord.orderId ? (
-                              <RefreshCw className="w-3.5 h-3.5 animate-spin text-white" />
-                            ) : (
-                              <span>Pickup</span>
-                            )}
-                          </button>
-                        )}
-
-                        {(isPickup || isManifested) && (
-                          <a
-                            href={ord.shiprocket?.labelUrl || `https://apiv2.shiprocket.in/generate/label/sample_${ord.shiprocket?.shipmentId}.pdf`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="px-2.5 py-1.5 rounded-lg bg-white hover:bg-neutral-100 text-[#111111] border border-neutral-300 text-[11.5px] font-medium transition-all shadow-2xs flex items-center gap-1 justify-center min-w-[62px]"
-                          >
-                            <Printer className="w-3 h-3" />
-                            <span>Label</span>
-                          </a>
-                        )}
-
-                        {isInTransit && (
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedOrder(ord);
-                            }}
-                            className="px-2.5 py-1.5 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-[#111111] text-[11.5px] font-medium transition-all border border-neutral-300 flex items-center justify-center min-w-[58px] cursor-pointer"
-                          >
-                            Track
-                          </button>
-                        )}
-
-                        {/* Three-Dot Popover Menu (Matching Exact UI Specification) */}
-                        <div className="relative" onClick={(e) => e.stopPropagation()}>
-                          <button
-                            type="button"
-                            onClick={() => setOpenDropdownId(openDropdownId === ord.orderId ? null : ord.orderId)}
-                            className="w-7 h-7 rounded-full bg-neutral-100 hover:bg-neutral-200 text-[#111111] flex items-center justify-center transition-colors cursor-pointer"
-                          >
-                            <MoreHorizontal className="w-4 h-4" />
-                          </button>
-
-                          {openDropdownId === ord.orderId && (
-                            <div className="absolute right-0 top-8 z-50 w-64 bg-white rounded-xl shadow-2xl border border-neutral-200 py-1.5 text-[13px] animate-dropdown select-none">
-
-                              {/* 1. Download Invoice */}
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  handleDownloadInvoice(ord);
-                                  setOpenDropdownId(null);
-                                }}
-                                className="w-full px-4 py-2 text-left hover:bg-neutral-50 flex items-center justify-between text-[#111111] font-semibold cursor-pointer transition-colors"
-                              >
-                                <span>Download Invoice</span>
-                                <span className="text-[12px] text-neutral-400 font-normal">Option + Shift + I</span>
-                              </button>
-
-                              {/* 2. Edit Order */}
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setSelectedOrder(ord);
-                                  setOpenDropdownId(null);
-                                }}
-                                className="w-full px-4 py-2 text-left hover:bg-neutral-50 flex items-center justify-between text-[#111111] font-semibold cursor-pointer transition-colors"
-                              >
-                                <span>Edit Order</span>
-                                <span className="text-[12px] text-neutral-400 font-normal">Option + Shift + E</span>
-                              </button>
-
-                              {/* Divider */}
-                              <div className="border-t border-neutral-200 my-1 mx-3" />
-
-                              {/* 3. Add Order Tag */}
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  handleAddOrderTag(ord);
-                                  setOpenDropdownId(null);
-                                }}
-                                className="w-full px-4 py-2 text-left hover:bg-neutral-50 flex items-center text-[#111111] font-semibold cursor-pointer transition-colors"
-                              >
-                                <span>Add Order Tag</span>
-                              </button>
-
-                              {/* 6. Clone Order */}
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  handleCloneOrder(ord);
-                                  setOpenDropdownId(null);
-                                }}
-                                className="w-full px-4 py-2 text-left hover:bg-neutral-50 flex items-center text-[#111111] font-semibold cursor-pointer transition-colors"
-                              >
-                                <span>Clone Order</span>
-                              </button>
-
-                              {/* 7. Move to On Hold */}
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  handleMoveToOnHold(ord);
-                                  setOpenDropdownId(null);
-                                }}
-                                className="w-full px-4 py-2 text-left hover:bg-neutral-50 flex items-center justify-between text-[#111111] font-semibold cursor-pointer transition-colors"
-                              >
-                                <span>{ord.fulfillmentStatus === 'on_hold' ? 'Remove from On Hold' : 'Move to On Hold'}</span>
-                                <span className="bg-[#00a859] text-white text-[11px] font-bold px-1.5 py-0.5 rounded leading-none">
-                                  New
-                                </span>
-                              </button>
-
-                              {/* 8. Cancel / Restore Order */}
-                              {ord.fulfillmentStatus !== 'cancelled' ? (
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    updateStatus(ord.orderId, 'cancelled');
-                                    setOpenDropdownId(null);
-                                  }}
-                                  className="w-full px-4 py-2 text-left hover:bg-rose-50 flex items-center text-[#e53935] font-semibold cursor-pointer transition-colors"
-                                >
-                                  <span>Cancel Order</span>
-                                </button>
+                        {activeTab === 'pickups' ? (
+                          /* In this tab only show the print label button */
+                          ord.shiprocket?.labelUrl ? (
+                            <a
+                              href={ord.shiprocket.labelUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="px-2.5 py-1.5 rounded-lg bg-[#111111] hover:bg-black text-white text-[11.5px] font-medium transition-all shadow-xs flex items-center gap-1.5 justify-center min-w-[95px] cursor-pointer"
+                            >
+                              <Printer className="w-3.5 h-3.5" />
+                              <span>Print Label</span>
+                            </a>
+                          ) : (
+                            <button
+                              type="button"
+                              disabled={actionLoading === ord.orderId}
+                              onClick={(e) => handleGenerateLabel(ord.orderId, e)}
+                              className="px-2.5 py-1.5 rounded-lg bg-[#111111] hover:bg-black text-white text-[11.5px] font-medium transition-all shadow-xs flex items-center gap-1.5 justify-center min-w-[95px] cursor-pointer"
+                            >
+                              {actionLoading === ord.orderId ? (
+                                <RefreshCw className="w-3.5 h-3.5 animate-spin text-white" />
                               ) : (
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    updateStatus(ord.orderId, 'new');
-                                    setOpenDropdownId(null);
-                                  }}
-                                  className="w-full px-4 py-2 text-left hover:bg-neutral-50 flex items-center text-neutral-700 font-semibold cursor-pointer transition-colors"
-                                >
-                                  <span>Restore Order</span>
-                                </button>
+                                <>
+                                  <Printer className="w-3.5 h-3.5" />
+                                  <span>Print Label</span>
+                                </>
                               )}
+                            </button>
+                          )
+                        ) : (
+                          <>
+                            {isCancelled && (
+                              <span className="px-2 py-1 text-[11.5px] font-medium text-neutral-400 select-none">
+                                Cancelled
+                              </span>
+                            )}
+                            {isNew && (
+                              <button
+                                type="button"
+                                disabled={actionLoading === ord.orderId}
+                                onClick={(e) => handleShipNow(ord.orderId, e)}
+                                className="px-2.5 py-1.5 rounded-lg bg-[#111111] hover:bg-black active:scale-[0.98] text-white text-[11.5px] font-medium transition-all shadow-xs flex items-center justify-center min-w-[90px] cursor-pointer"
+                              >
+                                {actionLoading === ord.orderId ? (
+                                  <RefreshCw className="w-3.5 h-3.5 animate-spin text-white" />
+                                ) : (
+                                  <span>Ready to Ship</span>
+                                )}
+                              </button>
+                            )}
 
+                            {isHold && (
+                              <button
+                                type="button"
+                                disabled={actionLoading === ord.orderId}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleMoveToOnHold(ord);
+                                }}
+                                className="px-2.5 py-1.5 rounded-lg bg-white border border-neutral-300 hover:border-[#111111] text-[#111111] text-[11.5px] font-medium transition-all shadow-xs flex items-center justify-center min-w-[64px] cursor-pointer"
+                              >
+                                <span>Unhold</span>
+                              </button>
+                            )}
+
+                            {isReadyToShip && (
+                              <button
+                                type="button"
+                                disabled={actionLoading === ord.orderId}
+                                onClick={(e) => handleRequestPickup(ord.orderId, e)}
+                                className="px-2.5 py-1.5 rounded-lg bg-[#111111] hover:bg-black active:scale-[0.98] text-white text-[11.5px] font-medium transition-all shadow-xs flex items-center justify-center min-w-[68px] cursor-pointer"
+                              >
+                                {actionLoading === ord.orderId ? (
+                                  <RefreshCw className="w-3.5 h-3.5 animate-spin text-white" />
+                                ) : (
+                                  <span>Pickup</span>
+                                )}
+                              </button>
+                            )}
+
+                            {(isPickup || isManifested) && ord.shiprocket?.labelUrl && (
+                              <a
+                                href={ord.shiprocket.labelUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="px-2.5 py-1.5 rounded-lg bg-white hover:bg-neutral-100 text-[#111111] border border-neutral-300 text-[11.5px] font-medium transition-all shadow-2xs flex items-center gap-1.5 justify-center min-w-[85px]"
+                              >
+                                <Printer className="w-3 h-3" />
+                                <span>Print Label</span>
+                              </a>
+                            )}
+
+                            {isInTransit && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedOrder(ord);
+                                }}
+                                className="px-2.5 py-1.5 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-[#111111] text-[11.5px] font-medium transition-all border border-neutral-300 flex items-center justify-center min-w-[58px] cursor-pointer"
+                              >
+                                Track
+                              </button>
+                            )}
+
+                            {/* Three-Dot Popover Menu (Matching Exact UI Specification) */}
+                            <div className="relative" onClick={(e) => e.stopPropagation()}>
+                              <button
+                                type="button"
+                                onClick={() => setOpenDropdownId(openDropdownId === ord.orderId ? null : ord.orderId)}
+                                className="w-7 h-7 rounded-full bg-neutral-100 hover:bg-neutral-200 text-[#111111] flex items-center justify-center transition-colors cursor-pointer"
+                              >
+                                <MoreHorizontal className="w-4 h-4" />
+                              </button>
+
+                              {openDropdownId === ord.orderId && (
+                                <div className="absolute right-0 top-8 z-50 w-64 bg-white rounded-xl shadow-2xl border border-neutral-200 py-1.5 text-[13px] animate-dropdown select-none">
+
+                                  {/* 1. Download Invoice */}
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      handleDownloadInvoice(ord);
+                                      setOpenDropdownId(null);
+                                    }}
+                                    className="w-full px-4 py-2 text-left hover:bg-neutral-50 flex items-center justify-between text-[#111111] font-medium cursor-pointer transition-colors"
+                                  >
+                                    <span>Download Invoice</span>
+                                    <span className="text-[12px] text-neutral-400 font-normal">Option + Shift + I</span>
+                                  </button>
+
+                                  {/* 2. Edit Order */}
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedOrder(ord);
+                                      setOpenDropdownId(null);
+                                    }}
+                                    className="w-full px-4 py-2 text-left hover:bg-neutral-50 flex items-center justify-between text-[#111111] font-medium cursor-pointer transition-colors"
+                                  >
+                                    <span>Edit Order</span>
+                                    <span className="text-[12px] text-neutral-400 font-normal">Option + Shift + E</span>
+                                  </button>
+
+                                  {/* Divider */}
+                                  <div className="border-t border-neutral-200 my-1 mx-3" />
+
+                                  {/* 3. Add Order Tag */}
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      handleAddOrderTag(ord);
+                                      setOpenDropdownId(null);
+                                    }}
+                                    className="w-full px-4 py-2 text-left hover:bg-neutral-50 flex items-center text-[#111111] font-medium cursor-pointer transition-colors"
+                                  >
+                                    <span>Add Order Tag</span>
+                                  </button>
+
+                                  {/* 6. Clone Order */}
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      handleCloneOrder(ord);
+                                      setOpenDropdownId(null);
+                                    }}
+                                    className="w-full px-4 py-2 text-left hover:bg-neutral-50 flex items-center text-[#111111] font-medium cursor-pointer transition-colors"
+                                  >
+                                    <span>Clone Order</span>
+                                  </button>
+
+                                  {/* 7. Move to On Hold */}
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      handleMoveToOnHold(ord);
+                                      setOpenDropdownId(null);
+                                    }}
+                                    className="w-full px-4 py-2 text-left hover:bg-neutral-50 flex items-center justify-between text-[#111111] font-medium cursor-pointer transition-colors"
+                                  >
+                                    <span>{ord.fulfillmentStatus === 'on_hold' ? 'Remove from On Hold' : 'Move to On Hold'}</span>
+                                    <span className="bg-[#00a859] text-white text-[11px] font-medium px-1.5 py-0.5 rounded leading-none">
+                                      New
+                                    </span>
+                                  </button>
+
+                                  {/* 8. Cancel / Restore Order */}
+                                  {ord.fulfillmentStatus !== 'cancelled' ? (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        updateStatus(ord.orderId, 'cancelled');
+                                        setOpenDropdownId(null);
+                                      }}
+                                      className="w-full px-4 py-2 text-left hover:bg-rose-50 flex items-center text-[#e53935] font-medium cursor-pointer transition-colors"
+                                    >
+                                      <span>Cancel Order</span>
+                                    </button>
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        updateStatus(ord.orderId, 'new');
+                                        setOpenDropdownId(null);
+                                      }}
+                                      className="w-full px-4 py-2 text-left hover:bg-neutral-50 flex items-center text-neutral-700 font-medium cursor-pointer transition-colors"
+                                    >
+                                      <span>Restore Order</span>
+                                    </button>
+                                  )}
+
+                                </div>
+                              )}
                             </div>
-                          )}
-                        </div>
-
+                          </>
+                        )}
                       </div>
 
                     </div>
@@ -3294,20 +3364,38 @@ function OrdersContent() {
                 )}
 
                 <div className="flex items-center gap-2 pt-1">
-                  <a
-                    href={selectedOrder.shiprocket?.labelUrl || `https://apiv2.shiprocket.in/generate/label/sample_${selectedOrder.shiprocket?.shipmentId}.pdf`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 py-2 px-3 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-100 text-[#111111] text-[12px] font-semibold transition-all flex items-center justify-center gap-1.5 shadow-2xs"
-                  >
-                    <Printer className="w-3.5 h-3.5 text-neutral-600" />
-                    <span>Print Label PDF</span>
-                  </a>
+                  {selectedOrder.shiprocket?.labelUrl ? (
+                    <a
+                      href={selectedOrder.shiprocket.labelUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 py-2 px-3 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-100 text-[#111111] text-[12px] font-medium transition-all flex items-center justify-center gap-1.5 shadow-2xs"
+                    >
+                      <Printer className="w-3.5 h-3.5 text-neutral-600" />
+                      <span>Print Label PDF</span>
+                    </a>
+                  ) : (selectedOrder.fulfillmentStatus === 'pickup_scheduled' || selectedOrder.fulfillmentStatus === 'manifested') ? (
+                    <button
+                      type="button"
+                      disabled={actionLoading === selectedOrder.orderId}
+                      onClick={(e) => handleGenerateLabel(selectedOrder.orderId, e)}
+                      className="flex-1 py-2 px-3 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-100 text-[#111111] text-[12px] font-medium transition-all flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
+                    >
+                      {actionLoading === selectedOrder.orderId ? (
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin text-neutral-600" />
+                      ) : (
+                        <>
+                          <Printer className="w-3.5 h-3.5 text-neutral-600" />
+                          <span>Print Label PDF</span>
+                        </>
+                      )}
+                    </button>
+                  ) : null}
 
                   <button
                     type="button"
                     onClick={() => handleDownloadInvoice(selectedOrder)}
-                    className="flex-1 py-2 px-3 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-100 text-[#111111] text-[12px] font-semibold transition-all flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
+                    className="flex-1 py-2 px-3 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-100 text-[#111111] text-[12px] font-medium transition-all flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
                   >
                     <Download className="w-3.5 h-3.5 text-neutral-600" />
                     <span>Tax Invoice PDF</span>
