@@ -276,7 +276,8 @@ function FloatingTextarea({
   );
 }
 
-function AddressJunkPieChart({ score, category, risk, address }) {
+function AddressScorePieChart({ score, category, risk, address }) {
+  // Score from 0 to 100: 100 is a completely valid address
   let resolvedScore = typeof score === 'number' ? (score <= 1 ? score * 100 : score) : null;
 
   if (resolvedScore === null && address) {
@@ -288,28 +289,31 @@ function AddressJunkPieChart({ score, category, risk, address }) {
     resolvedScore = Math.max(20, Math.min(100, pts));
   }
 
-  const finalScore = resolvedScore !== null ? Math.round(resolvedScore) : 50;
-  const junkPercent = Math.max(0, Math.min(100, 100 - finalScore));
+  const validScore = resolvedScore !== null ? Math.round(resolvedScore) : 50;
 
-  const isHighJunk = junkPercent >= 60;
-  const isMedJunk = junkPercent >= 35 && junkPercent < 60;
+  // Validity color coding:
+  // >= 70%: Green (Valid / High Delivery Probability)
+  // 40% - 69%: Amber (Moderate Probability / Needs Review)
+  // < 40%: Rose / Red (Low Probability / Incomplete)
+  const isValid = validScore >= 70;
+  const isModerate = validScore >= 40 && validScore < 70;
 
-  const strokeColor = isHighJunk ? '#e11d48' : isMedJunk ? '#d97706' : '#16a34a';
-  const tagBg = isHighJunk
-    ? 'bg-rose-50 text-rose-700 border-rose-200'
-    : isMedJunk
+  const strokeColor = isValid ? '#16a34a' : isModerate ? '#d97706' : '#e11d48';
+  const tagBg = isValid
+    ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+    : isModerate
     ? 'bg-amber-50 text-amber-800 border-amber-200'
-    : 'bg-emerald-50 text-emerald-700 border-emerald-200';
+    : 'bg-rose-50 text-rose-700 border-rose-200';
 
   const radius = 6.5;
   const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (junkPercent / 100) * circumference;
+  const offset = circumference - (validScore / 100) * circumference;
 
-  const categoryLabel = (category || (isHighJunk ? 'junk' : isMedJunk ? 'ambiguous' : 'valid')).toUpperCase();
+  const probabilityLabel = isValid ? 'HIGH PROBABILITY' : isModerate ? 'MODERATE' : 'LOW PROBABILITY';
 
   return (
     <div
-      className="relative group/junk inline-flex items-center gap-1.5 mt-1 cursor-help select-none"
+      className="relative group/score inline-flex items-center gap-1.5 mt-1 cursor-help select-none"
       onClick={(e) => e.stopPropagation()}
     >
       <div className="relative w-4 h-4 shrink-0 flex items-center justify-center">
@@ -330,30 +334,30 @@ function AddressJunkPieChart({ score, category, risk, address }) {
       </div>
 
       <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border leading-none ${tagBg}`}>
-        {junkPercent}% Junk ({categoryLabel})
+        {validScore}% Valid
       </span>
 
       {/* Speech Bubble Tooltip */}
-      <div className="invisible group-hover/junk:visible opacity-0 group-hover/junk:opacity-100 transition-all duration-150 absolute bottom-full left-0 mb-2 z-50 w-64 p-3 bg-neutral-900 text-white rounded-xl shadow-2xl text-[11.5px] pointer-events-none text-left">
+      <div className="invisible group-hover/score:visible opacity-0 group-hover/score:opacity-100 transition-all duration-150 absolute bottom-full left-0 mb-2 z-50 w-64 p-3 bg-neutral-900 text-white rounded-xl shadow-2xl text-[11.5px] pointer-events-none text-left">
         <div className="flex items-center justify-between pb-1.5 border-b border-neutral-700">
-          <span className="font-semibold text-white">Address Risk Assessment</span>
-          <span className="text-[9.5px] font-bold px-1.5 py-0.5 rounded bg-neutral-800 border border-neutral-700 uppercase tracking-wider text-neutral-200">
-            {categoryLabel}
+          <span className="font-semibold text-white">Address Validity AI</span>
+          <span className={`text-[9.5px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${isValid ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' : isModerate ? 'bg-amber-950 text-amber-300 border border-amber-800' : 'bg-rose-950 text-rose-300 border border-rose-800'}`}>
+            {probabilityLabel}
           </span>
         </div>
         <div className="mt-2 space-y-1.5 text-neutral-300">
           <div className="flex items-center justify-between">
-            <span>Junk Percentage:</span>
-            <span className="font-bold text-white">{junkPercent}% Junk</span>
+            <span>Validity Score:</span>
+            <span className="font-bold text-white">{validScore} / 100</span>
           </div>
           <div className="flex items-center justify-between">
-            <span>Deliverability Score:</span>
-            <span className="font-bold text-white">{finalScore} / 100</span>
+            <span>Delivery Probability:</span>
+            <span className="font-bold text-white">{validScore}%</span>
           </div>
           <div className="flex items-center justify-between">
-            <span>Risk Level:</span>
-            <span className={`font-semibold capitalize ${isHighJunk ? 'text-rose-400' : isMedJunk ? 'text-amber-400' : 'text-emerald-400'}`}>
-              {risk || (isHighJunk ? 'High RTO / Delivery Risk' : isMedJunk ? 'Moderate Risk' : 'Clean & Verified')}
+            <span>Quality Status:</span>
+            <span className={`font-semibold capitalize ${isValid ? 'text-emerald-400' : isModerate ? 'text-amber-400' : 'text-rose-400'}`}>
+              {isValid ? 'Valid Address' : isModerate ? 'Deliverable (Check Area)' : 'Low Deliverability / Incomplete'}
             </span>
           </div>
         </div>
@@ -1982,9 +1986,9 @@ function OrdersContent() {
                           </div>
                         </div>
 
-                        {/* Little Junk Address Pie Chart */}
+                        {/* Address Validity & Probability Score Pie Chart */}
                         <div>
-                          <AddressJunkPieChart
+                          <AddressScorePieChart
                             score={ord.shiprocket?.addressScore}
                             category={ord.shiprocket?.addressCategory}
                             risk={ord.shiprocket?.addressRisk}
@@ -2597,7 +2601,7 @@ function OrdersContent() {
                       Delivery Address
                     </span>
                   </div>
-                  <AddressJunkPieChart
+                  <AddressScorePieChart
                     score={selectedOrder.shiprocket?.addressScore}
                     category={selectedOrder.shiprocket?.addressCategory}
                     risk={selectedOrder.shiprocket?.addressRisk}
