@@ -1777,7 +1777,7 @@ function OrdersContent() {
         </div>
 
         {/* 2. PRIMARY NAVIGATION TABS */}
-        <div className="flex items-center gap-8 border-b border-neutral-200 overflow-x-auto scrollbar-none mb-4">
+        <div className="flex items-center gap-2 sm:gap-3 md:gap-4 lg:gap-6 border-b border-neutral-200 overflow-x-auto scrollbar-none mb-4">
           {navTabs.map((tab) => {
             const isActive = activeTab === tab.id;
             const count = tabCounts[tab.id];
@@ -1789,14 +1789,14 @@ function OrdersContent() {
                   setActiveTab(tab.id);
                   setCurrentPage(1);
                 }}
-                className={`pb-3 text-[13.5px] font-medium transition-all cursor-pointer whitespace-nowrap relative ${isActive
-                  ? 'text-[#111111] border-b-2 border-[#111111] font-bold'
+                className={`pb-3 text-[13px] sm:text-[13.5px] font-medium transition-all cursor-pointer whitespace-nowrap relative ${isActive
+                  ? 'text-[#111111] border-b-2 border-[#111111]'
                   : 'text-neutral-500 hover:text-[#111111] border-b-2 border-transparent'
                   }`}
               >
                 <span>{tab.label}</span>
                 {count > 0 && tab.id !== 'all' && (
-                  <span className={`ml-1.5 text-[11px] px-1.5 py-0.2 rounded-full font-bold ${isActive ? 'bg-[#111111] text-white' : 'bg-neutral-200 text-neutral-700'
+                  <span className={`ml-1.5 text-[10.5px] px-1.5 py-0.2 rounded-full font-medium ${isActive ? 'bg-[#111111] text-white' : 'bg-neutral-200 text-neutral-700'
                     }`}>
                     {count}
                   </span>
@@ -1828,7 +1828,7 @@ function OrdersContent() {
 
           <div className="-mx-5 sm:-mx-7 lg:-mx-8 w-[calc(100%+2.5rem)] sm:w-[calc(100%+3.5rem)] lg:w-[calc(100%+4rem)] overflow-x-auto overflow-y-hidden border-t border-b border-neutral-200 bg-white flex-1 custom-table-scrollbar">
             {/* Table Header Row */}
-            <div className="grid grid-cols-[36px_175px_235px_180px_140px_105px_165px_110px_115px] gap-3 px-6 py-3 text-[11.5px] font-medium text-neutral-600 uppercase tracking-wider border-b border-neutral-200 bg-neutral-100/90 rounded-none min-w-[1340px] w-full select-none">
+            <div className="grid grid-cols-[28px_minmax(120px,1.15fr)_minmax(150px,1.4fr)_minmax(120px,1.15fr)_minmax(95px,0.9fr)_minmax(75px,0.7fr)_minmax(130px,1.2fr)_minmax(85px,0.75fr)_minmax(85px,0.75fr)] gap-2 px-4 sm:px-5 py-3 text-[11px] sm:text-[11.5px] font-medium text-neutral-600 uppercase tracking-wider border-b border-neutral-200 bg-neutral-100/90 rounded-none min-w-[980px] w-full select-none">
               <div className="flex items-center">
                 <input
                   type="checkbox"
@@ -1849,9 +1849,9 @@ function OrdersContent() {
 
             {/* Table Body / Order Cards */}
             {loading ? (
-              <div className="divide-y divide-neutral-200 min-w-[1340px] w-full bg-white">
+              <div className="divide-y divide-neutral-200 min-w-[980px] w-full bg-white">
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="bg-white px-6 py-4 grid grid-cols-[36px_175px_235px_180px_140px_105px_165px_110px_115px] gap-3 items-center">
+                  <div key={i} className="bg-white px-4 sm:px-5 py-3.5 grid grid-cols-[28px_minmax(120px,1.15fr)_minmax(150px,1.4fr)_minmax(120px,1.15fr)_minmax(95px,0.9fr)_minmax(75px,0.7fr)_minmax(130px,1.2fr)_minmax(85px,0.75fr)_minmax(85px,0.75fr)] gap-2 items-center">
                     <div className="w-4 h-4 rounded bg-neutral-200" />
                     <div className="space-y-2">
                       <div className="w-24 h-4 rounded bg-neutral-200" />
@@ -1874,7 +1874,7 @@ function OrdersContent() {
                 ))}
               </div>
             ) : paginatedOrders.length > 0 ? (
-              <div className="divide-y divide-neutral-200 min-w-[1340px] w-full bg-white">
+              <div className="divide-y divide-neutral-200 min-w-[980px] w-full bg-white">
                 {paginatedOrders.map((ord) => {
                   const customer = ord.customer || {};
                   const customerName = customer.name || `${customer.firstName || ''} ${customer.lastName || ''}`.trim() || ord.customerName || 'Customer';
@@ -1915,7 +1915,7 @@ function OrdersContent() {
                     <div
                       key={ord.orderId}
                       onClick={() => setSelectedOrder(ord)}
-                      className={`grid grid-cols-[36px_175px_235px_180px_140px_105px_165px_110px_115px] gap-3 px-6 py-4 bg-white transition-colors cursor-pointer items-start text-[13px] relative hover:bg-neutral-50/80 ${isSelected
+                      className={`grid grid-cols-[28px_minmax(120px,1.15fr)_minmax(150px,1.4fr)_minmax(120px,1.15fr)_minmax(95px,0.9fr)_minmax(75px,0.7fr)_minmax(130px,1.2fr)_minmax(85px,0.75fr)_minmax(85px,0.75fr)] gap-2 px-4 sm:px-5 py-3.5 bg-white transition-colors cursor-pointer items-start text-[12.5px] relative hover:bg-neutral-50/80 ${isSelected
                         ? 'bg-neutral-50/90 font-medium'
                         : ''
                         }`}
@@ -1971,7 +1971,7 @@ function OrdersContent() {
                           {customerName}
                         </p>
 
-                        <p className="text-[12px] text-neutral-500 truncate max-w-[210px] mt-0.5" title={email}>
+                        <p className="text-[12px] text-neutral-500 truncate max-w-full mt-0.5" title={email}>
                           {email}
                         </p>
 
@@ -1987,7 +1987,7 @@ function OrdersContent() {
                           </button>
                         </div>
 
-                        <div className="relative group/addr inline-block max-w-[210px] mt-1" onClick={(e) => e.stopPropagation()}>
+                        <div className="relative group/addr block max-w-full mt-1" onClick={(e) => e.stopPropagation()}>
                           <div className="text-[11.5px] text-neutral-500 truncate cursor-pointer border-b border-dotted border-neutral-300 hover:text-black transition-colors">
                             {fullAddress || 'Patna, Bihar'}
                           </div>
@@ -2078,15 +2078,15 @@ function OrdersContent() {
                         </p>
                         <div className="mt-1">
                           {ord.payment?.method === 'full_cod' || ord.payment?.method === 'cod' ? (
-                            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-50 text-amber-900 border border-amber-300">
+                            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-50 text-amber-900  border-amber-300">
                               Full COD
                             </span>
                           ) : ord.payment?.method === 'partial_cod' ? (
-                            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium bg-neutral-100 text-red-800 border border-neutral-200">
+                            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium bg-neutral-100 text-red-800  border-neutral-200">
                               Partial COD
                             </span>
                           ) : (
-                            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium bg-neutral-100 text-green-800 border border-neutral-200">
+                            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium bg-neutral-100 text-green-800  border-neutral-200">
                               Prepaid
                             </span>
                           )}
@@ -2110,7 +2110,7 @@ function OrdersContent() {
                             </p>
 
                             {/* Picking (Hub Location) */}
-                            <div className="relative group/hub inline-block max-w-[155px]">
+                            <div className="relative group/hub block max-w-full">
                               <p className="text-[11px] text-neutral-700 truncate cursor-help border-b border-dotted border-neutral-300 leading-tight">
                                 <span className="text-neutral-500">Picking: </span>
                                 <span className="font-medium text-[#111111]">{ord.shiprocket?.pickupLocationName || 'Patna One Plaza Hub'}</span>
@@ -2208,7 +2208,7 @@ function OrdersContent() {
                       {/* 9. Action Buttons */}
                       <div className="flex items-center justify-end gap-1.5 relative">
                         {isCancelled && (
-                          <span className="px-2.5 py-1 text-[11.5px] font-semibold text-neutral-400 select-none">
+                          <span className="px-2 py-1 text-[11.5px] font-medium text-neutral-400 select-none">
                             Cancelled
                           </span>
                         )}
@@ -2217,7 +2217,7 @@ function OrdersContent() {
                             type="button"
                             disabled={actionLoading === ord.orderId}
                             onClick={(e) => handleShipNow(ord.orderId, e)}
-                            className="px-3 py-1.5 rounded-lg bg-[#111111] hover:bg-black active:scale-[0.98] text-white text-[12px] font-medium transition-all shadow-xs flex items-center justify-center min-w-[104px] cursor-pointer"
+                            className="px-2.5 py-1.5 rounded-lg bg-[#111111] hover:bg-black active:scale-[0.98] text-white text-[11.5px] font-medium transition-all shadow-xs flex items-center justify-center min-w-[90px] cursor-pointer"
                           >
                             {actionLoading === ord.orderId ? (
                               <RefreshCw className="w-3.5 h-3.5 animate-spin text-white" />
@@ -2235,7 +2235,7 @@ function OrdersContent() {
                               e.stopPropagation();
                               handleMoveToOnHold(ord);
                             }}
-                            className="px-3 py-1.5 rounded-lg bg-white border border-neutral-300 hover:border-[#111111] text-[#111111] text-[12px] font-medium transition-all shadow-xs flex items-center justify-center min-w-[76px] cursor-pointer"
+                            className="px-2.5 py-1.5 rounded-lg bg-white border border-neutral-300 hover:border-[#111111] text-[#111111] text-[11.5px] font-medium transition-all shadow-xs flex items-center justify-center min-w-[64px] cursor-pointer"
                           >
                             <span>Unhold</span>
                           </button>
@@ -2246,7 +2246,7 @@ function OrdersContent() {
                             type="button"
                             disabled={actionLoading === ord.orderId}
                             onClick={(e) => handleRequestPickup(ord.orderId, e)}
-                            className="px-3 py-1.5 rounded-lg bg-[#111111] hover:bg-black active:scale-[0.98] text-white text-[12px] font-medium transition-all shadow-xs flex items-center justify-center min-w-[80px] cursor-pointer"
+                            className="px-2.5 py-1.5 rounded-lg bg-[#111111] hover:bg-black active:scale-[0.98] text-white text-[11.5px] font-medium transition-all shadow-xs flex items-center justify-center min-w-[68px] cursor-pointer"
                           >
                             {actionLoading === ord.orderId ? (
                               <RefreshCw className="w-3.5 h-3.5 animate-spin text-white" />
@@ -2262,7 +2262,7 @@ function OrdersContent() {
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={(e) => e.stopPropagation()}
-                            className="px-3 py-1.5 rounded-lg bg-white hover:bg-neutral-100 text-[#111111] border border-neutral-300 text-[12px] font-semibold transition-all shadow-2xs flex items-center gap-1 justify-center min-w-[72px]"
+                            className="px-2.5 py-1.5 rounded-lg bg-white hover:bg-neutral-100 text-[#111111] border border-neutral-300 text-[11.5px] font-medium transition-all shadow-2xs flex items-center gap-1 justify-center min-w-[62px]"
                           >
                             <Printer className="w-3 h-3" />
                             <span>Label</span>
@@ -2276,7 +2276,7 @@ function OrdersContent() {
                               e.stopPropagation();
                               setSelectedOrder(ord);
                             }}
-                            className="px-3 py-1.5 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-[#111111] text-[12px] font-medium transition-all border border-neutral-300 flex items-center justify-center min-w-[65px] cursor-pointer"
+                            className="px-2.5 py-1.5 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-[#111111] text-[11.5px] font-medium transition-all border border-neutral-300 flex items-center justify-center min-w-[58px] cursor-pointer"
                           >
                             Track
                           </button>
