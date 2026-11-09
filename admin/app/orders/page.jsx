@@ -1971,18 +1971,33 @@ function OrdersContent() {
                         </div>
 
                         <div className="relative group/addr inline-block max-w-[210px] mt-1" onClick={(e) => e.stopPropagation()}>
-                          <div className="text-[11.5px] text-neutral-500 truncate cursor-help border-b border-dotted border-neutral-300">
+                          <div className="text-[11.5px] text-neutral-500 truncate cursor-pointer border-b border-dotted border-neutral-300 hover:text-black transition-colors">
                             {fullAddress || 'Patna, Bihar'}
                           </div>
 
-                          {/* Speech Bubble Tooltip */}
-                          <div className="invisible group-hover/addr:visible opacity-0 group-hover/addr:opacity-100 transition-all duration-150 absolute top-full left-0 mt-2 z-50 w-72 p-4 bg-white rounded-2xl shadow-2xl border border-neutral-200/90 pointer-events-none text-left">
-                            <div className="text-[13px] font-semibold text-[#111111] leading-relaxed space-y-0.5">
-                              {formatAddressLines(addr, fullAddress).map((line, idx) => (
-                                <p key={idx}>{line}</p>
-                              ))}
+                          {/* Hover Bridge & Toolbox */}
+                          <div className="invisible group-hover/addr:visible opacity-0 group-hover/addr:opacity-100 transition-opacity duration-150 absolute top-full left-0 pt-1 z-50 pointer-events-auto">
+                            <div className="w-68 p-3 bg-white rounded-lg shadow-lg border border-neutral-200 text-left select-text space-y-2">
+                              <div className="text-[11.5px] font-normal text-neutral-700 leading-relaxed space-y-0.5">
+                                {formatAddressLines(addr, fullAddress).map((line, idx) => (
+                                  <p key={idx}>{line}</p>
+                                ))}
+                              </div>
+                              <div className="pt-2 border-t border-neutral-100 flex items-center justify-between text-[11px] font-normal text-neutral-400">
+                                <span>Shipping Address</span>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigator.clipboard?.writeText(fullAddress);
+                                    showToast('Address copied');
+                                  }}
+                                  className="text-neutral-600 hover:text-black font-normal underline hover:no-underline cursor-pointer"
+                                >
+                                  Copy
+                                </button>
+                              </div>
                             </div>
-                            <div className="absolute -top-1.5 left-6 w-3 h-3 bg-white border-l border-t border-neutral-200/90 rotate-45" />
                           </div>
                         </div>
 
@@ -2050,11 +2065,11 @@ function OrdersContent() {
                               Full COD
                             </span>
                           ) : ord.payment?.method === 'partial_cod' ? (
-                            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-neutral-100 text-neutral-800 border border-neutral-300">
+                            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-neutral-100 text-red-800 ">
                               Partial COD
                             </span>
                           ) : (
-                            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#111111] text-white">
+                            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-neutral-100 text-green-800">
                               Prepaid
                             </span>
                           )}
@@ -2066,10 +2081,10 @@ function OrdersContent() {
                         {isPickup || isManifested || ord.shiprocket?.pickupDate || rawStatus === 'pickup_scheduled' ? (
                           <>
                             {/* Status: Pickup */}
-                            <div className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#111111] text-white shadow-2xs">
+                            {/* <div className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#111111] text-white shadow-2xs">
                               <Truck className="w-3 h-3 text-white" />
                               <span>Status: Pickup</span>
-                            </div>
+                            </div> */}
 
                             {/* Date */}
                             <p className="text-[11.5px] font-semibold text-[#111111] leading-tight">
@@ -2084,14 +2099,14 @@ function OrdersContent() {
                                 <span className="font-medium text-[#111111]">{ord.shiprocket?.pickupLocationName || 'Patna One Plaza Hub'}</span>
                               </p>
                               {/* Speech Bubble Tooltip */}
-                              <div className="invisible group-hover/hub:visible opacity-0 group-hover/hub:opacity-100 transition-all duration-150 absolute bottom-full left-0 mb-1.5 z-50 w-72 p-3 bg-white rounded-xl shadow-xl border border-neutral-200 text-left pointer-events-none">
-                                <p className="text-[11px] font-bold uppercase tracking-wider text-neutral-500 mb-1">Pickup Facility</p>
-                                <p className="text-[12px] font-semibold text-[#111111]">Patna One Plaza Hub</p>
-                                <p className="text-[11.5px] text-neutral-600 mt-0.5 leading-relaxed">
+                              <div className="invisible group-hover/hub:visible opacity-0 group-hover/hub:opacity-100 transition-all duration-150 absolute bottom-full left-0 mb-1 z-50 w-72 p-3 bg-white rounded-lg shadow-lg border border-neutral-200 text-left pointer-events-none">
+                                <p className="text-[11px] font-normal text-neutral-400 mb-0.5">Pickup Facility</p>
+                                <p className="text-[12px] font-normal text-[#111111]">Patna One Plaza Hub</p>
+                                <p className="text-[11.5px] font-normal text-neutral-600 mt-0.5 leading-relaxed">
                                   Shop No 101, Patna One Plaza Mall, New Dak Bunglow Road, opp Bharat Petrol Pump, Patna, Bihar, 800001
                                 </p>
                                 {ord.shiprocket?.pickupToken && (
-                                  <p className="mt-1.5 pt-1.5 border-t border-neutral-100 text-[10.5px] text-neutral-500 font-mono">
+                                  <p className="mt-1.5 pt-1.5 border-t border-neutral-100 text-[10.5px] font-normal text-neutral-500 font-mono">
                                     Token / Ref: {ord.shiprocket.pickupToken}
                                   </p>
                                 )}
@@ -2101,7 +2116,7 @@ function OrdersContent() {
                             {/* Picking Update (Courier & Dispatch) */}
                             {ord.shiprocket?.courierName && (
                               <div className="text-[10.5px] text-neutral-500 truncate" title={ord.shiprocket.courierName}>
-                                <span className="text-neutral-400">Update: </span>
+                                <span className="">Update: </span>
                                 <span className="font-semibold text-neutral-800">{ord.shiprocket.courierName}</span>
                               </div>
                             )}

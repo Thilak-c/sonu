@@ -3,7 +3,23 @@
 @font-face {
   font-family: 'Helvetica Now Text';
   src: url('/Font/HelveticaNowText.woff2') format('woff2');
-  font-weight: 100 900;
+  font-weight: 100 450;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Helvetica Now Text';
+  src: url('/Font/HelveticaNowTextMedium.woff2') format('woff2');
+  font-weight: 451 650;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Helvetica Now Text';
+  src: url('/Font/Bold.woff2') format('woff2');
+  font-weight: 651 900;
   font-style: normal;
   font-display: swap;
 }
@@ -33,17 +49,20 @@
 }
 
 @theme {
-  --font-sans: 'Helvetica Now Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --font-body: 'Helvetica Now Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --font-display: 'Helvetica Now Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-sans: 'Helvetica Now Text', sans-serif;
+  --font-body: 'Helvetica Now Text', sans-serif;
+  --font-display: 'Helvetica Now Text', sans-serif;
 }
 
 :root {
-  font-family: 'Helvetica Now Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Helvetica Now Text', sans-serif;
+}
+
+html, body, *, ::before, ::after, input, button, select, textarea {
+  font-family: 'Helvetica Now Text', sans-serif;
 }
 
 html, body {
-  font-family: 'Helvetica Now Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   color: #111111;
   background-color: #ffffff;
   -webkit-font-smoothing: antialiased;
