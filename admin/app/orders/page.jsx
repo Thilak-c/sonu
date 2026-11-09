@@ -300,10 +300,10 @@ function AddressScorePieChart({ score, category, risk, address }) {
 
   const strokeColor = isValid ? '#16a34a' : isModerate ? '#d97706' : '#e11d48';
   const tagBg = isValid
-    ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+    ? 'text-emerald-800'
     : isModerate
-      ? 'bg-amber-50 text-amber-800 border-amber-200'
-      : 'bg-rose-50 text-rose-700 border-rose-200';
+      ? ' text-amber-800 '
+      : ' text-rose-700 ';
 
   const radius = 6.5;
   const circumference = 2 * Math.PI * radius;
@@ -313,7 +313,7 @@ function AddressScorePieChart({ score, category, risk, address }) {
 
   return (
     <div
-      className="relative group/score inline-flex items-center gap-1.5 mt-1 cursor-help select-none"
+      className="relative group/score inline-flex items-center  mt-1 cursor-help select-none"
       onClick={(e) => e.stopPropagation()}
     >
       <div className="relative w-4 h-4 shrink-0 flex items-center justify-center">
@@ -333,36 +333,10 @@ function AddressScorePieChart({ score, category, risk, address }) {
         </svg>
       </div>
 
-      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border leading-none ${tagBg}`}>
+      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded  leading-none ${tagBg}`}>
         {validScore}% Valid
       </span>
 
-      {/* Speech Bubble Tooltip */}
-      <div className="invisible group-hover/score:visible opacity-0 group-hover/score:opacity-100 transition-all duration-150 absolute bottom-full left-0 mb-2 z-50 w-64 p-3 bg-neutral-900 text-white rounded-xl shadow-2xl text-[11.5px] pointer-events-none text-left">
-        <div className="flex items-center justify-between pb-1.5 border-b border-neutral-700">
-          <span className="font-semibold text-white">Address Validity AI</span>
-          <span className={`text-[9.5px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${isValid ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' : isModerate ? 'bg-amber-950 text-amber-300 border border-amber-800' : 'bg-rose-950 text-rose-300 border border-rose-800'}`}>
-            {probabilityLabel}
-          </span>
-        </div>
-        <div className="mt-2 space-y-1.5 text-neutral-300">
-          <div className="flex items-center justify-between">
-            <span>Validity Score:</span>
-            <span className="font-bold text-white">{validScore} / 100</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span>Delivery Probability:</span>
-            <span className="font-bold text-white">{validScore}%</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span>Quality Status:</span>
-            <span className={`font-semibold capitalize ${isValid ? 'text-emerald-400' : isModerate ? 'text-amber-400' : 'text-rose-400'}`}>
-              {isValid ? 'Valid Address' : isModerate ? 'Deliverable (Check Area)' : 'Low Deliverability / Incomplete'}
-            </span>
-          </div>
-        </div>
-        <div className="absolute -bottom-1 left-4 w-2 h-2 bg-neutral-900 rotate-45" />
-      </div>
     </div>
   );
 }
@@ -1806,21 +1780,11 @@ function OrdersContent() {
           })}
         </div>
 
-        {/* 3. FILTER CONTROLS & EXPORT */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+        {/* 3. ORDER COUNTS */}
+        <div className="flex items-center justify-between mb-3">
           <p className="text-[12.5px] text-neutral-500 font-normal">
             Showing {filteredOrders.length} {filteredOrders.length === 1 ? 'Order' : 'Orders'} (Page {currentPage} of {totalPages})
           </p>
-
-          <button
-            type="button"
-            onClick={handleExportCSV}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-neutral-300 bg-white hover:bg-neutral-50 text-neutral-800 text-[12.5px] font-medium shadow-2xs transition-colors cursor-pointer self-start sm:self-auto"
-            title="Export Orders to CSV"
-          >
-            <Download className="w-3.5 h-3.5 text-neutral-600" />
-            <span>Export CSV</span>
-          </button>
         </div>
 
         {/* 5. ORDERS TABLE & PAGINATION CONTAINER (Dynamic Viewport Height & Edge-to-Edge Bleed) */}
@@ -1995,7 +1959,7 @@ function OrdersContent() {
                           {/* Hover Bridge & Toolbox */}
                           <div className="invisible group-hover/addr:visible opacity-0 group-hover/addr:opacity-100 transition-opacity duration-150 absolute top-full left-0 pt-1 z-50 pointer-events-auto">
                             <div className="w-68 p-3 bg-white rounded-lg shadow-lg border border-neutral-200 text-left select-text space-y-2">
-                              <div className="text-[11.5px] font-normal text-neutral-700 leading-relaxed space-y-0.5">
+                              <div className="text-[11.5px] font-normal text-neutral-700 leading-relaxed">
                                 {formatAddressLines(addr, fullAddress).map((line, idx) => (
                                   <p key={idx}>{line}</p>
                                 ))}
