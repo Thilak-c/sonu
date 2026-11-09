@@ -276,6 +276,93 @@ function FloatingTextarea({
   );
 }
 
+function AddressJunkPieChart({ score, category, risk, address }) {
+  let resolvedScore = typeof score === 'number' ? (score <= 1 ? score * 100 : score) : null;
+
+  if (resolvedScore === null && address) {
+    let pts = 0;
+    if (address.houseNo && String(address.houseNo).trim().length > 2) pts += 25;
+    if (address.street && String(address.street).trim().length > 3) pts += 25;
+    if (address.pincode && /^[0-9]{6}$/.test(String(address.pincode).trim())) pts += 30;
+    if (address.city && String(address.city).trim().length > 2) pts += 20;
+    resolvedScore = Math.max(20, Math.min(100, pts));
+  }
+
+  const finalScore = resolvedScore !== null ? Math.round(resolvedScore) : 50;
+  const junkPercent = Math.max(0, Math.min(100, 100 - finalScore));
+
+  const isHighJunk = junkPercent >= 60;
+  const isMedJunk = junkPercent >= 35 && junkPercent < 60;
+
+  const strokeColor = isHighJunk ? '#e11d48' : isMedJunk ? '#d97706' : '#16a34a';
+  const tagBg = isHighJunk
+    ? 'bg-rose-50 text-rose-700 border-rose-200'
+    : isMedJunk
+    ? 'bg-amber-50 text-amber-800 border-amber-200'
+    : 'bg-emerald-50 text-emerald-700 border-emerald-200';
+
+  const radius = 6.5;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (junkPercent / 100) * circumference;
+
+  const categoryLabel = (category || (isHighJunk ? 'junk' : isMedJunk ? 'ambiguous' : 'valid')).toUpperCase();
+
+  return (
+    <div
+      className="relative group/junk inline-flex items-center gap-1.5 mt-1 cursor-help select-none"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="relative w-4 h-4 shrink-0 flex items-center justify-center">
+        <svg className="w-4 h-4 -rotate-90" viewBox="0 0 20 20">
+          <circle cx="10" cy="10" r={radius} stroke="#e5e7eb" strokeWidth="2.75" fill="none" />
+          <circle
+            cx="10"
+            cy="10"
+            r={radius}
+            stroke={strokeColor}
+            strokeWidth="2.75"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            strokeLinecap="round"
+            fill="none"
+          />
+        </svg>
+      </div>
+
+      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border leading-none ${tagBg}`}>
+        {junkPercent}% Junk ({categoryLabel})
+      </span>
+
+      {/* Speech Bubble Tooltip */}
+      <div className="invisible group-hover/junk:visible opacity-0 group-hover/junk:opacity-100 transition-all duration-150 absolute bottom-full left-0 mb-2 z-50 w-64 p-3 bg-neutral-900 text-white rounded-xl shadow-2xl text-[11.5px] pointer-events-none text-left">
+        <div className="flex items-center justify-between pb-1.5 border-b border-neutral-700">
+          <span className="font-semibold text-white">Address Risk Assessment</span>
+          <span className="text-[9.5px] font-bold px-1.5 py-0.5 rounded bg-neutral-800 border border-neutral-700 uppercase tracking-wider text-neutral-200">
+            {categoryLabel}
+          </span>
+        </div>
+        <div className="mt-2 space-y-1.5 text-neutral-300">
+          <div className="flex items-center justify-between">
+            <span>Junk Percentage:</span>
+            <span className="font-bold text-white">{junkPercent}% Junk</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span>Deliverability Score:</span>
+            <span className="font-bold text-white">{finalScore} / 100</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span>Risk Level:</span>
+            <span className={`font-semibold capitalize ${isHighJunk ? 'text-rose-400' : isMedJunk ? 'text-amber-400' : 'text-emerald-400'}`}>
+              {risk || (isHighJunk ? 'High RTO / Delivery Risk' : isMedJunk ? 'Moderate Risk' : 'Clean & Verified')}
+            </span>
+          </div>
+        </div>
+        <div className="absolute -bottom-1 left-4 w-2 h-2 bg-neutral-900 rotate-45" />
+      </div>
+    </div>
+  );
+}
+
 function OrdersContent() {
   const searchParams = useSearchParams();
   const initialId = searchParams.get('id');
@@ -1699,7 +1786,7 @@ function OrdersContent() {
 
           <div className="w-full overflow-x-auto scrollbar-none flex-1 pb-4">
             {/* Table Header Row */}
-            <div className="grid grid-cols-[36px_180px_220px_190px_150px_110px_110px_125px_120px] gap-3 px-4 py-2.5 text-[11.5px] font-bold text-neutral-600 uppercase tracking-wider border-b border-neutral-200 bg-neutral-100/70 rounded-t-lg min-w-[1280px]">
+            <div className="grid grid-cols-[36px_175px_235px_180px_140px_105px_165px_110px_115px] gap-3 px-4 py-2.5 text-[11.5px] font-bold text-neutral-600 uppercase tracking-wider border-b border-neutral-200 bg-neutral-100/70 rounded-t-lg min-w-[1300px]">
               <div className="flex items-center">
                 <input
                   type="checkbox"
@@ -1713,16 +1800,16 @@ function OrdersContent() {
               <div>Product Details</div>
               <div>Package Details</div>
               <div>Payment</div>
-              <div>Pickup Address</div>
+              <div>{activeTab === 'pickups' ? 'Pickup & Dispatch' : 'Pickup Details'}</div>
               <div>Status</div>
               <div className="text-right pr-2">Action</div>
             </div>
 
             {/* Table Body / Order Cards */}
             {loading ? (
-              <div className="space-y-2 mt-2 min-w-[1280px]">
+              <div className="space-y-2 mt-2 min-w-[1300px]">
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="bg-white border border-neutral-200 p-4 grid grid-cols-[36px_180px_220px_190px_150px_110px_110px_125px_120px] gap-3 items-center">
+                  <div key={i} className="bg-white border border-neutral-200 p-4 grid grid-cols-[36px_175px_235px_180px_140px_105px_165px_110px_115px] gap-3 items-center">
                     <div className="w-4 h-4 rounded bg-neutral-200" />
                     <div className="space-y-2">
                       <div className="w-24 h-4 rounded bg-neutral-200" />
@@ -1786,7 +1873,7 @@ function OrdersContent() {
                     <div
                       key={ord.orderId}
                       onClick={() => setSelectedOrder(ord)}
-                      className={`grid grid-cols-[36px_180px_220px_190px_150px_110px_110px_125px_120px] gap-3 px-4 py-3.5 bg-white rounded-lg border transition-all cursor-pointer items-start text-[13px] relative hover:z-30 ${isSelected
+                      className={`grid grid-cols-[36px_175px_235px_180px_140px_105px_165px_110px_115px] gap-3 px-4 py-3.5 bg-white rounded-lg border transition-all cursor-pointer items-start text-[13px] relative hover:z-30 ${isSelected
                         ? 'border-[#111111] shadow-[0_0_0_1px_#111111] bg-neutral-50/60'
                         : 'border-neutral-200 hover:border-neutral-400 hover:shadow-2xs'
                         }`}
@@ -1873,6 +1960,16 @@ function OrdersContent() {
                             <div className="absolute -top-1.5 left-6 w-3 h-3 bg-white border-l border-t border-neutral-200/90 rotate-45" />
                           </div>
                         </div>
+
+                        {/* Little Junk Address Pie Chart */}
+                        <div>
+                          <AddressJunkPieChart
+                            score={ord.shiprocket?.addressScore}
+                            category={ord.shiprocket?.addressCategory}
+                            risk={ord.shiprocket?.addressRisk}
+                            address={addr}
+                          />
+                        </div>
                       </div>
 
                       {/* 4. Product Details */}
@@ -1939,26 +2036,57 @@ function OrdersContent() {
                         </div>
                       </div>
 
-                      {/* 7. Pickup Address */}
-                      <div onClick={(e) => e.stopPropagation()}>
-                        <div className="relative group/pickup inline-block">
-                          <span className="text-[12.5px] font-medium text-neutral-800 border-b border-dotted border-neutral-400 cursor-help">
-                            Patna Hub
-                          </span>
-
-                          {/* Speech Bubble Tooltip */}
-                          <div className="invisible group-hover/pickup:visible opacity-0 group-hover/pickup:opacity-100 transition-all duration-150 absolute top-full left-1/2 -translate-x-1/2 mt-2 z-50 w-80 p-4 bg-white rounded-2xl shadow-2xl border border-neutral-200/90 pointer-events-none text-left">
-                            <div className="text-[13px] font-semibold text-[#111111] leading-relaxed space-y-0.5">
-                              <p className="font-bold text-[#111111]">Patna One Plaza Hub</p>
-                              <p>First & Second floor, Patna One Plaza Mall,</p>
-                              <p>New Dak Bunglow Rd, opp. Bharat Petrol Pump,</p>
-                              <p>Bander Bagicha, Fraser Road Area,</p>
-                              <p>Patna, Bihar - 800001, India</p>
-                              <p className="text-[11.5px] text-neutral-500 pt-1">Contact: Mohammad Shamshad (9122913620)</p>
+                      {/* 7. Pickup Details & Scheduled Status */}
+                      <div onClick={(e) => e.stopPropagation()} className="space-y-1">
+                        {isPickup || isManifested || ord.shiprocket?.pickupDate || rawStatus === 'pickup_scheduled' ? (
+                          <>
+                            {/* Status: Pickup */}
+                            <div className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#111111] text-white shadow-2xs">
+                              <Truck className="w-3 h-3 text-white" />
+                              <span>Status: Pickup</span>
                             </div>
-                            <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-l border-t border-neutral-200/90 rotate-45" />
+
+                            {/* Date */}
+                            <p className="text-[11.5px] font-semibold text-[#111111] leading-tight">
+                              <span className="text-neutral-500 font-normal">Date: </span>
+                              {ord.shiprocket?.pickupDate ? new Date(ord.shiprocket.pickupDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '10 Nov 2026'}
+                            </p>
+
+                            {/* Picking (Hub Location) */}
+                            <div className="relative group/hub inline-block max-w-[155px]">
+                              <p className="text-[11px] text-neutral-700 truncate cursor-help border-b border-dotted border-neutral-300 leading-tight">
+                                <span className="text-neutral-500">Picking: </span>
+                                <span className="font-medium text-[#111111]">{ord.shiprocket?.pickupLocationName || 'Patna One Plaza Hub'}</span>
+                              </p>
+                              {/* Speech Bubble Tooltip */}
+                              <div className="invisible group-hover/hub:visible opacity-0 group-hover/hub:opacity-100 transition-all duration-150 absolute bottom-full left-0 mb-1.5 z-50 w-72 p-3 bg-white rounded-xl shadow-xl border border-neutral-200 text-left pointer-events-none">
+                                <p className="text-[11px] font-bold uppercase tracking-wider text-neutral-500 mb-1">Pickup Facility</p>
+                                <p className="text-[12px] font-semibold text-[#111111]">Patna One Plaza Hub</p>
+                                <p className="text-[11.5px] text-neutral-600 mt-0.5 leading-relaxed">
+                                  Shop No 101, Patna One Plaza Mall, New Dak Bunglow Road, opp Bharat Petrol Pump, Patna, Bihar, 800001
+                                </p>
+                                {ord.shiprocket?.pickupToken && (
+                                  <p className="mt-1.5 pt-1.5 border-t border-neutral-100 text-[10.5px] text-neutral-500 font-mono">
+                                    Token / Ref: {ord.shiprocket.pickupToken}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Picking Update (Courier & Dispatch) */}
+                            {ord.shiprocket?.courierName && (
+                              <div className="text-[10.5px] text-neutral-500 truncate" title={ord.shiprocket.courierName}>
+                                <span className="text-neutral-400">Update: </span>
+                                <span className="font-semibold text-neutral-800">{ord.shiprocket.courierName}</span>
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <div className="space-y-0.5">
+                            <span className="text-[12px] font-medium text-neutral-800">Patna Hub</span>
+                            <p className="text-[10.5px] text-neutral-400">Not scheduled</p>
                           </div>
-                        </div>
+                        )}
                       </div>
 
                       {/* 8. Status Badge */}
@@ -2441,11 +2569,19 @@ function OrdersContent() {
 
               {/* 2. Shipping Address Card */}
               <div className="p-4 bg-white space-y-4">
-                <div className="flex items-center gap-2 pb-1 border-b border-neutral-100">
-                  <MapPin className="w-4 h-4 text-neutral-600" />
-                  <span className="text-[11.5px] font-bold uppercase tracking-wider text-neutral-800">
-                    Delivery Address
-                  </span>
+                <div className="flex items-center justify-between pb-1 border-b border-neutral-100">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-neutral-600" />
+                    <span className="text-[11.5px] font-bold uppercase tracking-wider text-neutral-800">
+                      Delivery Address
+                    </span>
+                  </div>
+                  <AddressJunkPieChart
+                    score={selectedOrder.shiprocket?.addressScore}
+                    category={selectedOrder.shiprocket?.addressCategory}
+                    risk={selectedOrder.shiprocket?.addressRisk}
+                    address={selectedOrder.customer?.address}
+                  />
                 </div>
 
                 <div className="pt-1 space-y-3.5">
@@ -3062,6 +3198,50 @@ function OrdersContent() {
                     </p>
                   </div>
                 </div>
+
+                {/* Pickup details if scheduled */}
+                {(selectedOrder.shiprocket?.pickupDate || selectedOrder.fulfillmentStatus === 'pickup_scheduled' || selectedOrder.fulfillmentStatus === 'manifested') && (
+                  <div className="p-3 rounded-xl bg-neutral-50 border border-neutral-200/80 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-bold bg-[#111111] text-white">
+                        <Truck className="w-3 h-3 text-white" />
+                        <span>Status: Pickup</span>
+                      </div>
+                      <span className="text-[11.5px] font-semibold text-[#111111]">
+                        Date: {selectedOrder.shiprocket?.pickupDate ? new Date(selectedOrder.shiprocket.pickupDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '10 Nov 2026'}
+                      </span>
+                    </div>
+
+                    <div className="text-[11.5px] text-neutral-600 space-y-0.5 pt-1.5 border-t border-neutral-200/70">
+                      <p>
+                        <span className="text-neutral-500 font-medium">Picking From: </span>
+                        <strong className="text-[#111111]">{selectedOrder.shiprocket?.pickupLocationName || 'Patna One Plaza Hub'}</strong>
+                      </p>
+                      <p className="text-[11px] text-neutral-500 leading-tight">
+                        Shop No 101, Patna One Plaza Mall, New Dak Bunglow Road, Patna - 800001
+                      </p>
+                      {selectedOrder.shiprocket?.pickupToken && (
+                        <p className="text-[11px] text-neutral-700 font-mono pt-0.5">
+                          Token / Ref: {selectedOrder.shiprocket.pickupToken}
+                        </p>
+                      )}
+                    </div>
+
+                    {selectedOrder.shiprocket?.manifestUrl && (
+                      <div className="pt-1">
+                        <a
+                          href={selectedOrder.shiprocket.manifestUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[11.5px] font-semibold text-[#111111] hover:underline inline-flex items-center gap-1"
+                        >
+                          <FileText className="w-3.5 h-3.5 text-neutral-500" />
+                          <span>View Official Pickup Manifest PDF</span>
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <div className="flex items-center gap-2 pt-1">
                   <a
