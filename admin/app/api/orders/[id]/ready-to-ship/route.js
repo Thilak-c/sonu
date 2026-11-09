@@ -72,6 +72,7 @@ export async function POST(request, context) {
       'shiprocket.courierName': awbResult.courierName,
       'shiprocket.courierCompanyId': awbResult.courierCompanyId,
       'shiprocket.routingCode': awbResult.routingCode,
+      ...(awbResult.rate ? { 'shiprocket.rate': awbResult.rate, 'shiprocket.deliveryPrice': awbResult.rate } : {}),
       'shiprocket.awbAssignedAt': new Date(),
       'shiprocket.isSimulated': false,
       updatedAt: new Date(),

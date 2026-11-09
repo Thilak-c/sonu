@@ -1825,7 +1825,7 @@ function OrdersContent() {
               <div>Product Details</div>
               <div>Package Details</div>
               <div>Payment</div>
-              <div>{activeTab === 'pickups' ? 'Pickup & Dispatch' : 'Pickup Details'}</div>
+              <div>Pickup & Dispatch</div>
               <div>Status</div>
               <div className="text-right pr-2">Action</div>
             </div>
@@ -2103,6 +2103,16 @@ function OrdersContent() {
                               <div className="text-[10.5px] text-neutral-500 truncate" title={ord.shiprocket.courierName}>
                                 <span className="text-neutral-400">Update: </span>
                                 <span className="font-semibold text-neutral-800">{ord.shiprocket.courierName}</span>
+                              </div>
+                            )}
+
+                            {/* Delivery Price */}
+                            {(ord.shiprocket?.rate || ord.shiprocket?.deliveryPrice || (ord.shiprocket?.courierName && (isPickup || isManifested || isReadyToShip))) && (
+                              <div className="text-[11px] font-semibold text-[#111111] leading-tight">
+                                <span className="text-neutral-500 font-normal">Delivery: </span>
+                                <span className="font-mono text-neutral-900">
+                                  ₹{Number(ord.shiprocket?.rate || ord.shiprocket?.deliveryPrice || (ord.payment?.method?.includes('cod') ? 111.72 : 55.72)).toFixed(2)}
+                                </span>
                               </div>
                             )}
                           </>
@@ -3209,7 +3219,7 @@ function OrdersContent() {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 text-[12.5px]">
+                <div className="grid grid-cols-3 gap-2.5 text-[12.5px]">
                   <div className="p-2.5 rounded-lg bg-neutral-50 border border-neutral-100 space-y-0.5">
                     <span className="text-[10.5px] uppercase font-bold text-neutral-400 block">Courier</span>
                     <p className={`font-semibold ${selectedOrder.shiprocket?.courierName ? 'text-[#111111]' : 'text-neutral-400 font-normal'}`}>
@@ -3220,6 +3230,16 @@ function OrdersContent() {
                     <span className="text-[10.5px] uppercase font-bold text-neutral-400 block">AWB Code</span>
                     <p className={`font-mono ${selectedOrder.shiprocket?.awbCode ? 'font-bold text-[#111111]' : 'text-neutral-400 font-normal'}`}>
                       {selectedOrder.shiprocket?.awbCode || 'Pending Dispatch'}
+                    </p>
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-neutral-50 border border-neutral-100 space-y-0.5">
+                    <span className="text-[10.5px] uppercase font-bold text-neutral-400 block">Delivery Price</span>
+                    <p className={`font-mono font-semibold ${selectedOrder.shiprocket?.rate || selectedOrder.shiprocket?.deliveryPrice ? 'text-neutral-900' : 'text-neutral-400 font-normal'}`}>
+                      {selectedOrder.shiprocket?.rate || selectedOrder.shiprocket?.deliveryPrice
+                        ? `₹${Number(selectedOrder.shiprocket.rate || selectedOrder.shiprocket.deliveryPrice).toFixed(2)}`
+                        : selectedOrder.shiprocket?.courierName
+                        ? (selectedOrder.payment?.method?.includes('cod') ? '₹111.72' : '₹55.72')
+                        : '—'}
                     </p>
                   </div>
                 </div>
@@ -3245,6 +3265,17 @@ function OrdersContent() {
                       <p className="text-[11px] text-neutral-500 leading-tight">
                         Shop No 101, Patna One Plaza Mall, New Dak Bunglow Road, Patna - 800001
                       </p>
+                      {selectedOrder.shiprocket?.courierName && (
+                        <p className="text-[11.5px] text-neutral-700 pt-0.5">
+                          <span className="text-neutral-500">Dispatch Partner: </span>
+                          <strong className="text-[#111111]">{selectedOrder.shiprocket.courierName}</strong>
+                          {(selectedOrder.shiprocket?.rate || selectedOrder.shiprocket?.deliveryPrice) && (
+                            <span className="ml-2 font-mono text-neutral-900 font-bold">
+                              ₹{Number(selectedOrder.shiprocket.rate || selectedOrder.shiprocket.deliveryPrice).toFixed(2)}
+                            </span>
+                          )}
+                        </p>
+                      )}
                       {selectedOrder.shiprocket?.pickupToken && (
                         <p className="text-[11px] text-neutral-700 font-mono pt-0.5">
                           Token / Ref: {selectedOrder.shiprocket.pickupToken}
