@@ -301,23 +301,7 @@ export default function AdminShell({ children, onNewProductClick }) {
               </span>
             </div>
 
-            <div className="flex items-center gap-3">
-              {user && (
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-neutral-100 border border-neutral-200/80 text-[12px] font-medium text-neutral-800">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  <span>User {user}</span>
-                </div>
-              )}
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-neutral-200 hover:border-neutral-300 bg-white hover:bg-neutral-50 text-[12px] font-medium text-neutral-700 hover:text-black transition-colors cursor-pointer"
-                title="Sign out of Admin"
-              >
-                <LogOut className="w-3.5 h-3.5 text-neutral-500" />
-                <span>Sign Out</span>
-              </button>
-            </div>
+           
           </header>
         )}
 

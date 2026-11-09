@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { initDb } from '@/lib/mongodb';
-import { createShiprocketOrder } from '@/lib/shiprocket';
+import { createShiprocketOrder, cancelShiprocketOrder } from '@/lib/shiprocket';
 import { sendMockWhatsAppMessage } from '@/lib/whatsapp';
 
 export const dynamic = 'force-dynamic';
@@ -178,7 +178,23 @@ export async function PATCH(request) {
       updatedAt: new Date(),
     };
 
-    if (fulfillmentStatus !== undefined) updateFields.fulfillmentStatus = fulfillmentStatus;
+    if (fulfillmentStatus !== undefined) {
+      updateFields.fulfillmentStatus = fulfillmentStatus;
+
+      // If cancelling an order that was registered on Shiprocket, cancel it with Shiprocket Production API
+      if (fulfillmentStatus === 'cancelled') {
+        const existingOrder = await db.collection('orders').findOne({ orderId });
+        const srOrderId = existingOrder?.shiprocket?.orderId;
+        if (srOrderId) {
+          try {
+            await cancelShiprocketOrder(srOrderId);
+            updateFields['shiprocket.status'] = 'CANCELLED';
+          } catch (cErr) {
+            console.warn(`[Shiprocket Cancellation Warning for ${orderId}]:`, cErr.message);
+          }
+        }
+      }
+    }
     if (status !== undefined) updateFields.status = status;
     if (customer !== undefined) updateFields.customer = customer;
     if (address !== undefined) updateFields.address = address;

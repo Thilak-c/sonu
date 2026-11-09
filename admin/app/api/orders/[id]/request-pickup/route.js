@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { initDb } from '@/lib/mongodb';
-import { requestShiprocketPickup, generateShiprocketLabel, generateShiprocketManifest } from '@/lib/shiprocket';
+import { requestShiprocketPickup, generateShiprocketLabel, generateShiprocketManifest, createShiprocketOrder } from '@/lib/shiprocket';
 import { sendMockWhatsAppMessage } from '@/lib/whatsapp';
 import { sendOrderStatusEmail } from '@/lib/email';
 
@@ -23,8 +23,16 @@ export async function POST(request, context) {
     }
 
     let shipmentId = order.shiprocket?.shipmentId;
+    let srOrderId = order.shiprocket?.orderId;
     if (!shipmentId) {
-      shipmentId = Math.floor(1000000 + Math.random() * 9000000);
+      try {
+        const srOrder = await createShiprocketOrder(order);
+        shipmentId = srOrder.shipment_id;
+        srOrderId = srOrder.order_id;
+      } catch (srErr) {
+        console.error('[Shiprocket Create Order in Request-Pickup Error]:', srErr.message);
+        throw srErr;
+      }
     }
 
     // 1. Request pickup from Shiprocket Production
@@ -69,6 +77,7 @@ export async function POST(request, context) {
     const updateDoc = {
       fulfillmentStatus: 'pickup_scheduled',
       'shiprocket.shipmentId': shipmentId,
+      ...(srOrderId ? { 'shiprocket.orderId': srOrderId } : {}),
       'shiprocket.status': 'PICKUP_SCHEDULED',
       'shiprocket.pickupToken': pickupResult.pickupToken,
       'shiprocket.pickupScheduledDate': pickupResult.pickupScheduledDate,

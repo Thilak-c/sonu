@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { initDb } from '@/lib/mongodb';
-import { assignShiprocketAWB } from '@/lib/shiprocket';
+import { assignShiprocketAWB, createShiprocketOrder } from '@/lib/shiprocket';
 import { sendMockWhatsAppMessage } from '@/lib/whatsapp';
 import { sendShippingNotificationEmail } from '@/lib/email';
 
@@ -23,8 +23,16 @@ export async function POST(request, context) {
     }
 
     let shipmentId = order.shiprocket?.shipmentId;
+    let srOrderId = order.shiprocket?.orderId;
     if (!shipmentId) {
-      shipmentId = Math.floor(1000000 + Math.random() * 9000000);
+      try {
+        const srOrder = await createShiprocketOrder(order);
+        shipmentId = srOrder.shipment_id;
+        srOrderId = srOrder.order_id;
+      } catch (srErr) {
+        console.error('[Shiprocket Create Order in Ready-To-Ship Error]:', srErr.message);
+        throw srErr;
+      }
     }
 
     // Trigger WhatsApp notification if customer phone exists
@@ -67,6 +75,7 @@ export async function POST(request, context) {
     const updateDoc = {
       fulfillmentStatus: 'ready_to_ship',
       'shiprocket.shipmentId': shipmentId,
+      ...(srOrderId ? { 'shiprocket.orderId': srOrderId } : {}),
       'shiprocket.status': 'READY_TO_SHIP',
       'shiprocket.awbCode': awbResult.awbCode,
       'shiprocket.courierName': awbResult.courierName,
