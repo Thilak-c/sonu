@@ -364,6 +364,8 @@ function OrdersContent() {
   const [toastMessage, setToastMessage] = useState(null);
   const [itemsPerPage, setItemsPerPage] = useState(15);
   const [currentPage, setCurrentPage] = useState(1);
+  const searchTimeoutRef = useRef(null);
+  const [shiprocketSettings, setShiprocketSettings] = useState(null);
   const [catalogProducts, setCatalogProducts] = useState([]);
   const [showAddProductModal, setShowAddProductModal] = useState(false);
   const [selectedCatalogProduct, setSelectedCatalogProduct] = useState(null);
@@ -391,8 +393,9 @@ function OrdersContent() {
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data?.seller) setSellerSettings((prev) => ({ ...prev, ...data.seller }));
+        if (data?.shiprocket) setShiprocketSettings(data.shiprocket);
       })
-      .catch((err) => console.warn('Could not load seller settings:', err));
+      .catch((err) => console.warn('Could not load settings:', err));
 
     fetch('/api/products')
       .then((res) => (res.ok ? res.json() : null))
@@ -462,11 +465,12 @@ function OrdersContent() {
     return () => window.removeEventListener('click', handleWindowClick);
   }, []);
 
-  const fetchOrders = async () => {
+  const fetchOrders = async (overrideQuery = null) => {
     try {
       setLoading(true);
       const url = new URL('/api/orders', window.location.origin);
-      if (searchQuery.trim()) url.searchParams.set('q', searchQuery.trim());
+      const q = overrideQuery !== null ? overrideQuery : searchQuery;
+      if (q && q.trim()) url.searchParams.set('q', q.trim());
 
       const res = await fetch(url.toString());
       if (res.ok) {
@@ -492,10 +496,29 @@ function OrdersContent() {
     fetchOrders();
   }, []);
 
+  // Real-time automatic search 0.5s (500ms) after user stops typing
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    searchTimeoutRef.current = setTimeout(() => {
+      fetchOrders(searchQuery);
+    }, 500);
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [searchQuery]);
+
   const handleSearchSubmit = (e) => {
     e.preventDefault();
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
     setCurrentPage(1);
-    fetchOrders();
+    fetchOrders(searchQuery);
   };
 
   const togglePhoneMask = (orderId, e) => {
@@ -1548,7 +1571,25 @@ function OrdersContent() {
         const emailMatch = (ord.customer?.email || ord.customerEmail || '').toLowerCase().includes(q);
         const phoneMatch = (ord.customer?.mobile || ord.customerPhone || ord.address?.mobile || '').includes(q);
         const awbMatch = (ord.shiprocket?.awbCode || '').toLowerCase().includes(q);
-        if (!orderIdMatch && !nameMatch && !emailMatch && !phoneMatch && !awbMatch) {
+        const courierMatch = (ord.shiprocket?.courierName || '').toLowerCase().includes(q);
+
+        // Product details match (product name, title, SKU, size, color, category)
+        const productMatch = (ord.items || []).some((item) => {
+          const title = (item.name || item.title || item.productName || '').toLowerCase();
+          const sku = (item.sku || item.id || item.productId || '').toLowerCase();
+          const size = String(item.size || '').toLowerCase();
+          const color = (item.color || '').toLowerCase();
+          const category = (item.category || '').toLowerCase();
+          return (
+            title.includes(q) ||
+            sku.includes(q) ||
+            size.includes(q) ||
+            color.includes(q) ||
+            category.includes(q)
+          );
+        });
+
+        if (!orderIdMatch && !nameMatch && !emailMatch && !phoneMatch && !awbMatch && !courierMatch && !productMatch) {
           return false;
         }
       }
@@ -1747,7 +1788,7 @@ function OrdersContent() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search by Order ID, Buyer, Email, Phone..."
+                  placeholder="Search by Order ID, Buyer, Product, Size, Email..."
                   className="w-full py-2 text-[13px] outline-none text-[#111111] placeholder:text-neutral-400 bg-transparent"
                 />
               </div>
@@ -2057,14 +2098,46 @@ function OrdersContent() {
                       {/* 5. Package Details */}
                       {(() => {
                         const totalUnits = (ord.items || []).reduce((s, it) => s + (Number(it.quantity) || 1), 0) || 1;
-                        const pkgWeight = totalUnits === 1 ? '0.9 Kg' : totalUnits === 2 ? '1.8 Kg' : `${(0.9 * totalUnits).toFixed(1)} Kg`;
-                        const pkgDim = totalUnits === 1 ? '30 x 20 x 12 cm' : totalUnits === 2 ? '35 x 28 x 24 cm' : `35 x 28 x ${24 + (totalUnits - 2) * 12} cm`;
+                        
+                        // Live dimensions from Admin Shiprocket settings
+                        const singleL = Number(shiprocketSettings?.singleLength) || 20;
+                        const singleB = Number(shiprocketSettings?.singleBreadth) || 15;
+                        const singleH = Number(shiprocketSettings?.singleHeight) || 8;
+                        const singleW = Number(shiprocketSettings?.singleWeight) || 0.4;
+
+                        const doubleL = Number(shiprocketSettings?.doubleLength) || 35;
+                        const doubleB = Number(shiprocketSettings?.doubleBreadth) || 28;
+                        const doubleH = Number(shiprocketSettings?.doubleHeight) || 24;
+                        const doubleW = Number(shiprocketSettings?.doubleWeight) || 1.8;
+
+                        const addH = Number(shiprocketSettings?.additionalHeightPerUnit) || 12;
+                        const addW = Number(shiprocketSettings?.additionalWeightPerUnit) || 0.9;
+
+                        let pkgWeight = '';
+                        let pkgDim = '';
+
+                        if (totalUnits === 1) {
+                          pkgWeight = `${singleW} Kg`;
+                          pkgDim = `${singleL} x ${singleB} x ${singleH} cm`;
+                        } else if (totalUnits === 2) {
+                          pkgWeight = `${doubleW} Kg`;
+                          pkgDim = `${doubleL} x ${doubleB} x ${doubleH} cm`;
+                        } else {
+                          const totalWeight = doubleW + (totalUnits - 2) * addW;
+                          const totalHeight = doubleH + (totalUnits - 2) * addH;
+                          pkgWeight = `${totalWeight.toFixed(1)} Kg`;
+                          pkgDim = `${doubleL} x ${doubleB} x ${totalHeight} cm`;
+                        }
+
                         return (
                           <div className="text-[12px] text-neutral-600 space-y-0.5">
-                            <p><span className="text-neutral-500">Weight:</span> {pkgWeight}</p>
-                            <p className="text-neutral-500">{pkgDim}</p>
+                            <p>
+                              <span className="text-neutral-500 font-normal">Weight:</span>{' '}
+                              <span className="font-medium text-[#111111]">{pkgWeight}</span>
+                            </p>
+                            <p className="text-neutral-600 font-medium">{pkgDim}</p>
                             {ord.shiprocket?.courierName && (
-                              <p className="text-[11px] text-[#111111] font-medium truncate" title={ord.shiprocket.courierName}>
+                              <p className="text-[11px] text-neutral-500 font-normal truncate" title={ord.shiprocket.courierName}>
                                 {ord.shiprocket.courierName}
                               </p>
                             )}

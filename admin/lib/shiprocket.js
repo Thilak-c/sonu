@@ -198,6 +198,34 @@ export async function createShiprocketOrder(order) {
   const totalAmount = Number(order.totalAmount || 13995);
   const advancePaid = isPartialCod ? Number(order.payment?.advancePaid ?? 200) : 0;
 
+  let pkgLength = 20;
+  let pkgBreadth = 15;
+  let pkgHeight = 8;
+  let pkgWeight = 0.4;
+  try {
+    const db = await getDb();
+    const sDoc = await db.collection('settings').findOne({ _id: 'shiprocket_settings' });
+    if (sDoc) {
+      const units = (order.items || []).reduce((acc, it) => acc + (Number(it.quantity) || 1), 0) || 1;
+      if (units === 1) {
+        pkgLength = Number(sDoc.singleLength) || pkgLength;
+        pkgBreadth = Number(sDoc.singleBreadth) || pkgBreadth;
+        pkgHeight = Number(sDoc.singleHeight) || pkgHeight;
+        pkgWeight = Number(sDoc.singleWeight) || pkgWeight;
+      } else if (units === 2) {
+        pkgLength = Number(sDoc.doubleLength) || 35;
+        pkgBreadth = Number(sDoc.doubleBreadth) || 28;
+        pkgHeight = Number(sDoc.doubleHeight) || 24;
+        pkgWeight = Number(sDoc.doubleWeight) || 1.8;
+      } else {
+        pkgLength = Number(sDoc.doubleLength) || 35;
+        pkgBreadth = Number(sDoc.doubleBreadth) || 28;
+        pkgHeight = (Number(sDoc.doubleHeight) || 24) + (units - 2) * (Number(sDoc.additionalHeightPerUnit) || 12);
+        pkgWeight = (Number(sDoc.doubleWeight) || 1.8) + (units - 2) * (Number(sDoc.additionalWeightPerUnit) || 0.9);
+      }
+    }
+  } catch (_) {}
+
   const payload = {
     order_id: String(order.orderId),
     order_date: orderDate,
@@ -226,10 +254,10 @@ export async function createShiprocketOrder(order) {
     transaction_charges: 0,
     total_discount: isPartialCod ? advancePaid : 0,
     sub_total: totalAmount,
-    length: 20,
-    breadth: 15,
-    height: 8,
-    weight: 0.4,
+    length: pkgLength,
+    breadth: pkgBreadth,
+    height: pkgHeight,
+    weight: pkgWeight,
   };
 
   const res = await fetch(`${base}/orders/create/adhoc`, {

@@ -37,6 +37,14 @@ export async function GET(request) {
         { 'customer.name': { $regex: q, $options: 'i' } },
         { 'customer.mobile': { $regex: q, $options: 'i' } },
         { 'customer.email': { $regex: q, $options: 'i' } },
+        { 'items.name': { $regex: q, $options: 'i' } },
+        { 'items.title': { $regex: q, $options: 'i' } },
+        { 'items.productName': { $regex: q, $options: 'i' } },
+        { 'items.sku': { $regex: q, $options: 'i' } },
+        { 'items.color': { $regex: q, $options: 'i' } },
+        { 'items.size': { $regex: q, $options: 'i' } },
+        { 'shiprocket.awbCode': { $regex: q, $options: 'i' } },
+        { 'shiprocket.courierName': { $regex: q, $options: 'i' } },
       ];
     }
 
