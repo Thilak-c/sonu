@@ -1828,7 +1828,7 @@ function OrdersContent() {
 
           <div className="-mx-5 sm:-mx-7 lg:-mx-8 w-[calc(100%+2.5rem)] sm:w-[calc(100%+3.5rem)] lg:w-[calc(100%+4rem)] overflow-x-auto overflow-y-hidden border-t border-b border-neutral-200 bg-white flex-1 custom-table-scrollbar">
             {/* Table Header Row */}
-            <div className="grid grid-cols-[36px_175px_235px_180px_140px_105px_165px_110px_115px] gap-3 px-6 py-3 text-[11.5px] font-bold text-neutral-600 uppercase tracking-wider border-b border-neutral-200 bg-neutral-100/90 rounded-none min-w-[1340px] w-full select-none">
+            <div className="grid grid-cols-[36px_175px_235px_180px_140px_105px_165px_110px_115px] gap-3 px-6 py-3 text-[11.5px] font-medium text-neutral-600 uppercase tracking-wider border-b border-neutral-200 bg-neutral-100/90 rounded-none min-w-[1340px] w-full select-none">
               <div className="flex items-center">
                 <input
                   type="checkbox"
@@ -2031,7 +2031,7 @@ function OrdersContent() {
 
                       {/* 4. Product Details */}
                       <div>
-                        <p className="font-semibold text-[#111111] text-[13px] truncate" title={firstItem.name || 'Sonu Footwear'}>
+                        <p className="font-medium text-[#111111] text-[13px] truncate" title={firstItem.name || 'Sonu Footwear'}>
                           {firstItem.name || 'Sonu Hybrid RN'}
                         </p>
 
@@ -2046,7 +2046,7 @@ function OrdersContent() {
                               e.stopPropagation();
                               setSelectedOrder(ord);
                             }}
-                            className="text-[11.5px] text-neutral-800 hover:underline font-semibold mt-1 block"
+                            className="text-[11.5px] text-neutral-800 hover:underline font-medium mt-1 block"
                           >
                             +{items.length - 1} more item{items.length - 1 > 1 ? 's' : ''}
                           </button>
@@ -2073,20 +2073,20 @@ function OrdersContent() {
 
                       {/* 6. Payment */}
                       <div>
-                        <p className="font-bold text-[#111111] text-[13.5px]">
+                        <p className="font-medium text-[#111111] text-[13.5px]">
                           ₹ {amount.toLocaleString('en-IN')}
                         </p>
                         <div className="mt-1">
                           {ord.payment?.method === 'full_cod' || ord.payment?.method === 'cod' ? (
-                            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-900 border border-amber-300">
+                            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-50 text-amber-900 border border-amber-300">
                               Full COD
                             </span>
                           ) : ord.payment?.method === 'partial_cod' ? (
-                            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-neutral-100 text-red-800 ">
+                            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium bg-neutral-100 text-red-800 border border-neutral-200">
                               Partial COD
                             </span>
                           ) : (
-                            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-neutral-100 text-green-800">
+                            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium bg-neutral-100 text-green-800 border border-neutral-200">
                               Prepaid
                             </span>
                           )}
@@ -2104,7 +2104,7 @@ function OrdersContent() {
                             </div> */}
 
                             {/* Date */}
-                            <p className="text-[11.5px] font-semibold text-[#111111] leading-tight">
+                            <p className="text-[11.5px] font-medium text-[#111111] leading-tight">
                               <span className="text-neutral-500 font-normal">Date: </span>
                               {ord.shiprocket?.pickupDate ? new Date(ord.shiprocket.pickupDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '10 Nov 2026'}
                             </p>
@@ -2116,8 +2116,8 @@ function OrdersContent() {
                                 <span className="font-medium text-[#111111]">{ord.shiprocket?.pickupLocationName || 'Patna One Plaza Hub'}</span>
                               </p>
                               {/* Speech Bubble Tooltip */}
-                              <div className="invisible group-hover/hub:visible opacity-0 group-hover/hub:opacity-100 transition-all duration-150 absolute bottom-full left-0 mb-1 z-50 w-72 p-3 bg-white rounded-lg shadow-lg border border-neutral-200 text-left pointer-events-none">
-                                <p className="text-[11px] font-normal text-neutral-400 ">Pickup Facility</p>
+                              <div className="invisible group-hover/hub:visible opacity-0 group-hover/hub:opacity-100 transition-all duration-150 absolute bottom-full left-0 mb-1 z-50 w-72 p-2.5 bg-gray-50 rounded-lg border border-neutral-200 text-left pointer-events-none">
+                                {/* <p className="text-[11px] font-normal text-neutral-400 ">Pickup Facility</p> */}
                                 <p className="text-[12px] font-normal text-[#111111]">Patna One Plaza Hub</p>
                                 <p className="text-[11.5px] font-normal text-neutral-600  leading-relaxed">
                                   Shop No 101, Patna One Plaza Mall, New Dak Bunglow Road, opp Bharat Petrol Pump, Patna, Bihar, 800001
@@ -2133,16 +2133,16 @@ function OrdersContent() {
                             {/* Picking Update (Courier & Dispatch) */}
                             {ord.shiprocket?.courierName && (
                               <div className="text-[10.5px] text-neutral-500 truncate" title={ord.shiprocket.courierName}>
-                                <span className="">Update: </span>
-                                <span className="font-semibold text-neutral-800">{ord.shiprocket.courierName}</span>
+                                <span>Update: </span>
+                                <span className="font-medium text-neutral-800">{ord.shiprocket.courierName}</span>
                               </div>
                             )}
 
                             {/* Delivery Price */}
                             {(ord.shiprocket?.rate || ord.shiprocket?.deliveryPrice || (ord.shiprocket?.courierName && (isPickup || isManifested || isReadyToShip))) && (
-                              <div className="text-[11px] font-semibold text-[#111111] leading-tight">
+                              <div className="text-[11px] font-medium text-[#111111] leading-tight">
                                 <span className="text-neutral-500 font-normal">Delivery: </span>
-                                <span className="font-mono text-neutral-900">
+                                <span className="font-mono text-neutral-900 font-medium">
                                   ₹{Number(ord.shiprocket?.rate || ord.shiprocket?.deliveryPrice || (ord.payment?.method?.includes('cod') ? 111.72 : 55.72)).toFixed(2)}
                                 </span>
                               </div>
@@ -2159,47 +2159,47 @@ function OrdersContent() {
                       {/* 8. Status Badge */}
                       <div className="flex items-center">
                         {isNew && (
-                          <span className="inline-flex items-center justify-center px-2 py-0.5 rounded text-[10.5px] font-bold bg-neutral-100 text-neutral-800 border border-neutral-300 whitespace-nowrap shrink-0">
+                          <span className="inline-flex items-center justify-center px-2 py-0.5 rounded text-[10.5px] font-medium bg-neutral-100 text-neutral-800 border border-neutral-300 whitespace-nowrap shrink-0">
                             NEW
                           </span>
                         )}
                         {isHold && (
-                          <span className="inline-flex items-center justify-center px-2 py-0.5 rounded text-[10.5px] font-bold bg-amber-50 text-amber-800 border border-amber-300 whitespace-nowrap shrink-0">
+                          <span className="inline-flex items-center justify-center px-2 py-0.5 rounded text-[10.5px] font-medium bg-amber-50 text-amber-800 border border-amber-300 whitespace-nowrap shrink-0">
                             HOLD
                           </span>
                         )}
                         {isReadyToShip && (
-                          <span className="inline-flex items-center justify-center px-2 py-0.5 rounded text-[10.5px] font-bold bg-neutral-100 text-neutral-800 border border-neutral-300 whitespace-nowrap shrink-0">
+                          <span className="inline-flex items-center justify-center px-2 py-0.5 rounded text-[10.5px] font-medium bg-neutral-100 text-neutral-800 border border-neutral-300 whitespace-nowrap shrink-0">
                             READY TO SHIP
                           </span>
                         )}
                         {isPickup && (
-                          <span className="inline-flex items-center justify-center px-2 py-0.5 rounded text-[10.5px] font-bold bg-neutral-100 text-neutral-800 border border-neutral-300 whitespace-nowrap shrink-0">
+                          <span className="inline-flex items-center justify-center px-2 py-0.5 rounded text-[10.5px] font-medium bg-neutral-100 text-neutral-800 border border-neutral-300 whitespace-nowrap shrink-0">
                             PICKUP
                           </span>
                         )}
                         {isManifested && (
-                          <span className="inline-flex items-center justify-center px-2 py-0.5 rounded text-[10.5px] font-bold bg-neutral-100 text-neutral-800 border border-neutral-300 whitespace-nowrap shrink-0">
+                          <span className="inline-flex items-center justify-center px-2 py-0.5 rounded text-[10.5px] font-medium bg-neutral-100 text-neutral-800 border border-neutral-300 whitespace-nowrap shrink-0">
                             MANIFESTED
                           </span>
                         )}
                         {isInTransit && (
-                          <span className="inline-flex items-center justify-center px-2 py-0.5 rounded text-[10.5px] font-bold bg-neutral-100 text-neutral-800 border border-neutral-300 whitespace-nowrap shrink-0">
+                          <span className="inline-flex items-center justify-center px-2 py-0.5 rounded text-[10.5px] font-medium bg-neutral-100 text-neutral-800 border border-neutral-300 whitespace-nowrap shrink-0">
                             IN TRANSIT
                           </span>
                         )}
                         {isDelivered && (
-                          <span className="inline-flex items-center justify-center px-2 py-0.5 rounded text-[10.5px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 whitespace-nowrap shrink-0">
+                          <span className="inline-flex items-center justify-center px-2 py-0.5 rounded text-[10.5px] font-medium bg-emerald-50 text-emerald-800 border border-emerald-300 whitespace-nowrap shrink-0">
                             DELIVERED
                           </span>
                         )}
                         {isRto && (
-                          <span className="inline-flex items-center justify-center px-2 py-0.5 rounded text-[10.5px] font-bold bg-neutral-100 text-neutral-500 border border-neutral-300 whitespace-nowrap shrink-0">
+                          <span className="inline-flex items-center justify-center px-2 py-0.5 rounded text-[10.5px] font-medium bg-neutral-100 text-neutral-500 border border-neutral-300 whitespace-nowrap shrink-0">
                             RTO
                           </span>
                         )}
                         {isCancelled && (
-                          <span className="inline-flex items-center justify-center px-2 py-0.5 rounded text-[10.5px] font-bold bg-rose-50 text-rose-700 border border-rose-200 whitespace-nowrap shrink-0">
+                          <span className="inline-flex items-center justify-center px-2 py-0.5 rounded text-[10.5px] font-medium bg-rose-50 text-rose-700 border border-rose-200 whitespace-nowrap shrink-0">
                             CANCELLED
                           </span>
                         )}
@@ -2217,7 +2217,7 @@ function OrdersContent() {
                             type="button"
                             disabled={actionLoading === ord.orderId}
                             onClick={(e) => handleShipNow(ord.orderId, e)}
-                            className="px-3 py-1.5 rounded-lg bg-[#111111] hover:bg-black active:scale-[0.98] text-white text-[12px] font-semibold transition-all shadow-xs flex items-center justify-center min-w-[104px] cursor-pointer"
+                            className="px-3 py-1.5 rounded-lg bg-[#111111] hover:bg-black active:scale-[0.98] text-white text-[12px] font-medium transition-all shadow-xs flex items-center justify-center min-w-[104px] cursor-pointer"
                           >
                             {actionLoading === ord.orderId ? (
                               <RefreshCw className="w-3.5 h-3.5 animate-spin text-white" />
@@ -2235,7 +2235,7 @@ function OrdersContent() {
                               e.stopPropagation();
                               handleMoveToOnHold(ord);
                             }}
-                            className="px-3 py-1.5 rounded-lg bg-white border border-neutral-300 hover:border-[#111111] text-[#111111] text-[12px] font-semibold transition-all shadow-xs flex items-center justify-center min-w-[76px] cursor-pointer"
+                            className="px-3 py-1.5 rounded-lg bg-white border border-neutral-300 hover:border-[#111111] text-[#111111] text-[12px] font-medium transition-all shadow-xs flex items-center justify-center min-w-[76px] cursor-pointer"
                           >
                             <span>Unhold</span>
                           </button>
@@ -2246,7 +2246,7 @@ function OrdersContent() {
                             type="button"
                             disabled={actionLoading === ord.orderId}
                             onClick={(e) => handleRequestPickup(ord.orderId, e)}
-                            className="px-3 py-1.5 rounded-lg bg-[#111111] hover:bg-black active:scale-[0.98] text-white text-[12px] font-semibold transition-all shadow-xs flex items-center justify-center min-w-[80px] cursor-pointer"
+                            className="px-3 py-1.5 rounded-lg bg-[#111111] hover:bg-black active:scale-[0.98] text-white text-[12px] font-medium transition-all shadow-xs flex items-center justify-center min-w-[80px] cursor-pointer"
                           >
                             {actionLoading === ord.orderId ? (
                               <RefreshCw className="w-3.5 h-3.5 animate-spin text-white" />
