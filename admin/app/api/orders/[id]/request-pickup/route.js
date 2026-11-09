@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { initDb } from '@/lib/mongodb';
-import { requestShiprocketPickup, generateShiprocketLabel } from '@/lib/shiprocket';
+import { requestShiprocketPickup, generateShiprocketLabel, generateShiprocketManifest } from '@/lib/shiprocket';
 import { sendMockWhatsAppMessage } from '@/lib/whatsapp';
 import { sendOrderStatusEmail } from '@/lib/email';
 
@@ -32,6 +32,14 @@ export async function POST(request, context) {
 
     // 2. Generate shipping label PDF link from Shiprocket Production
     const labelResult = await generateShiprocketLabel(shipmentId);
+
+    // 2b. Generate pickup manifest PDF link from Shiprocket Production
+    let manifestResult = null;
+    try {
+      manifestResult = await generateShiprocketManifest(shipmentId);
+    } catch (mErr) {
+      console.warn(`[Shiprocket Manifest] Warning for #${orderId}:`, mErr.message);
+    }
 
     // 3. Trigger Mock WhatsApp Notification
     const customer = order.customer || {};
@@ -66,6 +74,7 @@ export async function POST(request, context) {
       'shiprocket.pickupScheduledDate': pickupResult.pickupScheduledDate,
       'shiprocket.pickupScheduledAt': new Date(),
       'shiprocket.labelUrl': labelResult?.labelUrl || null,
+      'shiprocket.manifestUrl': manifestResult?.manifestUrl || null,
       updatedAt: new Date(),
     };
 

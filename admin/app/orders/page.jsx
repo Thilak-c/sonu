@@ -1673,6 +1673,27 @@ function OrdersContent() {
         </div>
       )}
 
+      {/* Edge-to-edge custom scrollbar styles */}
+      <style jsx global>{`
+        .custom-table-scrollbar {
+          scrollbar-width: thin;
+          scrollbar-color: #a3a3a3 #f5f5f5;
+        }
+        .custom-table-scrollbar::-webkit-scrollbar {
+          height: 8px;
+        }
+        .custom-table-scrollbar::-webkit-scrollbar-track {
+          background: #f5f5f5;
+        }
+        .custom-table-scrollbar::-webkit-scrollbar-thumb {
+          background: #a3a3a3;
+          border-radius: 4px;
+        }
+        .custom-table-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #555555;
+        }
+      `}</style>
+
       <div className="w-full flex-1 flex flex-col p-5 sm:p-7 lg:p-8 text-[#111111]" style={{ fontFamily: "'Helvetica Now Text', sans-serif" }}>
 
         {/* 1. TOP HEADER ROW */}
@@ -1781,12 +1802,12 @@ function OrdersContent() {
           </button>
         </div>
 
-        {/* 5. ORDERS TABLE & PAGINATION CONTAINER (Dynamic Viewport Height) */}
+        {/* 5. ORDERS TABLE & PAGINATION CONTAINER (Dynamic Viewport Height & Edge-to-Edge Bleed) */}
         <div className="w-full flex-1 flex flex-col min-h-[calc(100vh-230px)]">
 
-          <div className="w-full overflow-x-auto scrollbar-none flex-1 pb-4">
+          <div className="-mx-5 sm:-mx-7 lg:-mx-8 w-[calc(100%+2.5rem)] sm:w-[calc(100%+3.5rem)] lg:w-[calc(100%+4rem)] overflow-x-auto overflow-y-hidden border-t border-b border-neutral-200 bg-white flex-1 custom-table-scrollbar">
             {/* Table Header Row */}
-            <div className="grid grid-cols-[36px_175px_235px_180px_140px_105px_165px_110px_115px] gap-3 px-4 py-2.5 text-[11.5px] font-bold text-neutral-600 uppercase tracking-wider border-b border-neutral-200 bg-neutral-100/70 rounded-t-lg min-w-[1300px]">
+            <div className="grid grid-cols-[36px_175px_235px_180px_140px_105px_165px_110px_115px] gap-3 px-6 py-3 text-[11.5px] font-bold text-neutral-600 uppercase tracking-wider border-b border-neutral-200 bg-neutral-100/90 rounded-none min-w-[1340px] w-full select-none">
               <div className="flex items-center">
                 <input
                   type="checkbox"
@@ -1807,9 +1828,9 @@ function OrdersContent() {
 
             {/* Table Body / Order Cards */}
             {loading ? (
-              <div className="space-y-2 mt-2 min-w-[1300px]">
+              <div className="divide-y divide-neutral-200 min-w-[1340px] w-full bg-white">
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="bg-white border border-neutral-200 p-4 grid grid-cols-[36px_175px_235px_180px_140px_105px_165px_110px_115px] gap-3 items-center">
+                  <div key={i} className="bg-white px-6 py-4 grid grid-cols-[36px_175px_235px_180px_140px_105px_165px_110px_115px] gap-3 items-center">
                     <div className="w-4 h-4 rounded bg-neutral-200" />
                     <div className="space-y-2">
                       <div className="w-24 h-4 rounded bg-neutral-200" />
@@ -1832,7 +1853,7 @@ function OrdersContent() {
                 ))}
               </div>
             ) : paginatedOrders.length > 0 ? (
-              <div className="space-y-2 mt-2 min-w-[1266px]">
+              <div className="divide-y divide-neutral-200 min-w-[1340px] w-full bg-white">
                 {paginatedOrders.map((ord) => {
                   const customer = ord.customer || {};
                   const customerName = customer.name || `${customer.firstName || ''} ${customer.lastName || ''}`.trim() || ord.customerName || 'Customer';
@@ -1873,9 +1894,9 @@ function OrdersContent() {
                     <div
                       key={ord.orderId}
                       onClick={() => setSelectedOrder(ord)}
-                      className={`grid grid-cols-[36px_175px_235px_180px_140px_105px_165px_110px_115px] gap-3 px-4 py-3.5 bg-white rounded-lg border transition-all cursor-pointer items-start text-[13px] relative hover:z-30 ${isSelected
-                        ? 'border-[#111111] shadow-[0_0_0_1px_#111111] bg-neutral-50/60'
-                        : 'border-neutral-200 hover:border-neutral-400 hover:shadow-2xs'
+                      className={`grid grid-cols-[36px_175px_235px_180px_140px_105px_165px_110px_115px] gap-3 px-6 py-4 bg-white transition-colors cursor-pointer items-start text-[13px] relative hover:bg-neutral-50/80 ${isSelected
+                        ? 'bg-neutral-50/90 font-medium'
+                        : ''
                         }`}
                     >
 
@@ -2332,11 +2353,11 @@ function OrdersContent() {
                 })}
               </div>
             ) : (
-              <div className="py-20 text-center bg-white rounded-b-lg border border-neutral-200">
+              <div className="py-20 text-center bg-white border-b border-neutral-200 min-w-[1340px] w-full">
                 <Box className="w-10 h-10 text-neutral-300 mx-auto mb-2" />
                 <h3 className="text-[15px] font-bold text-[#111111]">No orders in this tab</h3>
                 <p className="text-[13px] text-neutral-400 mt-1 max-w-sm mx-auto">
-                  No orders match your filter. Click <strong>+ Create Test Order</strong> above to spawn a sample order instantly.
+                  No orders match your filter.
                 </p>
               </div>
             )}
