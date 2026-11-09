@@ -85,7 +85,7 @@ const DEFAULT_SHIPROCKET = {
   additionalWeightPerUnit: 0.9,
   additionalHeightPerUnit: 12,
 
-  courierPreference: 'Delhivery Surface Express',
+  courierPreference: 'Most Recommended Surface (Auto)',
 };
 
 const DEFAULT_CHECKOUT = {
@@ -1459,13 +1459,14 @@ export default function SettingsPage() {
                   {/* Section 5: Courier Preference & Simulation Mode */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2">
                     <FloatingSelect
-                      label="Preferred Courier Partner"
-                      value={shiprocket.courierPreference}
+                      label="Shipping Method Preference (Surface Only)"
+                      value={shiprocket.courierPreference || 'Most Recommended Surface (Auto)'}
                       options={[
+                        'Most Recommended Surface (Auto)',
                         'Delhivery Surface Express',
-                        'Blue Dart Express',
-                        'Ekart Logistics',
-                        'DTDC Express',
+                        'Shadowfax Surface',
+                        'Ekart Logistics Surface',
+                        'Xpressbees Surface',
                       ]}
                       onSelect={(val) => handleShiprocketChange('courierPreference', val)}
                     />

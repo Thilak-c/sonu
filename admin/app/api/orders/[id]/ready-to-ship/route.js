@@ -27,13 +27,19 @@ export async function POST(request, context) {
       shipmentId = Math.floor(1000000 + Math.random() * 9000000);
     }
 
-    // Call Shiprocket Production to assign courier & generate real AWB
-    const awbResult = await assignShiprocketAWB(shipmentId);
-
     // Trigger WhatsApp notification if customer phone exists
     const customer = order.customer || {};
     const customerPhone = customer.mobile || order.address?.mobile || '';
     const customerName = customer.name || `${customer.firstName || ''} ${customer.lastName || ''}`.trim() || 'Valued Runner';
+    const isCod = order.payment?.method === 'partial_cod' || order.payment?.method === 'full_cod';
+
+    // Call Shiprocket Production to assign courier & generate real AWB (Always recommended Surface, never Air)
+    const awbResult = await assignShiprocketAWB(shipmentId, null, {
+      orderId: order.shiprocket?.orderId,
+      deliveryPincode: customer.address?.pincode || order.address?.pincode,
+      isCod: isCod ? 1 : 0,
+      weight: '0.5',
+    });
 
     let waResult = null;
     if (customerPhone) {
