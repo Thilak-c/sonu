@@ -282,10 +282,15 @@ function AddressScorePieChart({ score, category, risk, address }) {
 
   if (resolvedScore === null && address) {
     let pts = 0;
-    if (address.houseNo && String(address.houseNo).trim().length > 2) pts += 25;
-    if (address.street && String(address.street).trim().length > 3) pts += 25;
-    if (address.pincode && /^[0-9]{6}$/.test(String(address.pincode).trim())) pts += 30;
-    if (address.city && String(address.city).trim().length > 2) pts += 20;
+    const house = address.houseNo || address.flat || address.building || '';
+    const street = address.street || address.roadArea || address.area || address.locality || '';
+    const pincode = address.pincode || address.zip || '';
+    const city = address.city || address.district || '';
+
+    if (String(house).trim().length >= 2) pts += 25;
+    if (String(street).trim().length >= 3) pts += 25;
+    if (/^[0-9]{6}$/.test(String(pincode).trim())) pts += 30;
+    if (String(city).trim().length >= 2) pts += 20;
     resolvedScore = Math.max(20, Math.min(100, pts));
   }
 
@@ -333,7 +338,7 @@ function AddressScorePieChart({ score, category, risk, address }) {
         </svg>
       </div>
 
-      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded  leading-none ${tagBg}`}>
+      <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded leading-none ${tagBg}`}>
         {validScore}% Valid
       </span>
 
