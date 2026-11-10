@@ -184,14 +184,14 @@ export default function OrdersHubClient() {
 
   // Status headline: "Delivered on Oct 8" or "Coming on Oct 5"
   const getStatusHeadline = (order) => {
-    const status = (order.shipment?.status || order.status || '').toUpperCase();
+    const status = (order.fulfillmentStatus || order.shiprocket?.status || order.shipment?.status || order.status || '').toUpperCase();
 
     if (status === 'DELIVERED') {
       const deliveredRaw = order.deliveryDate || order.deliveredAt || order.placedAt || order.createdAt || new Date();
       return `Delivered on ${formatDate(deliveredRaw)}`;
     }
 
-    if (status === 'CANCELLED') {
+    if (status === 'CANCELLED' || status === 'CANCELED') {
       const cancelledRaw = order.cancelledAt || order.placedAt || order.createdAt || new Date();
       return `Cancelled on ${formatDate(cancelledRaw)}`;
     }

@@ -1465,11 +1465,14 @@ function OrdersContent() {
         createdAt: new Date(),
         updatedAt: new Date(),
         fulfillmentStatus: 'new',
+        trackingNumber: null,
         shiprocket: {
-          ...ord.shiprocket,
-          orderId: Math.floor(10000000 + Math.random() * 90000000),
-          shipmentId: Math.floor(1000000 + Math.random() * 9000000),
+          orderId: null,
+          shipmentId: null,
           awbCode: null,
+          courierName: null,
+          labelUrl: null,
+          manifestUrl: null,
           status: 'NEW',
         },
       };

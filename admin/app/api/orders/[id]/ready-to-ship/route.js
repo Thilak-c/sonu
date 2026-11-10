@@ -24,7 +24,8 @@ export async function POST(request, context) {
 
     let shipmentId = order.shiprocket?.shipmentId;
     let srOrderId = order.shiprocket?.orderId;
-    if (!shipmentId) {
+    const isCancelled = order.shiprocket?.status === 'CANCELLED' || order.fulfillmentStatus === 'cancelled';
+    if (!shipmentId || isCancelled) {
       try {
         const srOrder = await createShiprocketOrder(order);
         shipmentId = srOrder.shipment_id;

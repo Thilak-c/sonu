@@ -193,6 +193,21 @@ export async function PATCH(request) {
             console.warn(`[Shiprocket Cancellation Warning for ${orderId}]:`, cErr.message);
           }
         }
+        updateFields['cancelledAt'] = new Date();
+      } else if (fulfillmentStatus === 'new') {
+        // If restoring a previously cancelled order, reset Shiprocket tracking state so a fresh shipment/AWB is generated
+        const existingOrder = await db.collection('orders').findOne({ orderId });
+        if (existingOrder?.fulfillmentStatus === 'cancelled' || existingOrder?.shiprocket?.status === 'CANCELLED') {
+          updateFields['shiprocket.status'] = 'NEW';
+          updateFields['shiprocket.orderId'] = null;
+          updateFields['shiprocket.shipmentId'] = null;
+          updateFields['shiprocket.awbCode'] = null;
+          updateFields['shiprocket.courierName'] = null;
+          updateFields['shiprocket.labelUrl'] = null;
+          updateFields['shiprocket.manifestUrl'] = null;
+          updateFields['trackingNumber'] = null;
+          updateFields['cancelledAt'] = null;
+        }
       }
     }
     if (status !== undefined) updateFields.status = status;

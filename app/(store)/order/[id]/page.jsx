@@ -3,6 +3,9 @@ import { getDb, initDb } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 import OrderTrackingClient from '@/components/order/OrderTrackingClient';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function generateMetadata({ params }) {
   const { id } = await params;
   const decodedId = decodeURIComponent(id || '');

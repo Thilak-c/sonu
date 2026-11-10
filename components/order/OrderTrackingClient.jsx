@@ -14,46 +14,53 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
   const [liveTrack, setLiveTrack] = useState(null);
   const [trackingLoading, setTrackingLoading] = useState(false);
 
-  // Fallback client-side fetch if server didn't find order in MongoDB
+  // Fetch latest order from MongoDB on mount or when orderId changes
   useEffect(() => {
-    if (order) return;
     if (!orderId) return;
 
+    let isMounted = true;
     const fetchOrder = async () => {
       try {
-        setLoading(true);
+        if (!order) setLoading(true);
         setError('');
 
         const res = await fetch(`/api/orders?orderId=${encodeURIComponent(orderId)}`);
         if (res.ok) {
           const data = await res.json();
-          if (data.order) {
+          if (data.order && isMounted) {
             setOrder(data.order);
             return;
           }
         }
 
         // Fallback: check localStorage for recently placed order
-        if (typeof window !== 'undefined') {
+        if (typeof window !== 'undefined' && !order) {
           const storedOrders = JSON.parse(localStorage.getItem('sonu_orders') || '[]');
           const match = storedOrders.find((o) => o.orderId === orderId);
-          if (match) {
+          if (match && isMounted) {
             setOrder(match);
             return;
           }
         }
 
-        setError('We could not find an order matching this reference ID.');
+        if (!order && isMounted) {
+          setError('We could not find an order matching this reference ID.');
+        }
       } catch (err) {
         console.error('Error fetching order:', err);
-        setError('Unable to load order details. Please check your connection.');
+        if (!order && isMounted) {
+          setError('Unable to load order details. Please check your connection.');
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
     fetchOrder();
-  }, [orderId, order]);
+    return () => {
+      isMounted = false;
+    };
+  }, [orderId]);
 
   // Fetch Live Shiprocket Tracking
   const fetchLiveTracking = async () => {
@@ -124,7 +131,7 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center font-['Helvetica_Now_Text',sans-serif] px-4 text-center">
         <div className="w-9 h-9 border-3 border-neutral-300 border-t-black rounded-full animate-spin mb-4" />
-        <h2 className="text-[17px] font-bold text-[#111111]">Loading your order tracking...</h2>
+        <h2 className="text-[17px] font-medium text-[#111111]">Loading your order tracking...</h2>
         <p className="text-[13px] text-neutral-500 mt-1">Retrieving details and live courier status</p>
       </div>
     );
@@ -136,7 +143,7 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
         <div className="w-16 h-16 rounded-full bg-neutral-100 flex items-center justify-center text-neutral-400 mb-4 text-2xl">
           📦
         </div>
-        <h1 className="text-[22px] font-bold text-[#111111]">Order Not Found</h1>
+        <h1 className="text-[22px] font-medium text-[#111111]">Order Not Found</h1>
         <p className="text-[14px] text-neutral-500 mt-2 mb-6">
           {error || "We couldn't locate this order. Please verify your order ID or contact customer support."}
         </p>
@@ -175,11 +182,15 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
 
   // Tracking Progress Stage
   const currentFulfillment = (order.fulfillmentStatus || order.status || 'confirmed').toLowerCase();
-  const isDelivered = currentFulfillment === 'delivered';
-  const isShipped = isDelivered || currentFulfillment === 'shipped' || currentFulfillment === 'in_transit';
-  const isPickupScheduled = isShipped || currentFulfillment === 'pickup_scheduled' || shiprocket.status === 'PICKUP_SCHEDULED';
-  const isReadyToShip = isPickupScheduled || currentFulfillment === 'ready_to_ship' || !!shiprocket.awbCode;
-  const isProcessing = isReadyToShip || currentFulfillment === 'processing' || currentFulfillment === 'confirmed';
+  const isCancelled =
+    currentFulfillment === 'cancelled' ||
+    currentFulfillment === 'canceled' ||
+    order.shiprocket?.status === 'CANCELLED';
+  const isDelivered = !isCancelled && currentFulfillment === 'delivered';
+  const isShipped = !isCancelled && (isDelivered || currentFulfillment === 'shipped' || currentFulfillment === 'in_transit');
+  const isPickupScheduled = !isCancelled && (isShipped || currentFulfillment === 'pickup_scheduled' || shiprocket.status === 'PICKUP_SCHEDULED');
+  const isReadyToShip = !isCancelled && (isPickupScheduled || currentFulfillment === 'ready_to_ship' || (!isCancelled && !!shiprocket.awbCode));
+  const isProcessing = !isCancelled && (isReadyToShip || currentFulfillment === 'processing' || currentFulfillment === 'confirmed' || currentFulfillment === 'new');
 
   // Payment Breakdown
   const orderPricing = getCartPricingSummary(items);
@@ -194,103 +205,113 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
         <div className="bg-white">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-[24px] sm:text-[28px] font-bold text-[#111111] tracking-tight font-['Helvetica_Now_Text_Medium',sans-serif]">
-                Thank you, {customer.name || 'Customer'}!
-              </h1>
+              <div className="flex items-center gap-2.5">
+                <h1 className="text-[24px] sm:text-[28px] font-medium text-[#111111] tracking-tight font-['Helvetica_Now_Text_Medium',sans-serif]">
+                  {isCancelled ? 'Order Cancelled' : `Thank you, ${customer.name || 'Customer'}!`}
+                </h1>
+                {isCancelled && (
+                  <span className="px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-rose-50 text-rose-600 border border-rose-200">
+                    Cancelled
+                  </span>
+                )}
+              </div>
               <div className="flex flex-wrap items-center gap-2.5 mt-2">
-        
                 <span className="text-[13px] text-[#707072]">Order ID: {order.orderId}</span>
               </div>
             </div>
           </div>
 
-          {/* Expected Delivery Date Highlight */}
-          <div className="pt-6">
-            <div className=" sm:p-5 font-['Helvetica_Now_Text_Medium',sans-serif] rounded-[18px] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <p className="text-[12px] uppercase font-bold tracking-wider text-emerald-800">
-                  Expected Delivery Date
-                </p>
-                <p className="text-[19px] sm:text-[22px] font-bold text-[#111111] mt-0.5 font-['Helvetica_Now_Text_Medium',sans-serif]">
-                  {getExpectedDateDisplay()}
-                </p>
-               
-              </div>
-
-          
+          {isCancelled ? (
+            <div className="mt-6 p-4 rounded-xl bg-neutral-50 border border-neutral-200 text-neutral-600 text-[13px] font-medium">
+              This order has been cancelled and will not be dispatched. If this order was re-created or a replacement was placed, please check your orders hub or email for the new Order ID.
             </div>
-
-            {/* 4-Step Progress Tracker */}
-            <div className="mt-8 pt-2">
-              <div className="relative">
-                {/* Horizontal Progress Bar Line (Visible on phone and desktop) */}
-                <div className="absolute top-[7px] left-[12.5%] right-[12.5%] h-[2px] bg-neutral-200 z-0" />
-                <div
-                  className="absolute top-[7px] left-[12.5%] h-[2px] bg-[#008C01] z-0 transition-all duration-500 ease-out"
-                  style={{
-                    width: isDelivered ? '75%' : isShipped ? '50%' : isProcessing ? '25%' : '0%',
-                  }}
-                />
-
-                <div className="grid grid-cols-4 gap-1 sm:gap-2 text-center relative z-10">
-                  {/* Step 1: Confirmed */}
-                  <div className="flex flex-col items-center">
-                    <div className="w-4 h-4 rounded-full bg-[#008C01] ring-4 ring-white mb-2 shadow-xs shrink-0" />
-                    <p className="text-[11px] sm:text-[13px] font-bold text-[#111111] leading-tight">Order Placed</p>
-                    <p className="text-[9.5px] sm:text-[11px] text-neutral-400 mt-0.5 leading-tight">Confirmed</p>
+          ) : (
+            <>
+              {/* Expected Delivery Date Highlight */}
+              <div className="pt-6">
+                <div className="sm:p-5 font-['Helvetica_Now_Text_Medium',sans-serif] rounded-[18px] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[12px] uppercase font-medium tracking-wider text-emerald-800">
+                      Expected Delivery Date
+                    </p>
+                    <p className="text-[19px] sm:text-[22px] font-medium text-[#111111] mt-0.5 font-['Helvetica_Now_Text_Medium',sans-serif]">
+                      {getExpectedDateDisplay()}
+                    </p>
                   </div>
+                </div>
 
-                  {/* Step 2: Processing */}
-                  <div className="flex flex-col items-center">
+                {/* 4-Step Progress Tracker */}
+                <div className="mt-8 pt-2">
+                  <div className="relative">
+                    {/* Horizontal Progress Bar Line */}
+                    <div className="absolute top-[7px] left-[12.5%] right-[12.5%] h-[2px] bg-neutral-200 z-0" />
                     <div
-                      className={`w-4 h-4 rounded-full ring-4 ring-white mb-2 shadow-xs shrink-0 transition-colors ${
-                        isProcessing
-                          ? 'bg-[#008C01]'
-                          : 'bg-neutral-200'
-                      }`}
+                      className="absolute top-[7px] left-[12.5%] h-[2px] bg-[#008C01] z-0 transition-all duration-500 ease-out"
+                      style={{
+                        width: isDelivered ? '75%' : isShipped ? '50%' : isProcessing ? '25%' : '0%',
+                      }}
                     />
-                    <p className="text-[11px] sm:text-[13px] font-bold text-[#111111] leading-tight">Preparing</p>
-                    <p className="text-[9.5px] sm:text-[11px] text-neutral-400 mt-0.5 leading-tight">Quality Check</p>
-                  </div>
 
-                  {/* Step 3: Shipped */}
-                  <div className="flex flex-col items-center">
-                    <div
-                      className={`w-4 h-4 rounded-full ring-4 ring-white mb-2 shadow-xs shrink-0 transition-colors ${
-                        isShipped
-                          ? 'bg-[#008C01]'
-                          : 'bg-neutral-200'
-                      }`}
-                    />
-                    <p className="text-[11px] sm:text-[13px] font-bold text-[#111111] leading-tight">Dispatched</p>
-                    <p className="text-[9.5px] sm:text-[11px] text-neutral-400 mt-0.5 leading-tight">In Transit</p>
-                  </div>
+                    <div className="grid grid-cols-4 gap-1 sm:gap-2 text-center relative z-10">
+                      {/* Step 1: Confirmed */}
+                      <div className="flex flex-col items-center">
+                        <div className="w-4 h-4 rounded-full bg-[#008C01] ring-4 ring-white mb-2 shadow-xs shrink-0" />
+                        <p className="text-[11px] sm:text-[13px] font-medium text-[#111111] leading-tight">Order Placed</p>
+                        <p className="text-[9.5px] sm:text-[11px] text-neutral-400 mt-0.5 leading-tight">Confirmed</p>
+                      </div>
 
-                  {/* Step 4: Delivered */}
-                  <div className="flex flex-col items-center">
-                    <div
-                      className={`w-4 h-4 rounded-full ring-4 ring-white mb-2 shadow-xs shrink-0 transition-colors ${
-                        isDelivered
-                          ? 'bg-[#008C01]'
-                          : 'bg-neutral-200'
-                      }`}
-                    />
-                    <p className="text-[11px] sm:text-[13px] font-bold text-[#111111] leading-tight">Delivered</p>
-                    <p className="text-[9.5px] sm:text-[11px] text-neutral-400 mt-0.5 leading-tight">To Doorstep</p>
+                      {/* Step 2: Processing */}
+                      <div className="flex flex-col items-center">
+                        <div
+                          className={`w-4 h-4 rounded-full ring-4 ring-white mb-2 shadow-xs shrink-0 transition-colors ${
+                            isProcessing
+                              ? 'bg-[#008C01]'
+                              : 'bg-neutral-200'
+                          }`}
+                        />
+                        <p className="text-[11px] sm:text-[13px] font-medium text-[#111111] leading-tight">Preparing</p>
+                        <p className="text-[9.5px] sm:text-[11px] text-neutral-400 mt-0.5 leading-tight">Quality Check</p>
+                      </div>
+
+                      {/* Step 3: Shipped */}
+                      <div className="flex flex-col items-center">
+                        <div
+                          className={`w-4 h-4 rounded-full ring-4 ring-white mb-2 shadow-xs shrink-0 transition-colors ${
+                            isShipped
+                              ? 'bg-[#008C01]'
+                              : 'bg-neutral-200'
+                          }`}
+                        />
+                        <p className="text-[11px] sm:text-[13px] font-medium text-[#111111] leading-tight">Dispatched</p>
+                        <p className="text-[9.5px] sm:text-[11px] text-neutral-400 mt-0.5 leading-tight">In Transit</p>
+                      </div>
+
+                      {/* Step 4: Delivered */}
+                      <div className="flex flex-col items-center">
+                        <div
+                          className={`w-4 h-4 rounded-full ring-4 ring-white mb-2 shadow-xs shrink-0 transition-colors ${
+                            isDelivered
+                              ? 'bg-[#008C01]'
+                              : 'bg-neutral-200'
+                          }`}
+                        />
+                        <p className="text-[11px] sm:text-[13px] font-medium text-[#111111] leading-tight">Delivered</p>
+                        <p className="text-[9.5px] sm:text-[11px] text-neutral-400 mt-0.5 leading-tight">To Doorstep</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
+            </>
+          )}
         </div>
 
         {/* Shiprocket Live Tracking Card */}
         <div className="font-['Helvetica_Now_Text_Medium',sans-serif]">
           <div className="flex items-center justify-between pb-4 border-b border-neutral-100">
             <div className="flex items-center gap-2.5">
-            
               <div>
-                <h2 className="text-[16px] font-bold text-[#111111]">
+                <h2 className="text-[16px] font-medium text-[#111111]">
                    Logistics Tracking
                 </h2>
                 <p className="text-[12px] text-neutral-400">
@@ -304,6 +325,14 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
             <div>
               <p className="text-[11.5px] text-[#111111] mb-1">Courier AWB Number</p>
               {(() => {
+                if (isCancelled) {
+                  return (
+                    <p className="text-[13px] font-medium text-neutral-400">
+                      Cancelled
+                    </p>
+                  );
+                }
+
                 const assignedAwb = liveTrack?.awbCode || shiprocket.awbCode;
                 const hasAwb = Boolean(
                   assignedAwb &&
@@ -319,7 +348,7 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
                       href={publicTrackingUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[15px] font-bold text-[#111111] underline hover:text-black inline-block"
+                      className="text-[15px] font-medium text-[#111111] underline hover:text-black inline-block"
                     >
                       {assignedAwb}
                     </a>
@@ -334,14 +363,12 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
               })()}
             </div>
           </div>
-
-      
         </div>
 
         {/* Ordered Footwear Items Breakdown (Same to Same as Bag) */}
         <div className="bg-white">
           <h2
-            className="text-[20px] sm:text-[22px] font-bold tracking-tight text-[#111111] font-['Helvetica_Now_Text_Medium',sans-serif] mb-6"
+            className="text-[20px] sm:text-[22px] font-medium tracking-tight text-[#111111] font-['Helvetica_Now_Text_Medium',sans-serif] mb-6"
             style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
           >
              {items.length} {items.length === 1 ? 'item' : 'items'}
@@ -372,14 +399,14 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
                     {/* Details Column - exact same as Bag */}
                     <div className="flex-1 min-w-0 flex flex-col justify-between">
                       {/* 1. Price */}
-                      <p className="text-[17px] sm:text-[18px] font-bold text-[#111111] leading-none">
+                      <p className="text-[17px] sm:text-[18px] font-medium text-[#111111] leading-none">
                         ₹ {(item.priceNumber || 13995).toLocaleString('en-IN')}
                       </p>
 
                       {/* 2. Product Name */}
                       <Link href={`/product/${item.slug || item.id}`} className="block hover:underline">
                         <h3
-                          className="text-[16px] sm:text-[17px] font-bold text-[#111111] leading-snug font-['Helvetica_Now_Text_Medium',sans-serif]"
+                          className="text-[16px] sm:text-[17px] font-medium text-[#111111] leading-snug font-['Helvetica_Now_Text_Medium',sans-serif]"
                           style={{ fontFamily: "'Helvetica Now Text Medium', sans-serif" }}
                         >
                           {item.name}
@@ -435,7 +462,7 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
             {orderPricing.combos.map((combo, idx) => (
               <div key={`combo-${idx}`} className="flex items-center justify-between text-[#0d8240] font-medium py-0.5">
                 <span className="capitalize">{combo.title || 'combo offer'}</span>
-                <span className="font-bold text-[#111111] shrink-0">
+                <span className="font-medium text-[#111111] shrink-0">
                   ₹ {combo.comboPrice.toLocaleString('en-IN')}
                 </span>
               </div>
@@ -464,7 +491,7 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
           <div className="border-t border-[#e5e5e5] my-4" />
 
           {isPartialCod ? (
-            <div className="flex items-center justify-between text-[17px] sm:text-[18px] font-bold text-[#111111]">
+            <div className="flex items-center justify-between text-[17px] sm:text-[18px] font-medium text-[#111111]">
               <span className="flex items-center gap-2">
                 <span>Due on Delivery</span>
                
@@ -472,7 +499,7 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
               <span>₹ {balanceDue.toLocaleString('en-IN')}</span>
             </div>
           ) : (
-            <div className="flex items-center justify-between text-[17px] sm:text-[18px] font-bold text-[#111111]">
+            <div className="flex items-center justify-between text-[17px] sm:text-[18px] font-medium text-[#111111]">
               <span>You Paid</span>
               <span>₹ {(order.totalAmount || 13995).toLocaleString('en-IN')}</span>
             </div>
@@ -481,11 +508,11 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
 
         {/* Delivery Address & Customer Details */}
         <div className=" rounded-[24px]">
-          <h2 className="text-[16px] font-bold text-[#111111] mb-3">
+          <h2 className="text-[16px] font-medium text-[#111111] mb-3">
             Delivery Address
           </h2>
           <div className="text-[13.5px] text-neutral-700 space-y-1.5 leading-relaxed">
-            <p className="text-[15px] font-bold text-[#111111]">
+            <p className="text-[15px] font-medium text-[#111111]">
               {customer.name || 'Customer'}
             </p>
             {customer.mobile && (
