@@ -113,7 +113,20 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
 
   // Compute Expected Delivery Date
   const getExpectedDateDisplay = () => {
-    if (liveTrack?.edd) return liveTrack.edd;
+    const rawEdd = liveTrack?.edd || shiprocket.edd;
+    if (rawEdd) {
+      try {
+        const d = new Date(rawEdd);
+        if (!isNaN(d.getTime())) {
+          return d.toLocaleDateString('en-IN', {
+            weekday: 'long',
+            month: 'short',
+            day: 'numeric',
+          });
+        }
+      } catch (e) {}
+      return rawEdd;
+    }
     if (order?.estimatedDelivery && order.estimatedDelivery.includes('Oct')) {
       return order.estimatedDelivery;
     }
@@ -321,9 +334,16 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
             </div>
           </div>
 
-          <div className="pt-2">
+          <div className="pt-3 grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <p className="text-[11.5px] text-[#111111] mb-1">Courier AWB Number</p>
+              <p className="text-[11.5px] text-[#707072] mb-0.5">Courier Partner</p>
+              <p className="text-[14px] font-medium text-[#111111]">
+                {shiprocket.courierName || liveTrack?.courierName || 'Shiprocket Surface'}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-[11.5px] text-[#707072] mb-0.5">Courier AWB Number</p>
               {(() => {
                 if (isCancelled) {
                   return (
@@ -348,9 +368,14 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
                       href={publicTrackingUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[15px] font-medium text-[#111111] underline hover:text-black inline-block"
+                      className="text-[14px] font-medium text-[#111111] underline hover:text-black inline-flex items-center gap-1"
                     >
-                      {assignedAwb}
+                      <span>{assignedAwb}</span>
+                      <svg className="w-3.5 h-3.5 text-neutral-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                        <polyline points="15 3 21 3 21 9" />
+                        <line x1="10" y1="14" x2="21" y2="3" />
+                      </svg>
                     </a>
                   );
                 }
@@ -361,6 +386,15 @@ export default function OrderTrackingClient({ initialOrder, orderId }) {
                   </p>
                 );
               })()}
+            </div>
+
+            <div>
+              <p className="text-[11.5px] text-[#707072] mb-0.5">Shipment Status</p>
+              <p className="text-[14px] font-medium text-[#111111]">
+                {isCancelled
+                  ? 'Cancelled'
+                  : liveTrack?.currentStatus || (shiprocket.status === 'PICKUP_SCHEDULED' ? 'Pickup Scheduled' : shiprocket.status || 'Confirmed')}
+              </p>
             </div>
           </div>
         </div>
