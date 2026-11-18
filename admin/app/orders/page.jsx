@@ -352,6 +352,7 @@ function OrdersContent() {
 
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isSyncing, setIsSyncing] = useState(false);
   const [activeTab, setActiveTab] = useState('new'); // 'new' | 'ready_to_ship' | 'on_hold' | 'pickups' | 'in_transit' | 'delivered' | 'rto' | 'all'
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedOrders, setSelectedOrders] = useState([]);
@@ -497,8 +498,28 @@ function OrdersContent() {
     }
   };
 
+  const syncShiprocket = async () => {
+    try {
+      setIsSyncing(true);
+      const res = await fetch('/api/orders/sync', { method: 'POST' });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.syncedCount > 0) {
+          showToast(`✓ Synced ${data.syncedCount} shipments with Shiprocket`);
+          fetchOrders();
+        }
+      }
+    } catch (e) {
+      console.warn('Shiprocket auto-sync error:', e);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   useEffect(() => {
     fetchOrders();
+    // Auto-sync live shipment statuses whenever admin opens the manage orders page
+    syncShiprocket();
   }, []);
 
   // Real-time automatic search 0.5s (500ms) after user stops typing
@@ -1825,12 +1846,15 @@ function OrdersContent() {
 
             <button
               type="button"
-              onClick={fetchOrders}
+              onClick={async () => {
+                await syncShiprocket();
+                await fetchOrders();
+              }}
               className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-neutral-300 bg-white hover:bg-neutral-100 text-[13px] font-medium text-[#111111] shadow-2xs transition-colors cursor-pointer"
-              title="Refresh"
+              title="Sync with Shiprocket & Refresh"
             >
-              <RefreshCw className={`w-3.5 h-3.5 text-neutral-700 ${loading ? 'animate-spin' : ''}`} />
-              <span>Refresh</span>
+              <RefreshCw className={`w-3.5 h-3.5 text-neutral-700 ${loading || isSyncing ? 'animate-spin' : ''}`} />
+              <span>{isSyncing ? 'Syncing...' : 'Refresh'}</span>
             </button>
           </div>
 
