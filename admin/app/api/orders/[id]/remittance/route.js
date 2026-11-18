@@ -31,17 +31,20 @@ export async function GET(request, context) {
     const remittance = await getShiprocketRemittanceDetails(srOrderId);
 
     // Cache remittance details in MongoDB
+    const updateFields = {
+      'shiprocket.remittance': remittance,
+      'shiprocket.remittanceStatus': remittance.remittanceStatus,
+      'shiprocket.remittanceUtr': remittance.remittanceUtr,
+      'shiprocket.remittanceDate': remittance.remittanceDate,
+      'shiprocket.lastSyncedAt': new Date(),
+    };
+    if (remittance.deliveredDate) updateFields['shiprocket.deliveredDate'] = remittance.deliveredDate;
+    if (remittance.invoiceNo) updateFields['shiprocket.invoiceNo'] = remittance.invoiceNo;
+    if (remittance.invoiceLink) updateFields['shiprocket.invoiceLink'] = remittance.invoiceLink;
+
     await db.collection('orders').updateOne(
       { orderId },
-      {
-        $set: {
-          'shiprocket.remittance': remittance,
-          'shiprocket.remittanceStatus': remittance.remittanceStatus,
-          'shiprocket.remittanceUtr': remittance.remittanceUtr,
-          'shiprocket.remittanceDate': remittance.remittanceDate,
-          'shiprocket.lastSyncedAt': new Date(),
-        },
-      }
+      { $set: updateFields }
     );
 
     return NextResponse.json({

@@ -465,6 +465,65 @@ function OrdersContent() {
     return lines;
   };
 
+  const getRemittanceInfo = (ord) => {
+    if (!ord) return { isRemitted: false, label: 'Remittance Scheduled:', value: '—', dateText: null };
+
+    // If remitted with UTR
+    const utr = ord.shiprocket?.remittanceUtr || ord.shiprocket?.remittance?.remittanceUtr;
+    const remDate = ord.shiprocket?.remittanceDate || ord.shiprocket?.remittance?.remittanceDate;
+    if (utr) {
+      return {
+        isRemitted: true,
+        label: 'Remitted:',
+        value: `UTR: ${utr}`,
+        dateText: remDate ? new Date(remDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : null,
+      };
+    }
+
+    // Determine delivery date
+    let delDate = null;
+    const rawDel = ord.shiprocket?.deliveredDate || ord.deliveredAt || ord.shiprocket?.remittance?.deliveredDate;
+    if (rawDel) {
+      if (typeof rawDel === 'string') {
+        const dmyMatch = rawDel.match(/^(\d{1,2})-(\d{1,2})-(\d{4})/);
+        if (dmyMatch) {
+          const [, d, m, y] = dmyMatch;
+          delDate = new Date(Number(y), Number(m) - 1, Number(d));
+        } else {
+          const d = new Date(rawDel);
+          if (!isNaN(d.getTime())) delDate = d;
+        }
+      } else if (rawDel instanceof Date) {
+        delDate = rawDel;
+      }
+    }
+
+    if (!delDate && ord.shiprocket?.activities?.length) {
+      const delActivity = ord.shiprocket.activities.find((a) => (a.status || '').toLowerCase() === 'delivered');
+      if (delActivity?.date) {
+        const d = new Date(delActivity.date);
+        if (!isNaN(d.getTime())) delDate = d;
+      }
+    }
+
+    if (!delDate) {
+      delDate = ord.updatedAt ? new Date(ord.updatedAt) : new Date();
+    }
+
+    // Standard Shiprocket COD remittance cycle: 9 to 14 days after delivery (e.g. 17 Nov -> 26 Nov - 01 Dec 2026)
+    const startDate = new Date(delDate.getTime() + 9 * 24 * 60 * 60 * 1000);
+    const endDate = new Date(delDate.getTime() + 14 * 24 * 60 * 60 * 1000);
+
+    const fmt = (d) => d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+    return {
+      isRemitted: false,
+      label: 'Remittance Scheduled:',
+      value: `${fmt(startDate)} - ${fmt(endDate)}`,
+      dateText: null,
+    };
+  };
+
   useEffect(() => {
     const handleWindowClick = () => setOpenDropdownId(null);
     window.addEventListener('click', handleWindowClick);
@@ -1902,7 +1961,7 @@ function OrdersContent() {
 
           <div className="-mx-5 sm:-mx-7 lg:-mx-8 w-[calc(100%+2.5rem)] sm:w-[calc(100%+3.5rem)] lg:w-[calc(100%+4rem)] overflow-x-auto overflow-y-hidden border-t border-b border-neutral-200 bg-white flex-1 custom-table-scrollbar">
             {/* Table Header Row */}
-            <div className="grid grid-cols-[28px_minmax(120px,1.15fr)_minmax(150px,1.4fr)_minmax(120px,1.15fr)_minmax(95px,0.9fr)_minmax(75px,0.7fr)_minmax(130px,1.2fr)_minmax(85px,0.75fr)_minmax(85px,0.75fr)] gap-2 px-4 sm:px-5 py-3 text-[11px] sm:text-[11.5px] font-medium text-neutral-600 uppercase tracking-wider border-b border-neutral-200 bg-neutral-100/90 rounded-none min-w-[980px] w-full select-none">
+            <div className="grid grid-cols-[28px_minmax(120px,1.15fr)_minmax(150px,1.4fr)_minmax(120px,1.15fr)_minmax(95px,0.9fr)_minmax(145px,1.1fr)_minmax(130px,1.2fr)_minmax(85px,0.75fr)_minmax(85px,0.75fr)] gap-2 px-4 sm:px-5 py-3 text-[11px] sm:text-[11.5px] font-medium text-neutral-600 uppercase tracking-wider border-b border-neutral-200 bg-neutral-100/90 rounded-none min-w-[1020px] w-full select-none">
               <div className="flex items-center">
                 <input
                   type="checkbox"
@@ -1923,9 +1982,9 @@ function OrdersContent() {
 
             {/* Table Body / Order Cards */}
             {loading ? (
-              <div className="divide-y divide-neutral-200 min-w-[980px] w-full bg-white">
+              <div className="divide-y divide-neutral-200 min-w-[1020px] w-full bg-white">
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="bg-white px-4 sm:px-5 py-3.5 grid grid-cols-[28px_minmax(120px,1.15fr)_minmax(150px,1.4fr)_minmax(120px,1.15fr)_minmax(95px,0.9fr)_minmax(75px,0.7fr)_minmax(130px,1.2fr)_minmax(85px,0.75fr)_minmax(85px,0.75fr)] gap-2 items-center">
+                  <div key={i} className="bg-white px-4 sm:px-5 py-3.5 grid grid-cols-[28px_minmax(120px,1.15fr)_minmax(150px,1.4fr)_minmax(120px,1.15fr)_minmax(95px,0.9fr)_minmax(145px,1.1fr)_minmax(130px,1.2fr)_minmax(85px,0.75fr)_minmax(85px,0.75fr)] gap-2 items-center">
                     <div className="w-4 h-4 rounded bg-neutral-200" />
                     <div className="space-y-2">
                       <div className="w-24 h-4 rounded bg-neutral-200" />
@@ -1948,7 +2007,7 @@ function OrdersContent() {
                 ))}
               </div>
             ) : paginatedOrders.length > 0 ? (
-              <div className="divide-y divide-neutral-200 min-w-[980px] w-full bg-white">
+              <div className="divide-y divide-neutral-200 min-w-[1020px] w-full bg-white">
                 {paginatedOrders.map((ord) => {
                   const customer = ord.customer || {};
                   const customerName = customer.name || `${customer.firstName || ''} ${customer.lastName || ''}`.trim() || ord.customerName || 'Customer';
@@ -1963,9 +2022,6 @@ function OrdersContent() {
                   const items = ord.items || [];
                   const firstItem = items[0] || {};
 
-                  const amount = Number(ord.totalAmount || ord.amount || 13995);
-                  const isCod = ord.payment?.method === 'partial_cod' || ord.payment?.method === 'cod';
-
                   const rawStatus = (ord.fulfillmentStatus || ord.shiprocket?.status || 'NEW').toLowerCase();
                   const isCancelled = rawStatus === 'cancelled';
                   const isHold = !isCancelled && (rawStatus === 'on_hold' || rawStatus === 'hold');
@@ -1976,6 +2032,13 @@ function OrdersContent() {
                   const isInTransit = !isCancelled && (rawStatus === 'shipped' || rawStatus === 'in_transit' || rawStatus === 'out_for_delivery');
                   const isDelivered = !isCancelled && rawStatus === 'delivered';
                   const isRto = !isCancelled && (rawStatus === 'rto' || rawStatus === 'return_to_origin' || rawStatus === 'returned');
+
+                  const isCod = ord.payment?.method === 'partial_cod' || ord.payment?.method === 'cod' || ord.payment?.method === 'full_cod';
+                  const isDeliveredTab = activeTab === 'delivered' || isDelivered;
+                  const codCollectAmount = ord.payment?.balanceDue || ord.payment?.codBalance || ord.shiprocket?.remittance?.codAmount || ord.totalAmount || 0;
+                  const displayAmount = isDeliveredTab && isCod && ord.payment?.method === 'partial_cod'
+                    ? Number(codCollectAmount)
+                    : Number(ord.totalAmount || ord.amount || 0);
 
                   const isSelected = selectedOrders.includes(ord.orderId);
                   const hasEmail = ord.emailLogs && ord.emailLogs.length > 0;
@@ -1989,7 +2052,7 @@ function OrdersContent() {
                     <div
                       key={ord.orderId}
                       onClick={() => setSelectedOrder(ord)}
-                      className={`grid grid-cols-[28px_minmax(120px,1.15fr)_minmax(150px,1.4fr)_minmax(120px,1.15fr)_minmax(95px,0.9fr)_minmax(75px,0.7fr)_minmax(130px,1.2fr)_minmax(85px,0.75fr)_minmax(85px,0.75fr)] gap-2 px-4 sm:px-5 py-3.5 bg-white transition-colors cursor-pointer items-start text-[12.5px] relative hover:bg-neutral-50/80 ${isSelected
+                      className={`grid grid-cols-[28px_minmax(120px,1.15fr)_minmax(150px,1.4fr)_minmax(120px,1.15fr)_minmax(95px,0.9fr)_minmax(145px,1.1fr)_minmax(130px,1.2fr)_minmax(85px,0.75fr)_minmax(85px,0.75fr)] gap-2 px-4 sm:px-5 py-3.5 bg-white transition-colors cursor-pointer items-start text-[12.5px] relative hover:bg-neutral-50/80 ${isSelected
                         ? 'bg-neutral-50/90 font-medium'
                         : ''
                         }`}
@@ -2180,23 +2243,41 @@ function OrdersContent() {
                       {/* 6. Payment */}
                       <div>
                         <p className="font-medium text-[#111111] text-[13.5px]">
-                          ₹ {amount.toLocaleString('en-IN')}
+                          ₹ {displayAmount.toLocaleString('en-IN', isDeliveredTab && isCod ? { minimumFractionDigits: 2, maximumFractionDigits: 2 } : {})}
                         </p>
                         <div className="mt-1">
-                          {ord.payment?.method === 'full_cod' || ord.payment?.method === 'cod' ? (
-                            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-50 text-amber-900  border-amber-300">
+                          {isDeliveredTab && isCod ? (
+                            <span className="inline-block px-2 py-0.5 rounded text-[11px] font-medium bg-[#f4f4f4] text-[#e04f16]">
+                              COD
+                            </span>
+                          ) : ord.payment?.method === 'full_cod' || ord.payment?.method === 'cod' ? (
+                            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-50 text-amber-900 border-amber-300">
                               Full COD
                             </span>
                           ) : ord.payment?.method === 'partial_cod' ? (
-                            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium bg-neutral-100 text-red-800  border-neutral-200">
+                            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium bg-neutral-100 text-red-800 border-neutral-200">
                               Partial COD
                             </span>
                           ) : (
-                            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium bg-neutral-100 text-green-800  border-neutral-200">
+                            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium bg-neutral-100 text-green-800 border-neutral-200">
                               Prepaid
                             </span>
                           )}
                         </div>
+
+                        {/* Remittance Detail Card for Delivered COD orders */}
+                        {isDeliveredTab && isCod && (() => {
+                          const rem = getRemittanceInfo(ord);
+                          return (
+                            <div className="mt-2 p-2 bg-[#f4f4f4] rounded text-[11px] leading-tight">
+                              <p className="text-neutral-500 font-normal">{rem.label}</p>
+                              <p className="font-medium text-neutral-800 mt-0.5">{rem.value}</p>
+                              {rem.dateText && (
+                                <p className="text-[10px] text-neutral-500 font-normal mt-0.5">Paid on: {rem.dateText}</p>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </div>
 
                       {/* 7. Pickup Details & Scheduled Status */}
@@ -2295,7 +2376,7 @@ function OrdersContent() {
                           </span>
                         )}
                         {isDelivered && (
-                          <span className="inline-flex items-center justify-center px-2 py-0.5 rounded text-[10.5px] font-medium bg-emerald-50 text-emerald-800 border border-emerald-300 whitespace-nowrap shrink-0">
+                          <span className="inline-flex items-center justify-center px-2 py-0.5 text-[11.5px] font-bold bg-emerald-100/30 text-emerald-600   whitespace-nowrap shrink-0">
                             DELIVERED
                           </span>
                         )}
@@ -3159,6 +3240,48 @@ function OrdersContent() {
                     </span>
                   )}
                 </div>
+
+                {/* COD Remittance Panel (when delivered & COD) */}
+                {((selectedOrder.fulfillmentStatus || selectedOrder.shiprocket?.status || '').toLowerCase() === 'delivered') &&
+                  (selectedOrder.payment?.method === 'cod' || selectedOrder.payment?.method === 'full_cod' || selectedOrder.payment?.method === 'partial_cod') && (() => {
+                    const rem = getRemittanceInfo(selectedOrder);
+                    const codAmt = selectedOrder.payment?.balanceDue || selectedOrder.payment?.codBalance || selectedOrder.shiprocket?.remittance?.codAmount || selectedOrder.totalAmount || 0;
+                    return (
+                      <div className="p-3.5 rounded-lg bg-[#f4f4f4] border border-neutral-200/80 space-y-2 text-[12px]">
+                        <div className="flex items-center justify-between pb-1.5 border-b border-neutral-200">
+                          <span className="text-[11px] font-medium uppercase tracking-wider text-neutral-700">
+                            Shiprocket COD Remittance
+                          </span>
+                          <span className={`px-2 py-0.5 rounded text-[10.5px] font-medium ${
+                            rem.isRemitted ? 'bg-emerald-100 text-emerald-800' : 'bg-neutral-200 text-neutral-800'
+                          }`}>
+                            {rem.isRemitted ? 'REMITTED' : 'SCHEDULED'}
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2 text-[11.5px] pt-1">
+                          <div>
+                            <span className="text-neutral-500 font-normal block">{rem.label}</span>
+                            <span className="font-medium text-[#111111] mt-0.5 block">{rem.value}</span>
+                            {rem.dateText && (
+                              <span className="text-[10.5px] text-neutral-500 font-normal mt-0.5 block">Paid: {rem.dateText}</span>
+                            )}
+                          </div>
+                          <div className="text-right">
+                            <span className="text-neutral-500 font-normal block">Remittance Amount</span>
+                            <span className="font-medium text-[#111111] mt-0.5 block">
+                              ₹ {Number(codAmt).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </span>
+                            {selectedOrder.shiprocket?.courierName && (
+                              <span className="text-[10.5px] text-neutral-500 font-normal mt-0.5 block">
+                                via {selectedOrder.shiprocket.courierName}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
 
                 {/* Gateway Metadata Strip */}
                 {(selectedOrder.payment?.razorpayPaymentId || selectedOrder.payment?.razorpayOrderId) && (

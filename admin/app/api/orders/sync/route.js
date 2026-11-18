@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { initDb } from '@/lib/mongodb';
-import { trackShiprocketOrder } from '@/lib/shiprocket';
+import { trackShiprocketOrder, getShiprocketRemittanceDetails } from '@/lib/shiprocket';
 
 export const dynamic = 'force-dynamic';
 
@@ -73,10 +73,29 @@ export async function POST(request) {
           if (courierName) updateDoc['shiprocket.courierName'] = courierName;
           if (edd) updateDoc['shiprocket.edd'] = edd;
           if (activities.length) updateDoc['shiprocket.activities'] = activities;
+          const finalFulfillment = mappedFulfillment || order.fulfillmentStatus;
           if (mappedFulfillment) {
             updateDoc.fulfillmentStatus = mappedFulfillment;
             if (mappedFulfillment === 'delivered') {
               updateDoc.deliveredAt = shipmentTrack.delivered_date || new Date();
+            }
+          }
+
+          // If order is delivered and has COD, fetch live remittance details
+          const isCodOrder = order.payment?.method === 'cod' || order.payment?.method === 'full_cod' || order.payment?.method === 'partial_cod';
+          if (finalFulfillment === 'delivered' && isCodOrder && order.shiprocket?.orderId) {
+            try {
+              const rem = await getShiprocketRemittanceDetails(order.shiprocket.orderId);
+              if (rem?.success) {
+                updateDoc['shiprocket.remittanceStatus'] = rem.remittanceStatus;
+                updateDoc['shiprocket.remittanceUtr'] = rem.remittanceUtr;
+                updateDoc['shiprocket.remittanceDate'] = rem.remittanceDate;
+                if (rem.deliveredDate) updateDoc['shiprocket.deliveredDate'] = rem.deliveredDate;
+                if (rem.invoiceNo) updateDoc['shiprocket.invoiceNo'] = rem.invoiceNo;
+                if (rem.invoiceLink) updateDoc['shiprocket.invoiceLink'] = rem.invoiceLink;
+              }
+            } catch (remErr) {
+              console.warn(`[Remittance fetch error for #${order.orderId}]:`, remErr.message);
             }
           }
 
