@@ -2084,10 +2084,28 @@ function OrdersContent() {
                           {formattedDate} | {formattedTime}
                         </p>
 
-                        <div className="flex items-center gap-1 text-[11px] text-neutral-500 mt-1.5">
-                          <ShoppingCart className="w-3.5 h-3.5 text-neutral-400" />
-                          <span>Shipment: {ord.shiprocket?.shipmentId || 'Pending'}</span>
-                        </div>
+                        {(() => {
+                          const awb = ord.shiprocket?.awbCode || ord.trackingNumber;
+                          return (
+                            <div className="flex items-center gap-1.5 text-[11px] mt-1.5">
+                              <Truck className="w-3.5 h-3.5 text-neutral-500 shrink-0" />
+                              {awb ? (
+                                <a
+                                  href={`https://shiprocket.co/tracking/${encodeURIComponent(awb)}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="text-black font-medium underline underline-offset-2 hover:opacity-80 transition-opacity cursor-pointer truncate"
+                                  title={`Track AWB ${awb} on Shiprocket`}
+                                >
+                                  {awb}
+                                </a>
+                              ) : (
+                                <span className="text-neutral-400 font-normal">AWB: Pending</span>
+                              )}
+                            </div>
+                          );
+                        })()}
 
                         {hasEmail ? (
                           <div className="mt-1.5 inline-flex items-center gap-1 text-[10.5px] font-medium text-neutral-800 bg-neutral-100 px-1.5 py-0.5 rounded border border-neutral-200" title={`Email sent to ${ord.customer?.email || 'customer'}`}>
