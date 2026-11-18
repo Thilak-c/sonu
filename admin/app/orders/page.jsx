@@ -2287,7 +2287,7 @@ function OrdersContent() {
                         {isDeliveredTab && isCod && (() => {
                           const rem = getRemittanceInfo(ord);
                           return (
-                            <div className="mt-2 p-2 bg-[#f4f4f4] rounded text-[11px] leading-tight">
+                            <div className="mt- p-2 rounded text-[11px] leading-tight">
                               <p className="text-neutral-500 font-normal">{rem.label}</p>
                               <p className="font-medium text-neutral-800 mt-0.5">{rem.value}</p>
                               {rem.dateText && (
