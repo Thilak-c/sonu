@@ -64,6 +64,18 @@ export async function POST(request) {
             if (shipment?.manifest_url) setFields['shiprocket.manifestUrl'] = shipment.manifest_url;
             if (shipment?.label_url) setFields['shiprocket.labelUrl'] = shipment.label_url;
             if (shipment?.pickup_id) setFields['shiprocket.pickupId'] = shipment.pickup_id;
+            const pickupSched = shipment?.pickup_scheduled_date || sr.pickup_scheduled_date || sr.pickup_booked_date;
+            if (pickupSched && !String(pickupSched).startsWith('0000')) {
+              setFields['shiprocket.pickupScheduledDate'] = pickupSched;
+              setFields['shiprocket.pickupDate'] = pickupSched;
+            }
+            const tokenNum = shipment?.pickup_token_number || sr.pickup_token_number;
+            if (tokenNum) {
+              setFields['shiprocket.pickupToken'] = tokenNum;
+            }
+            if (sr.pickup_exception_reason) {
+              setFields['shiprocket.pickupExceptionReason'] = sr.pickup_exception_reason;
+            }
             if (mapped) setFields.fulfillmentStatus = mapped;
 
             const res = await db.collection('orders').updateOne(
@@ -131,6 +143,10 @@ export async function POST(request) {
           if (courierName) updateDoc['shiprocket.courierName'] = courierName;
           if (edd) updateDoc['shiprocket.edd'] = edd;
           if (activities.length) updateDoc['shiprocket.activities'] = activities;
+          if (shipmentTrack.pickup_scheduled_date && !String(shipmentTrack.pickup_scheduled_date).startsWith('0000')) {
+            updateDoc['shiprocket.pickupScheduledDate'] = shipmentTrack.pickup_scheduled_date;
+            updateDoc['shiprocket.pickupDate'] = shipmentTrack.pickup_scheduled_date;
+          }
           const finalFulfillment = mappedFulfillment || order.fulfillmentStatus;
           if (mappedFulfillment) {
             updateDoc.fulfillmentStatus = mappedFulfillment;

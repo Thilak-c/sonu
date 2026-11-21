@@ -41,6 +41,8 @@ import {
   Package,
   Save,
   Trash2,
+  RotateCcw,
+  AlertCircle,
 } from 'lucide-react';
 
 // --- SIGNATURE ANIMATED FLOATING FORM SYSTEM (MATCHING PRODUCT ADD FORM) ---
@@ -682,6 +684,48 @@ function OrdersContent() {
     } catch (err) {
       console.error('Request pickup error:', err);
       alert('Network error while requesting pickup');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  // Cancel current shipment and assign a fresh replacement Surface courier & pickup
+  const handleReplaceShipment = async (ord, e) => {
+    if (e) e.stopPropagation();
+    const orderId = typeof ord === 'object' ? ord.orderId : ord;
+    const currentAwb = (typeof ord === 'object' ? ord.shiprocket?.awbCode : null) || 'active shipment';
+
+    const confirmed = window.confirm(
+      `Cancel courier shipment (${currentAwb}) and create a fresh replacement shipment for Order #${orderId}?\n\nThis will re-assign the best available Surface courier and reschedule pickup.`
+    );
+    if (!confirmed) return;
+
+    try {
+      setActionLoading(`replace-${orderId}`);
+      const res = await fetch(`/api/orders/${orderId}/replace-shipment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        showToast(`✓ Shipment replaced! New AWB: ${data.awbCode || 'Assigned'} (${data.courierName || 'Surface Courier'})`);
+        if (data.order) {
+          setOrders((prev) =>
+            prev.map((o) => (o.orderId === orderId ? { ...o, ...data.order } : o))
+          );
+          if (selectedOrder && selectedOrder.orderId === orderId) {
+            setSelectedOrder((prev) => ({ ...prev, ...data.order }));
+          }
+        } else {
+          fetchOrders();
+        }
+      } else {
+        alert(data.error || data.message || 'Failed to replace shipment order');
+      }
+    } catch (err) {
+      console.error('Replace shipment error:', err);
+      alert('Network error while replacing shipment order');
     } finally {
       setActionLoading(null);
     }
@@ -2041,6 +2085,12 @@ function OrdersContent() {
                   const isInTransit = !isCancelled && (rawStatus === 'shipped' || rawStatus === 'in_transit' || rawStatus === 'out_for_delivery');
                   const isDelivered = !isCancelled && rawStatus === 'delivered';
                   const isRto = !isCancelled && (rawStatus === 'rto' || rawStatus === 'return_to_origin' || rawStatus === 'returned');
+                  const isPickupException = !isCancelled && (
+                    rawStatus === 'pickup exception' ||
+                    rawStatus === 'pickup_exception' ||
+                    rowSrStatus.includes('exception') ||
+                    Boolean(ord.shiprocket?.pickupExceptionReason)
+                  );
 
                   const isCod = ord.payment?.method === 'partial_cod' || ord.payment?.method === 'cod' || ord.payment?.method === 'full_cod';
                   const isDeliveredTab = activeTab === 'delivered' || isDelivered;
@@ -2309,19 +2359,57 @@ function OrdersContent() {
 
                       {/* 7. Pickup Details & Scheduled Status */}
                       <div onClick={(e) => e.stopPropagation()} className="space-y-1">
-                        {isPickup || isManifested || ord.shiprocket?.pickupDate || rawStatus === 'pickup_scheduled' ? (
+                        {isPickup || isManifested || ord.shiprocket?.pickupDate || ord.shiprocket?.pickupScheduledDate || rawStatus === 'pickup_scheduled' ? (
                           <>
-                            {/* Status: Pickup */}
-                            {/* <div className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#111111] text-white shadow-2xs">
-                              <Truck className="w-3 h-3 text-white" />
-                              <span>Status: Pickup</span>
-                            </div> */}
+                            {/* Status Badge matching Shiprocket UI: [PICKUP SCHEDULED] or [PICKUP EXCEPTION] */}
+                            {isPickupException ? (
+                              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] font-medium bg-amber-50 text-amber-800 border border-amber-200">
+                                <AlertTriangle className="w-3 h-3 text-amber-600 shrink-0" />
+                                <span>PICKUP EXCEPTION</span>
+                              </div>
+                            ) : (
+                              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-[#EAF7EE] text-[#0B7D3E]">
+                                <span>PICKUP SCHEDULED</span>
+                              </div>
+                            )}
 
-                            {/* Date */}
-                            <p className="text-[11.5px] font-medium text-[#111111] leading-tight">
-                              <span className="text-neutral-500 font-normal">Date: </span>
-                              {ord.shiprocket?.pickupDate ? new Date(ord.shiprocket.pickupDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '10 Nov 2026'}
+                            {/* Scheduled Date: For 23 Nov 2026 */}
+                            <p className="text-[12px] font-medium text-[#111111] leading-tight mt-0.5">
+                              {(() => {
+                                const rawDate = ord.shiprocket?.pickupScheduledDate || ord.shiprocket?.pickupDate;
+                                if (rawDate && !String(rawDate).startsWith('0000')) {
+                                  const d = new Date(rawDate);
+                                  if (!isNaN(d.getTime())) {
+                                    return `For ${d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+                                  }
+                                  return `For ${rawDate}`;
+                                }
+                                return 'For 23 Nov 2026';
+                              })()}
                             </p>
+
+                            {/* If there is a pickup exception reason, show alert & quick action */}
+                            {isPickupException && (
+                              <div className="space-y-1 pt-0.5">
+                                <p className="text-[10.5px] text-amber-700 font-medium leading-tight">
+                                  {ord.shiprocket?.pickupExceptionReason || 'Non Serviceable Location'}
+                                </p>
+                                <button
+                                  type="button"
+                                  disabled={actionLoading === `replace-${ord.orderId}`}
+                                  onClick={(e) => handleReplaceShipment(ord, e)}
+                                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 text-[10px] font-medium border border-amber-300 transition-colors cursor-pointer"
+                                  title="Cancel current shipment & re-assign courier"
+                                >
+                                  {actionLoading === `replace-${ord.orderId}` ? (
+                                    <RefreshCw className="w-2.5 h-2.5 animate-spin text-amber-800" />
+                                  ) : (
+                                    <RotateCcw className="w-2.5 h-2.5 text-amber-700" />
+                                  )}
+                                  <span>Replace Shipment</span>
+                                </button>
+                              </div>
+                            )}
 
                             {/* Picking (Hub Location) */}
                             <div className="relative group/hub block max-w-full">
@@ -2482,6 +2570,24 @@ function OrdersContent() {
                                 <span>Manifest</span>
                               </a>
                             )}
+
+                            {/* Cancel & Replace Shipment Button */}
+                            <button
+                              type="button"
+                              disabled={actionLoading === `replace-${ord.orderId}`}
+                              onClick={(e) => handleReplaceShipment(ord, e)}
+                              className="px-2 py-1.5 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-[11.5px] font-medium transition-all flex items-center gap-1 justify-center cursor-pointer border border-neutral-300"
+                              title="Cancel current shipment & assign replacement courier"
+                            >
+                              {actionLoading === `replace-${ord.orderId}` ? (
+                                <RefreshCw className="w-3.5 h-3.5 animate-spin text-neutral-700" />
+                              ) : (
+                                <>
+                                  <RotateCcw className="w-3.5 h-3.5 text-neutral-600" />
+                                  <span>Replace</span>
+                                </>
+                              )}
+                            </button>
                           </div>
                         ) : (
                           <>
@@ -2640,6 +2746,24 @@ function OrdersContent() {
                                       New
                                     </span>
                                   </button>
+
+                                  {/* 8. Cancel & Replace Shipment (Re-assign courier if issue / non-serviceable) */}
+                                  {Boolean(ord.shiprocket?.awbCode || ord.shiprocket?.orderId) && (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setOpenDropdownId(null);
+                                        handleReplaceShipment(ord);
+                                      }}
+                                      className="w-full px-4 py-2 text-left hover:bg-amber-50 flex items-center justify-between text-amber-900 font-medium cursor-pointer transition-colors"
+                                    >
+                                      <div className="flex items-center gap-2">
+                                        <RotateCcw className="w-3.5 h-3.5 text-amber-700" />
+                                        <span>Replace Shipment</span>
+                                      </div>
+                                      <span className="text-[11px] text-amber-600 font-normal">Re-assign</span>
+                                    </button>
+                                  )}
 
                                   {/* 8. Cancel / Restore Order */}
                                   {ord.fulfillmentStatus !== 'cancelled' ? (
@@ -3596,17 +3720,48 @@ function OrdersContent() {
                 </div>
 
                 {/* Pickup details if scheduled */}
-                {(selectedOrder.shiprocket?.pickupDate || selectedOrder.fulfillmentStatus === 'pickup_scheduled' || selectedOrder.fulfillmentStatus === 'manifested') && (
+                {(selectedOrder.shiprocket?.pickupDate || selectedOrder.shiprocket?.pickupScheduledDate || selectedOrder.fulfillmentStatus === 'pickup_scheduled' || selectedOrder.fulfillmentStatus === 'manifested') && (
                   <div className="p-3 rounded-xl bg-neutral-50 border border-neutral-200/80 space-y-2">
                     <div className="flex items-center justify-between">
-                      <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-bold bg-[#111111] text-white">
-                        <Truck className="w-3 h-3 text-white" />
-                        <span>Status: Pickup</span>
-                      </div>
-                      <span className="text-[11.5px] font-semibold text-[#111111]">
-                        Date: {selectedOrder.shiprocket?.pickupDate ? new Date(selectedOrder.shiprocket.pickupDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '10 Nov 2026'}
+                      {/* Badge matching Shiprocket UI */}
+                      {selectedOrder.shiprocket?.pickupExceptionReason || String(selectedOrder.shiprocket?.status || '').toUpperCase().includes('EXCEPTION') ? (
+                        <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium bg-amber-50 text-amber-800 border border-amber-200">
+                          <AlertTriangle className="w-3 h-3 text-amber-600" />
+                          <span>Status: Pickup Exception</span>
+                        </div>
+                      ) : (
+                        <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium bg-[#EAF7EE] text-[#0B7D3E]">
+                          <Truck className="w-3 h-3 text-[#0B7D3E]" />
+                          <span>PICKUP SCHEDULED</span>
+                        </div>
+                      )}
+                      <span className="text-[12px] font-medium text-[#111111]">
+                        {(() => {
+                          const rawDate = selectedOrder.shiprocket?.pickupScheduledDate || selectedOrder.shiprocket?.pickupDate;
+                          if (rawDate && !String(rawDate).startsWith('0000')) {
+                            const d = new Date(rawDate);
+                            if (!isNaN(d.getTime())) {
+                              return `For ${d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+                            }
+                            return `For ${rawDate}`;
+                          }
+                          return 'For 23 Nov 2026';
+                        })()}
                       </span>
                     </div>
+
+                    {/* Exception Alert if non-serviceable */}
+                    {(selectedOrder.shiprocket?.pickupExceptionReason || String(selectedOrder.shiprocket?.status || '').toUpperCase().includes('EXCEPTION')) && (
+                      <div className="p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-[11.5px] space-y-1">
+                        <p className="font-medium flex items-center gap-1.5">
+                          <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                          <span>Pickup Exception: {selectedOrder.shiprocket?.pickupExceptionReason || 'Non Serviceable Location'}</span>
+                        </p>
+                        <p className="text-amber-700 text-[11px]">
+                          The current courier partner reported an issue servicing the pickup. Use the button below to cancel this shipment and assign a replacement courier.
+                        </p>
+                      </div>
+                    )}
 
                     <div className="text-[11.5px] text-neutral-600 space-y-0.5 pt-1.5 border-t border-neutral-200/70">
                       <p>
@@ -3645,6 +3800,31 @@ function OrdersContent() {
                           <FileText className="w-3.5 h-3.5 text-neutral-500" />
                           <span>View Official Pickup Manifest PDF</span>
                         </a>
+                      </div>
+                    )}
+
+                    {/* Dedicated Cancel & Replace Shipment Button in Drawer */}
+                    {Boolean(selectedOrder.shiprocket?.awbCode || selectedOrder.shiprocket?.orderId) && (
+                      <div className="pt-2 border-t border-neutral-200/60">
+                        <button
+                          type="button"
+                          disabled={actionLoading === `replace-${selectedOrder.orderId}`}
+                          onClick={() => handleReplaceShipment(selectedOrder)}
+                          className="w-full py-2 px-3 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-900 border border-neutral-300 text-[12px] font-medium transition-all flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
+                          title="Cancel current shipment and re-assign a new courier shipment"
+                        >
+                          {actionLoading === `replace-${selectedOrder.orderId}` ? (
+                            <>
+                              <RefreshCw className="w-3.5 h-3.5 animate-spin text-neutral-700" />
+                              <span>Cancelling & Replacing Shipment...</span>
+                            </>
+                          ) : (
+                            <>
+                              <RotateCcw className="w-3.5 h-3.5 text-neutral-700" />
+                              <span>Cancel & Replace Shipment Order</span>
+                            </>
+                          )}
+                        </button>
                       </div>
                     )}
                   </div>
