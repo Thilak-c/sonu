@@ -1683,9 +1683,21 @@ function OrdersContent() {
       }
 
       const status = (ord.fulfillmentStatus || ord.shiprocket?.status || 'new').toLowerCase();
+      const srStatus = String(ord.shiprocket?.status || '').toLowerCase();
+      const isPickupOrManifest =
+        status === 'pickup_scheduled' ||
+        status === 'manifested' ||
+        status === 'pickup_queued' ||
+        status === 'picked_up' ||
+        status === 'pickup exception' ||
+        status === 'pickup_exception' ||
+        srStatus.includes('pickup') ||
+        srStatus.includes('manifest') ||
+        Boolean(ord.shiprocket?.manifestUrl) ||
+        Boolean(ord.shiprocket?.pickupToken);
 
-      // Cancelled orders: ONLY shown in 'all' tab. Completely excluded from every other tab!
-      if (status === 'cancelled') {
+      // Cancelled orders: ONLY shown in 'all' tab, unless they have an active pickup/manifest in Shiprocket
+      if (status === 'cancelled' && !isPickupOrManifest) {
         return activeTab === 'all';
       }
 
@@ -1701,12 +1713,7 @@ function OrdersContent() {
       if (activeTab === 'ready_to_ship') return status === 'ready_to_ship';
       if (activeTab === 'on_hold') return status === 'on_hold' || status === 'hold';
       if (activeTab === 'pickups') {
-        return (
-          status === 'pickup_scheduled' ||
-          status === 'manifested' ||
-          status === 'pickup_queued' ||
-          status === 'picked_up'
-        );
+        return isPickupOrManifest;
       }
       if (activeTab === 'in_transit') {
         return (
@@ -2023,12 +2030,14 @@ function OrdersContent() {
                   const firstItem = items[0] || {};
 
                   const rawStatus = (ord.fulfillmentStatus || ord.shiprocket?.status || 'NEW').toLowerCase();
-                  const isCancelled = rawStatus === 'cancelled';
+                  const rowSrStatus = String(ord.shiprocket?.status || '').toLowerCase();
+                  const hasActivePickupOrManifest = Boolean(ord.shiprocket?.manifestUrl) || Boolean(ord.shiprocket?.pickupToken) || rowSrStatus.includes('pickup') || rowSrStatus.includes('manifest');
+                  const isCancelled = rawStatus === 'cancelled' && !hasActivePickupOrManifest;
                   const isHold = !isCancelled && (rawStatus === 'on_hold' || rawStatus === 'hold');
                   const isNew = !isCancelled && !isHold && (rawStatus === 'new' || rawStatus === 'pending' || rawStatus === 'unfulfilled' || rawStatus === 'confirmed' || !ord.fulfillmentStatus);
                   const isReadyToShip = !isCancelled && rawStatus === 'ready_to_ship';
-                  const isPickup = !isCancelled && (rawStatus === 'pickup_scheduled' || rawStatus === 'pickup_queued' || rawStatus === 'picked_up');
-                  const isManifested = !isCancelled && rawStatus === 'manifested';
+                  const isPickup = !isCancelled && (rawStatus === 'pickup_scheduled' || rawStatus === 'pickup_queued' || rawStatus === 'picked_up' || rawStatus === 'pickup exception' || rawStatus === 'pickup_exception' || rowSrStatus.includes('pickup') || Boolean(ord.shiprocket?.pickupToken));
+                  const isManifested = !isCancelled && (rawStatus === 'manifested' || rowSrStatus.includes('manifest') || Boolean(ord.shiprocket?.manifestUrl));
                   const isInTransit = !isCancelled && (rawStatus === 'shipped' || rawStatus === 'in_transit' || rawStatus === 'out_for_delivery');
                   const isDelivered = !isCancelled && rawStatus === 'delivered';
                   const isRto = !isCancelled && (rawStatus === 'rto' || rawStatus === 'return_to_origin' || rawStatus === 'returned');
@@ -2287,7 +2296,7 @@ function OrdersContent() {
                         {isDeliveredTab && isCod && (() => {
                           const rem = getRemittanceInfo(ord);
                           return (
-                            <div className="mt- p-2 rounded text-[11px] leading-tight">
+                            <div className="mt-2 p-2 bg-[#f4f4f4] rounded text-[11px] leading-tight">
                               <p className="text-neutral-500 font-normal">{rem.label}</p>
                               <p className="font-medium text-neutral-800 mt-0.5">{rem.value}</p>
                               {rem.dateText && (
@@ -2352,6 +2361,23 @@ function OrdersContent() {
                                 </span>
                               </div>
                             )}
+
+                            {/* Manifest Link if generated */}
+                            {ord.shiprocket?.manifestUrl && (
+                              <div className="pt-0.5">
+                                <a
+                                  href={ord.shiprocket.manifestUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="text-[11px] font-medium text-neutral-600 hover:text-black underline inline-flex items-center gap-1"
+                                  title="Download Manifest PDF"
+                                >
+                                  <FileText className="w-3 h-3 text-neutral-500" />
+                                  <span>Manifest PDF</span>
+                                </a>
+                              </div>
+                            )}
                           </>
                         ) : (
                           <div className="space-y-0.5">
@@ -2413,35 +2439,50 @@ function OrdersContent() {
                       {/* 9. Action Buttons */}
                       <div className="flex items-center justify-end gap-1.5 relative">
                         {activeTab === 'pickups' ? (
-                          /* In this tab only show the print label button */
-                          ord.shiprocket?.labelUrl ? (
-                            <a
-                              href={ord.shiprocket.labelUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={(e) => e.stopPropagation()}
-                              className="px-2.5 py-1.5 rounded-lg bg-[#111111] hover:bg-black text-white text-[11.5px] font-medium transition-all shadow-xs flex items-center gap-1.5 justify-center min-w-[95px] cursor-pointer"
-                            >
-                              <Printer className="w-3.5 h-3.5" />
-                              <span>Print Label</span>
-                            </a>
-                          ) : (
-                            <button
-                              type="button"
-                              disabled={actionLoading === ord.orderId}
-                              onClick={(e) => handleGenerateLabel(ord.orderId, e)}
-                              className="px-2.5 py-1.5 rounded-lg bg-[#111111] hover:bg-black text-white text-[11.5px] font-medium transition-all shadow-xs flex items-center gap-1.5 justify-center min-w-[95px] cursor-pointer"
-                            >
-                              {actionLoading === ord.orderId ? (
-                                <RefreshCw className="w-3.5 h-3.5 animate-spin text-white" />
-                              ) : (
-                                <>
-                                  <Printer className="w-3.5 h-3.5" />
-                                  <span>Print Label</span>
-                                </>
-                              )}
-                            </button>
-                          )
+                          <div className="flex items-center gap-1.5">
+                            {ord.shiprocket?.labelUrl ? (
+                              <a
+                                href={ord.shiprocket.labelUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="px-2.5 py-1.5 rounded-lg bg-[#111111] hover:bg-black text-white text-[11.5px] font-medium transition-all shadow-xs flex items-center gap-1.5 justify-center min-w-[95px] cursor-pointer"
+                              >
+                                <Printer className="w-3.5 h-3.5" />
+                                <span>Print Label</span>
+                              </a>
+                            ) : (
+                              <button
+                                type="button"
+                                disabled={actionLoading === ord.orderId}
+                                onClick={(e) => handleGenerateLabel(ord.orderId, e)}
+                                className="px-2.5 py-1.5 rounded-lg bg-[#111111] hover:bg-black text-white text-[11.5px] font-medium transition-all shadow-xs flex items-center gap-1.5 justify-center min-w-[95px] cursor-pointer"
+                              >
+                                {actionLoading === ord.orderId ? (
+                                  <RefreshCw className="w-3.5 h-3.5 animate-spin text-white" />
+                                ) : (
+                                  <>
+                                    <Printer className="w-3.5 h-3.5" />
+                                    <span>Print Label</span>
+                                  </>
+                                )}
+                              </button>
+                            )}
+
+                            {ord.shiprocket?.manifestUrl && (
+                              <a
+                                href={ord.shiprocket.manifestUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="px-2 py-1.5 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-[11.5px] font-medium transition-all flex items-center gap-1 justify-center cursor-pointer border border-neutral-300"
+                                title="Download Pickup Manifest"
+                              >
+                                <FileText className="w-3.5 h-3.5 text-neutral-600" />
+                                <span>Manifest</span>
+                              </a>
+                            )}
+                          </div>
                         ) : (
                           <>
                             {isCancelled && (

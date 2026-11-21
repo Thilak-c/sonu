@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { initDb } from '@/lib/mongodb';
-import { trackShiprocketOrder, getShiprocketRemittanceDetails } from '@/lib/shiprocket';
+import { trackShiprocketOrder, getShiprocketRemittanceDetails, getShiprocketToken } from '@/lib/shiprocket';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,7 +10,11 @@ function mapShiprocketStatus(statusStr = '', statusId = null) {
 
   if (id === 7 || s.includes('DELIVERED')) return 'delivered';
   if (id === 6 || id === 17 || id === 18 || s.includes('IN TRANSIT') || s.includes('SHIPPED') || s.includes('OUT FOR DELIVERY')) return 'in_transit';
-  if (id === 3 || id === 4 || id === 19 || s.includes('PICKUP SCHEDULED') || s.includes('PICKED UP') || s.includes('PICKUP GENERATED') || s.includes('OUT FOR PICKUP')) return 'pickup_scheduled';
+  if (
+    id === 3 || id === 4 || id === 19 || id === 20 || id === 35 || id === 42 ||
+    s.includes('PICKUP SCHEDULED') || s.includes('PICKED UP') || s.includes('PICKUP GENERATED') ||
+    s.includes('OUT FOR PICKUP') || s.includes('PICKUP EXCEPTION') || s.includes('MANIFEST')
+  ) return 'pickup_scheduled';
   if (id === 8 || id === 9 || id === 13 || id === 14 || id === 15 || id === 16 || s.includes('RTO') || s.includes('RETURN')) return 'rto';
   if (id === 5 || s.includes('CANCEL')) return 'cancelled';
   return null;
@@ -19,8 +23,64 @@ function mapShiprocketStatus(statusStr = '', statusId = null) {
 export async function POST(request) {
   try {
     const db = await initDb();
+    const updates = [];
 
-    // Find active orders that have an AWB assigned and are not yet cancelled
+    // 1. Fetch recent active orders directly from Shiprocket to discover newly created or manifested shipments
+    try {
+      const base = process.env.SHIPROCKET_BASE_URL || 'https://apiv2.shiprocket.in/v1/external';
+      const token = await getShiprocketToken();
+      const srRes = await fetch(`${base}/orders?per_page=30`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (srRes.ok) {
+        const srData = await srRes.json();
+        const srOrders = Array.isArray(srData.data) ? srData.data : [];
+        for (const sr of srOrders) {
+          const rawChannel = sr.channel_order_id || '';
+          const baseOrderId = rawChannel.replace(/-R\d+$/, '').replace(/-[A-Z0-9]+$/, '').trim();
+          if (!baseOrderId) continue;
+
+          const srStatus = (sr.status || '').toUpperCase();
+          if (srStatus === 'CANCELED' || srStatus === 'CANCELLED') continue;
+
+          const shipment = Array.isArray(sr.shipments) ? sr.shipments[0] : sr.shipments;
+          const awb = sr.awb_code || shipment?.awb;
+          const courier = sr.courier_name || shipment?.courier;
+          const statusId = sr.status_code || shipment?.status;
+          const mapped = mapShiprocketStatus(srStatus, statusId);
+
+          if (awb || mapped) {
+            const setFields = {
+              'shiprocket.orderId': sr.id,
+              'shiprocket.status': srStatus,
+              'shiprocket.currentStatus': sr.status,
+              'shiprocket.channelOrderId': rawChannel,
+              'shiprocket.lastSyncedAt': new Date(),
+              updatedAt: new Date(),
+            };
+            if (shipment?.id) setFields['shiprocket.shipmentId'] = shipment.id;
+            if (awb) setFields['shiprocket.awbCode'] = awb;
+            if (courier) setFields['shiprocket.courierName'] = courier;
+            if (shipment?.manifest_url) setFields['shiprocket.manifestUrl'] = shipment.manifest_url;
+            if (shipment?.label_url) setFields['shiprocket.labelUrl'] = shipment.label_url;
+            if (shipment?.pickup_id) setFields['shiprocket.pickupId'] = shipment.pickup_id;
+            if (mapped) setFields.fulfillmentStatus = mapped;
+
+            const res = await db.collection('orders').updateOne(
+              { orderId: baseOrderId },
+              { $set: setFields }
+            );
+            if (res.modifiedCount > 0) {
+              updates.push({ orderId: baseOrderId, awbCode: awb, status: srStatus, mappedFulfillment: mapped });
+            }
+          }
+        }
+      }
+    } catch (srErr) {
+      console.warn('[Sync Shiprocket Orders Discovery Warning]:', srErr.message);
+    }
+
+    // 2. Find active orders that have an AWB assigned in MongoDB
     const activeOrders = await db
       .collection('orders')
       .find({
@@ -31,11 +91,9 @@ export async function POST(request) {
       .limit(30)
       .toArray();
 
-    if (!activeOrders.length) {
+    if (!activeOrders.length && !updates.length) {
       return NextResponse.json({ success: true, message: 'No active courier orders to sync', syncedCount: 0 });
     }
-
-    const updates = [];
 
     // Parallel sync each active AWB with Shiprocket Production Tracking API
     await Promise.allSettled(
